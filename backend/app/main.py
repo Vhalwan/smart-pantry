@@ -1,16 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db import engine, Base
-from app.routes import transactions
+import app.models  # registers Ingredient, Recipe, RecipeIngredient, MealPlan with Base
 
-# This creates all tables in PostgreSQL automatically on startup
-# It looks at all your models and creates the tables if they don't exist yet
+# Creates all tables in PostgreSQL on startup if they don't exist yet
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="Personal Finance Tracker",
-    description="API for tracking personal finances",
-    version="1.0.0"
+    title="Smart Pantry",
+    description="API for managing pantry ingredients, recipes, and meal plans",
+    version="1.0.0",
 )
 
 app.add_middleware(
@@ -21,10 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register our transaction routes
-# All transaction routes will be under /transactions
-app.include_router(transactions.router)
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "message": "Finance Tracker API is running"}
+    return {"status": "ok", "message": "Smart Pantry API is running"}
