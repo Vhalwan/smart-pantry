@@ -1,1 +1,1 @@
-# personal-finance-tracker
+# smart-pantry
