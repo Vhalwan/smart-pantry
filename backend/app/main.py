@@ -4,9 +4,6 @@ from app.db import engine, Base
 import app.models  # registers Ingredient, Recipe, RecipeIngredient, MealPlan with Base
 from app.routes import auth, ingredients, meal_plans, recipes
 
-# Creates all tables in PostgreSQL on startup if they don't exist yet
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI(
     title="Smart Pantry",
     description="API for managing pantry ingredients, recipes, and meal plans",
