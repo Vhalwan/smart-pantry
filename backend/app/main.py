@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db import engine, Base
 import app.models  # registers Ingredient, Recipe, RecipeIngredient, MealPlan with Base
-from app.routes import auth, ingredients, meal_plans, recipes
+from app.routes import auth, ingredients, meal_plans, recipes, suggestions
 
 app = FastAPI(
     title="Smart Pantry",
@@ -20,6 +20,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(ingredients.router)
+app.include_router(suggestions.router)  # before recipes so /suggest is not captured by /{id}
 app.include_router(recipes.router)
 app.include_router(meal_plans.router)
 
