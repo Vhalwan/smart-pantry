@@ -47,7 +47,11 @@ def suggest_recipes(
         "Suggest exactly 3 recipes using ONLY (or mostly) the ingredients listed below. "
         "Respond ONLY with valid JSON matching this shape, with no extra commentary:\n"
         '[{"name": str, "description": str, "instructions": str, '
-        '"prep_time_minutes": int, "ingredients_used": [str]}]\n\n'
+        '"prep_time_minutes": int, '
+        '"ingredients_used": [{"name": str, "quantity": str, "unit": str}]}]\n'
+        "For each ingredient in ingredients_used, estimate a reasonable quantity and unit "
+        "needed for the recipe. Prefer the same units already present in the pantry list "
+        "where sensible.\n\n"
         f"Available ingredients:\n{ingredient_list}"
     )
 

@@ -272,10 +272,22 @@ export default function Pantry() {
                       </p>
                       <ul className="list-disc list-inside text-sm text-slate-600 space-y-0.5">
                         {(recipe.ingredients_used ?? []).map((ing) => (
-                          <li key={ing}>{ing}</li>
+                          <li key={ing.name}>
+                            {`${ing.quantity} ${ing.unit} ${ing.name}`}
+                          </li>
                         ))}
                       </ul>
                     </div>
+                    {recipe.instructions && (
+                      <div>
+                        <p className="text-sm font-medium text-slate-800 mb-1">
+                          Instructions
+                        </p>
+                        <pre className="text-sm text-slate-600 whitespace-pre-wrap font-sans">
+                          {recipe.instructions}
+                        </pre>
+                      </div>
+                    )}
                   </article>
                 ))}
               </div>
