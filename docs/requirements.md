@@ -31,7 +31,7 @@ IDs (FR-1, and so on) are for tracking. The statements are written in plain lang
 | FR-15 | When generating suggestions, the app may prefer recipes that use soon-to-expire items when those dates are available. |
 | FR-16 | A user can mark that they cooked a recipe (or finished using listed ingredients) and have pantry quantities updated accordingly. |
 
-FR-8 through FR-10 and FR-13 through FR-16 are required for the current plan’s “done” bar. Some of that behavior is designed but not fully in the live UI yet; the [project plan](./project-plan.md) tracks the weekly delivery order.
+FR-8 through FR-10 are in the UI (save from a suggestion card with name matching and a skip note). FR-13 through FR-16 are still required for the plan’s “done” bar and are tracked in the [project plan](./project-plan.md).
 
 ## Quality and safety expectations
 
@@ -60,3 +60,4 @@ These are intentionally out for now:
 |------|--------|
 | 6 Aug 2026 | First version from project notes, matched to the current API and deploy shape. |
 | 6 Aug 2026 | Added FR-13–FR-16 for quantity edits, expiry notices, use-it-up bias, and cook-and-update. Softened wording so non-technical readers can follow. Aligned with the project plan. |
+| 7 Aug 2026 | Noted FR-8–FR-10 as shipped in the UI; FR-13–FR-16 still open. |

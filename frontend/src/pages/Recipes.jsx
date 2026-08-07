@@ -10,6 +10,62 @@ const emptyIngredientLine = () => ({
   unit: "",
 });
 
+function RecipeCard({ recipe, ingredientName, onDelete }) {
+  const [showInstructions, setShowInstructions] = useState(false);
+  const hasInstructions = Boolean(recipe.instructions?.trim());
+
+  return (
+    <article className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-base font-semibold text-slate-900">
+            {recipe.name}
+          </h3>
+          {recipe.description && (
+            <p className="mt-1 text-sm text-slate-600">{recipe.description}</p>
+          )}
+          <p className="mt-2 text-sm text-slate-500">
+            Prep time:{" "}
+            {recipe.prep_time_minutes != null
+              ? `${recipe.prep_time_minutes} min`
+              : "—"}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onDelete(recipe.id)}
+          className="text-red-600 hover:text-red-700 font-medium text-sm shrink-0"
+        >
+          Delete
+        </button>
+      </div>
+      <ul className="mt-4 list-disc list-inside space-y-1 text-sm text-slate-800">
+        {(recipe.ingredients ?? []).map((line) => (
+          <li key={line.id}>
+            {ingredientName(line.ingredient_id)} — {line.quantity} {line.unit}
+          </li>
+        ))}
+      </ul>
+      {hasInstructions && (
+        <div className="mt-4 space-y-2">
+          <button
+            type="button"
+            onClick={() => setShowInstructions((open) => !open)}
+            className="text-sm font-medium text-slate-700 hover:text-slate-900"
+          >
+            {showInstructions ? "Hide instructions" : "View instructions"}
+          </button>
+          {showInstructions && (
+            <pre className="text-sm text-slate-600 whitespace-pre-wrap font-sans">
+              {recipe.instructions}
+            </pre>
+          )}
+        </div>
+      )}
+    </article>
+  );
+}
+
 export default function Recipes() {
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -290,44 +346,12 @@ export default function Recipes() {
           ) : (
             <div className="grid grid-cols-1 gap-4">
               {recipes.map((recipe) => (
-                <article
+                <RecipeCard
                   key={recipe.id}
-                  className="bg-white rounded-xl border border-slate-200 shadow-sm p-6"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="text-base font-semibold text-slate-900">
-                        {recipe.name}
-                      </h3>
-                      {recipe.description && (
-                        <p className="mt-1 text-sm text-slate-600">
-                          {recipe.description}
-                        </p>
-                      )}
-                      <p className="mt-2 text-sm text-slate-500">
-                        Prep time:{" "}
-                        {recipe.prep_time_minutes != null
-                          ? `${recipe.prep_time_minutes} min`
-                          : "—"}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(recipe.id)}
-                      className="text-red-600 hover:text-red-700 font-medium text-sm shrink-0"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                  <ul className="mt-4 list-disc list-inside space-y-1 text-sm text-slate-800">
-                    {(recipe.ingredients ?? []).map((line) => (
-                      <li key={line.id}>
-                        {ingredientName(line.ingredient_id)} — {line.quantity}{" "}
-                        {line.unit}
-                      </li>
-                    ))}
-                  </ul>
-                </article>
+                  recipe={recipe}
+                  ingredientName={ingredientName}
+                  onDelete={handleDelete}
+                />
               ))}
             </div>
           )}

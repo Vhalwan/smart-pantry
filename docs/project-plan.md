@@ -31,12 +31,12 @@ Already working:
 - Accounts and login
 - Pantry list (name, quantity, unit)
 - AI recipe suggestions from the current pantry
+- Save a suggestion as a recipe from the suggestion card (name match + skip note)
 - Manual recipes and meal plans
 - Live site (frontend on Vercel, API on Render)
 
 Still open:
 
-- Saving a suggestion as a recipe from the suggestion card
 - Collecting category and expiry when adding food, and using them
 - Near-expiry notices
 - Easy quantity changes and a simple “I cooked this” update so the pantry stays true
@@ -68,10 +68,10 @@ Checkpoints are every Sunday. This first week is short (Thursday through Sunday)
 
 Get suggestions into the recipe list.
 
-- [ ] Save button on each suggestion
-- [ ] Match ingredient names to the pantry (ignore capitalization); tell the user what was skipped
-- [ ] Confirm the recipe shows up under Recipes
-- [ ] Update the user guide once it works
+- [x] Save button on each suggestion
+- [x] Match ingredient names to the pantry (ignore capitalization); tell the user what was skipped
+- [x] Confirm the recipe shows up under Recipes
+- [x] Update the user guide once it works
 
 Done when: Pantry, Suggest, Save works without rebuilding the recipe by hand.
 
@@ -157,3 +157,4 @@ Spend a few minutes each Sunday:
 - 6 Aug 2026: First plan used a longer two-month calendar.
 - 6 Aug 2026: Shortened to about five weeks plus one buffer, because the foundation already exists. Core end 6 Sep, buffer 13 Sep.
 - 6 Aug 2026: Rewrote for clearer language and alignment with the other docs.
+- 7 Aug 2026: Marked save-from-suggestion week complete (Save on suggestion cards, name matching, Recipes list, user guide).

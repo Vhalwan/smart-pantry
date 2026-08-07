@@ -44,13 +44,13 @@ Category and expiry date exist in the system, but adding them from the form is s
 
 Go to Recipes, create a recipe with a name, and pick ingredients from your pantry. You can add description, instructions, and prep time if you want. Delete anything you no longer need.
 
+On each saved recipe card, if there are instructions, use View instructions to expand them (and Hide instructions to collapse). Recipes without instructions omit that control.
+
 ### Save an AI suggestion
 
-This is the main path we want: click Save on a suggestion card and it becomes a normal recipe.
+On a suggestion card, click Save recipe. The app matches ingredient names to your pantry (ignoring capitalization) and creates a normal recipe you can find under Recipes.
 
-When that flow is finished, the app will match suggestion ingredient names to your pantry (ignoring capitalization). If a name does not match, the recipe still saves and you get a note about what was skipped.
-
-Until the Save button is fully wired up, use the manual Recipes page.
+If a name does not match, the recipe still saves and you get a note about what was skipped.
 
 ## Meal plans
 

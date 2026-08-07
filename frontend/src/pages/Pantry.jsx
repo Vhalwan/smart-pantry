@@ -5,6 +5,7 @@ import {
   deleteIngredient,
   getIngredients,
 } from "../api/ingredients";
+import { createRecipe } from "../api/recipes";
 import { getSuggestions } from "../api/suggestions";
 import { useAuth } from "../context/AuthContext";
 
@@ -21,6 +22,9 @@ export default function Pantry() {
   const [suggestions, setSuggestions] = useState([]);
   const [suggesting, setSuggesting] = useState(false);
   const [suggestError, setSuggestError] = useState("");
+  const [savingIndex, setSavingIndex] = useState(null);
+  const [savedIndex, setSavedIndex] = useState(null);
+  const [saveNotes, setSaveNotes] = useState({});
 
   async function loadIngredients() {
     setError("");
@@ -73,6 +77,8 @@ export default function Pantry() {
     setSuggesting(true);
     setSuggestError("");
     setSuggestions([]);
+    setSaveNotes({});
+    setSavedIndex(null);
     try {
       const data = await getSuggestions();
       setSuggestions(data);
@@ -83,6 +89,58 @@ export default function Pantry() {
       );
     } finally {
       setSuggesting(false);
+    }
+  }
+
+  async function handleSaveSuggestion(recipe, index) {
+    setSavingIndex(index);
+    setError("");
+    setSaveNotes((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
+
+    const matched = [];
+    const unmatched = [];
+    for (const used of recipe.ingredients_used ?? []) {
+      const pantryItem = ingredients.find(
+        (item) => item.name.toLowerCase() === used.name.toLowerCase(),
+      );
+      if (pantryItem) {
+        const qty = Number(used.quantity);
+        matched.push({
+          ingredient_id: pantryItem.id,
+          quantity: Number.isFinite(qty) ? qty : 0,
+          unit: used.unit,
+        });
+      } else {
+        unmatched.push(used.name);
+      }
+    }
+
+    try {
+      await createRecipe({
+        name: recipe.name,
+        description: recipe.description || null,
+        instructions: recipe.instructions || null,
+        prep_time_minutes: recipe.prep_time_minutes ?? null,
+        ingredients: matched,
+      });
+      setSavedIndex(index);
+      if (unmatched.length > 0) {
+        setSaveNotes((prev) => ({
+          ...prev,
+          [index]: `Saved, but couldn't match: ${unmatched.join(", ")}`,
+        }));
+      }
+      window.setTimeout(() => {
+        setSavedIndex((current) => (current === index ? null : current));
+      }, 2000);
+    } catch {
+      setError("Failed to save recipe.");
+    } finally {
+      setSavingIndex(null);
     }
   }
 
@@ -287,6 +345,23 @@ export default function Pantry() {
                           {recipe.instructions}
                         </pre>
                       </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleSaveSuggestion(recipe, index)}
+                      disabled={savingIndex === index}
+                      className="rounded-lg bg-slate-900 text-white px-3 py-1.5 text-sm font-medium hover:bg-slate-800 disabled:opacity-60"
+                    >
+                      {savingIndex === index
+                        ? "Saving..."
+                        : savedIndex === index
+                          ? "Saved!"
+                          : "Save recipe"}
+                    </button>
+                    {saveNotes[index] && (
+                      <p className="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                        {saveNotes[index]}
+                      </p>
                     )}
                   </article>
                 ))}

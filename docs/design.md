@@ -59,4 +59,5 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - No automatic retries yet when Gemini fails
 - Recipe and meal-plan lists are not paginated (fine at current size); ingredients support skip/limit
 - Name matching is exact after normalizing case, not fuzzy
-- Save-from-suggestion in the UI, expiry notices, and cook-and-update are on the [project plan](./project-plan.md) and not all shipped yet
+- Expiry notices and cook-and-update are on the [project plan](./project-plan.md) and not shipped yet
+- Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching
