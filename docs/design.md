@@ -26,6 +26,8 @@ Each user owns:
 
 Recipes do not store ingredients as loose free text alone. They link back to pantry items so amounts stay structured and stay tied to what the user actually tracks.
 
+Meal plans point at saved recipes. Deleting a recipe that is still on a meal plan is rejected until that plan entry is removed (the API returns a conflict; the Recipes page explains what to do).
+
 If a user account is deleted, their pantry, recipes, and meal plans go with it.
 
 ## Login flow (short version)

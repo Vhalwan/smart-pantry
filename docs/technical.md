@@ -41,7 +41,7 @@ Auth means a valid bearer token from login.
 | POST | `/recipes/` | Yes | Create recipe |
 | GET | `/recipes/{id}` | Yes | Get one |
 | PUT | `/recipes/{id}` | Yes | Update recipe fields (not ingredient lines) |
-| DELETE | `/recipes/{id}` | Yes | Delete |
+| DELETE | `/recipes/{id}` | Yes | Delete (409 if the recipe is used in a meal plan) |
 | GET | `/meal-plans/` | Yes | List meal plans |
 | POST | `/meal-plans/` | Yes | Create |
 | GET | `/meal-plans/week/{start_date}` | Yes | Week window from start_date |
@@ -99,6 +99,14 @@ Create meal plan (`POST /meal-plans/`):
 
 `meal_type` is `breakfast`, `lunch`, or `dinner`.
 
+## Notable errors
+
+| Situation | Status | Detail (typical) |
+|-----------|--------|------------------|
+| Delete a recipe that still appears in a meal plan | 409 | `Cannot delete recipe: it is referenced by a meal plan` |
+
+The Recipes page shows a clearer inline message for that 409. Other delete failures keep a generic fallback.
+
 ## Conventions
 
 - Route handlers should say what they do, whether auth is required, and how errors look when that is not obvious.
@@ -125,9 +133,11 @@ npm run dev
 | Swagger | http://localhost:8000/docs |
 | Frontend | http://localhost:5173 |
 
-Set `VITE_API_URL` if the frontend should not use `http://localhost:8000`.
+Copy `frontend/.env.example` to `frontend/.env.local` (or `.env`) and keep `VITE_API_URL=http://localhost:8000` for local work. Restart Vite after changing env files. If this points at your Render URL, local logins will hit production (and fail for accounts that only exist in local Postgres).
 
 ## Environment variables
+
+Root `.env.example` covers Compose/API. Frontend uses `frontend/.env.example`.
 
 | Variable | Where | Purpose |
 |----------|-------|---------|
@@ -139,7 +149,7 @@ Set `VITE_API_URL` if the frontend should not use `http://localhost:8000`.
 | `JWT_ALGORITHM` | API | e.g. HS256 |
 | `JWT_EXPIRE_MINUTES` | API | Token lifetime in minutes |
 | `GEMINI_API_KEY` | API | AI suggestions |
-| `VITE_API_URL` | Frontend | Optional API base URL |
+| `VITE_API_URL` | Frontend | API base URL (`http://localhost:8000` locally; Render URL on Vercel) |
 | `PORT` | API | Bind port in the container (Compose uses 8000) |
 
 On Render, bind the HTTP server to `0.0.0.0` and the platform `$PORT`. Local disk is ephemeral there; keep real data in Postgres.

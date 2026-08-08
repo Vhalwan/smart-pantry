@@ -158,3 +158,4 @@ Spend a few minutes each Sunday:
 - 6 Aug 2026: Shortened to about five weeks plus one buffer, because the foundation already exists. Core end 6 Sep, buffer 13 Sep.
 - 6 Aug 2026: Rewrote for clearer language and alignment with the other docs.
 - 7 Aug 2026: Marked save-from-suggestion week complete (Save on suggestion cards, name matching, Recipes list, user guide).
+- 8 Aug 2026: Recipes polish — client-side title search, card layout/spacing pass, clearer error when delete is blocked by a meal plan (API 409 + UI message).

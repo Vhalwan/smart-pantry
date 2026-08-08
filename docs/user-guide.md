@@ -42,7 +42,7 @@ Category and expiry date exist in the system, but adding them from the form is s
 
 ### Write one yourself
 
-Go to Recipes, create a recipe with a name, and pick ingredients from your pantry. You can add description, instructions, and prep time if you want. Delete anything you no longer need.
+Go to Recipes, create a recipe with a name, and pick ingredients from your pantry. You can add description, instructions, and prep time if you want. Use the search box at the top of your list to filter by recipe name as you type. Delete anything you no longer need — if that recipe is still on a meal plan, the app will tell you to remove it from the plan first.
 
 On each saved recipe card, if there are instructions, use View instructions to expand them (and Hide instructions to collapse). Recipes without instructions omit that control.
 
@@ -66,6 +66,9 @@ Check the email and password. Email is matched the way it was stored when you re
 
 **A saved recipe is missing some ingredients**
 If you saved from a suggestion, check the skip note. Names have to match your pantry entries closely.
+
+**Can't delete a recipe**
+If you see a message about a meal plan, open Meal Plans, remove that recipe from the plan, then try deleting again.
 
 **The page hangs on the first request**
 On the live app, give it 30 to 60 seconds and try again. Locally, confirm Docker is running and the frontend can reach the API.

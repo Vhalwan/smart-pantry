@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.db import get_db
@@ -116,4 +117,11 @@ def delete_recipe(
 
     db.query(RecipeIngredient).filter(RecipeIngredient.recipe_id == id).delete()
     db.delete(db_recipe)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete recipe: it is referenced by a meal plan",
+        )

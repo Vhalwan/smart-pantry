@@ -15,21 +15,50 @@ function RecipeCard({ recipe, ingredientName, onDelete }) {
   const hasInstructions = Boolean(recipe.instructions?.trim());
 
   return (
-    <article className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+    <article className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0 flex-1 space-y-3">
           <h3 className="text-base font-semibold text-slate-900">
             {recipe.name}
           </h3>
           {recipe.description && (
-            <p className="mt-1 text-sm text-slate-600">{recipe.description}</p>
+            <p className="text-sm text-slate-600">{recipe.description}</p>
           )}
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="text-sm text-slate-500">
             Prep time:{" "}
             {recipe.prep_time_minutes != null
               ? `${recipe.prep_time_minutes} min`
               : "—"}
           </p>
+          <div>
+            <p className="text-sm font-medium text-slate-800 mb-1">
+              Ingredients
+            </p>
+            <ul className="list-disc list-inside text-sm text-slate-600 space-y-0.5">
+              {(recipe.ingredients ?? []).map((line) => (
+                <li key={line.id}>
+                  {ingredientName(line.ingredient_id)} — {line.quantity}{" "}
+                  {line.unit}
+                </li>
+              ))}
+            </ul>
+          </div>
+          {hasInstructions && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowInstructions((open) => !open)}
+                className="text-sm font-medium text-slate-700 hover:text-slate-900"
+              >
+                {showInstructions ? "Hide instructions" : "View instructions"}
+              </button>
+              {showInstructions && (
+                <pre className="mt-2 text-sm text-slate-600 whitespace-pre-wrap font-sans rounded-lg bg-slate-50 border border-slate-100 px-3 py-2">
+                  {recipe.instructions}
+                </pre>
+              )}
+            </div>
+          )}
         </div>
         <button
           type="button"
@@ -39,29 +68,6 @@ function RecipeCard({ recipe, ingredientName, onDelete }) {
           Delete
         </button>
       </div>
-      <ul className="mt-4 list-disc list-inside space-y-1 text-sm text-slate-800">
-        {(recipe.ingredients ?? []).map((line) => (
-          <li key={line.id}>
-            {ingredientName(line.ingredient_id)} — {line.quantity} {line.unit}
-          </li>
-        ))}
-      </ul>
-      {hasInstructions && (
-        <div className="mt-4 space-y-2">
-          <button
-            type="button"
-            onClick={() => setShowInstructions((open) => !open)}
-            className="text-sm font-medium text-slate-700 hover:text-slate-900"
-          >
-            {showInstructions ? "Hide instructions" : "View instructions"}
-          </button>
-          {showInstructions && (
-            <pre className="text-sm text-slate-600 whitespace-pre-wrap font-sans">
-              {recipe.instructions}
-            </pre>
-          )}
-        </div>
-      )}
     </article>
   );
 }
@@ -73,6 +79,7 @@ export default function Recipes() {
   const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
@@ -81,6 +88,10 @@ export default function Recipes() {
     emptyIngredientLine(),
   ]);
   const [submitting, setSubmitting] = useState(false);
+
+  const filteredRecipes = recipes.filter((r) =>
+    r.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   async function loadData() {
     setError("");
@@ -163,8 +174,19 @@ export default function Recipes() {
     try {
       await deleteRecipe(id);
       await loadData();
-    } catch {
-      setError("Failed to delete recipe.");
+    } catch (err) {
+      const status = err.response?.status;
+      const detail = err.response?.data?.detail;
+      const detailText = typeof detail === "string" ? detail : "";
+      const blockedByMealPlan =
+        status === 409 ||
+        /meal\s*plan|foreign\s*key|integrity/i.test(detailText);
+
+      setError(
+        blockedByMealPlan
+          ? "Can't delete — this recipe is used in a meal plan. Remove it from the meal plan first."
+          : "Failed to delete recipe.",
+      );
     }
   }
 
@@ -337,15 +359,29 @@ export default function Recipes() {
         <section className="space-y-4">
           <h2 className="text-lg font-medium text-slate-900">Your recipes</h2>
 
+          {!loading && (
+            <input
+              type="text"
+              placeholder="Search recipes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+            />
+          )}
+
           {loading ? (
-            <p className="text-slate-500 text-sm">Loading…</p>
+            <p className="text-sm text-slate-500">Loading…</p>
           ) : recipes.length === 0 ? (
-            <p className="text-slate-500 text-sm">
+            <p className="text-sm text-slate-500">
               No recipes yet. Add one above.
+            </p>
+          ) : filteredRecipes.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              No recipes match your search
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {recipes.map((recipe) => (
+              {filteredRecipes.map((recipe) => (
                 <RecipeCard
                   key={recipe.id}
                   recipe={recipe}

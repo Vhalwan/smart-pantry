@@ -16,8 +16,11 @@ Web app for tracking pantry ingredients, generating AI recipe suggestions (Gemin
 ## Quick start
 
 ```bash
-# Configure secrets (see docs/technical.md §6)
+# Configure secrets (see docs/technical.md)
 cp .env.example .env
+
+# Frontend API URL (localhost for local work — not the Render URL)
+cp frontend/.env.example frontend/.env.local
 
 # API + database
 docker compose up --build
@@ -28,5 +31,6 @@ cd frontend && npm install && npm run dev
 
 - API: http://localhost:8000 · Swagger: http://localhost:8000/docs  
 - Frontend: http://localhost:5173  
+- Keep `VITE_API_URL=http://localhost:8000` in `frontend/.env.local`; restart Vite after changing it.
 
 More detail: [User Guide](docs/user-guide.md) · [Technical docs](docs/technical.md).
