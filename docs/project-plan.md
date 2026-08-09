@@ -121,7 +121,7 @@ Ship what you meant to build. This is not another feature week.
 
 ### Buffer: Sunday 13 September 2026
 
-Only if the 6 September checklist failed, or one small stretch is clearly worth it (better name matching, shopping hints, category filter, AI retries). If you already passed on the 6th, stop.
+Only if the 6 September checklist failed, or one small stretch is clearly worth it (better name matching, shopping hints, category filter, AI retries, optional “similar to a saved recipe” badge for near-dupes). If you already passed on the 6th, stop.
 
 ## In scope / out of scope
 
@@ -158,4 +158,5 @@ Spend a few minutes each Sunday:
 - 6 Aug 2026: Shortened to about five weeks plus one buffer, because the foundation already exists. Core end 6 Sep, buffer 13 Sep.
 - 6 Aug 2026: Rewrote for clearer language and alignment with the other docs.
 - 7 Aug 2026: Marked save-from-suggestion week complete (Save on suggestion cards, name matching, Recipes list, user guide).
-- 8 Aug 2026: Recipes polish — client-side title search, card layout/spacing pass, clearer error when delete is blocked by a meal plan (API 409 + UI message).
+- 8 Aug 2026: Recipes polish — client-side title search, card layout/spacing pass, clearer error when delete is blocked by a meal plan (API 409 + UI message). Documented in technical, design, and user guide.
+- 9 Aug 2026: Save-loop polish (four items): (1) no double-save on the same suggestion card until Suggest runs again, (2) View in Recipes link after a successful save, (3) trim spaces when matching ingredient names, (4) do not create a recipe when nothing matches — show a clear note instead. Also: suggestions ask the model to avoid already-saved recipe names and hide leftover exact name matches.

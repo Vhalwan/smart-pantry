@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.dependencies import get_current_user
 from app.models.ingredient import Ingredient
+from app.models.recipe import Recipe
 from app.models.user import User
 
 router = APIRouter(prefix="/recipes", tags=["suggestions"])
@@ -21,6 +22,10 @@ def _strip_json_fences(text: str) -> str:
     if fence_match:
         return fence_match.group(1).strip()
     return text
+
+
+def _normalize_name(value: str) -> str:
+    return (value or "").strip().lower()
 
 
 @router.get("/suggest")
@@ -39,9 +44,26 @@ def suggest_recipes(
             detail="No ingredients found. Add ingredients to your pantry first.",
         )
 
+    saved_recipes = (
+        db.query(Recipe)
+        .filter(Recipe.user_id == current_user.id)
+        .all()
+    )
+    saved_names = [recipe.name for recipe in saved_recipes if recipe.name]
+    saved_name_set = {_normalize_name(name) for name in saved_names}
+
     ingredient_list = "\n".join(
         f"- {ing.name}: {ing.quantity} {ing.unit}" for ing in ingredients
     )
+
+    avoid_block = ""
+    if saved_names:
+        avoid_list = "\n".join(f"- {name}" for name in saved_names)
+        avoid_block = (
+            "\n\nThe user already saved these recipes. Do NOT suggest the same or "
+            "near-identical dishes (ignore capitalization). Prefer different ideas:\n"
+            f"{avoid_list}"
+        )
 
     prompt = (
         "Suggest exactly 3 recipes using ONLY (or mostly) the ingredients listed below. "
@@ -51,7 +73,8 @@ def suggest_recipes(
         '"ingredients_used": [{"name": str, "quantity": str, "unit": str}]}]\n'
         "For each ingredient in ingredients_used, estimate a reasonable quantity and unit "
         "needed for the recipe. Prefer the same units already present in the pantry list "
-        "where sensible.\n\n"
+        "where sensible."
+        f"{avoid_block}\n\n"
         f"Available ingredients:\n{ingredient_list}"
     )
 
@@ -76,4 +99,17 @@ def suggest_recipes(
             detail=f"Failed to generate recipe suggestions: {exc}",
         ) from exc
 
-    return suggestions
+    if not isinstance(suggestions, list):
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to generate recipe suggestions: unexpected response shape.",
+        )
+
+    # Soft filter: drop exact name matches the model ignored (case/whitespace).
+    fresh = [
+        recipe
+        for recipe in suggestions
+        if _normalize_name(recipe.get("name") if isinstance(recipe, dict) else "")
+        not in saved_name_set
+    ]
+    return fresh if fresh else suggestions

@@ -85,7 +85,7 @@ Create recipe (`POST /recipes/`):
 }
 ```
 
-Suggestions use ingredient names. Creating a recipe expects pantry ingredient ids. Name-to-id matching for save-from-suggestion belongs in the page or a helper, not in the thin `api/*.js` wrappers. See [design](./design.md).
+Suggestions use ingredient names. Creating a recipe expects pantry ingredient ids. Name-to-id matching for save-from-suggestion belongs in the page or a helper, not in the thin `api/*.js` wrappers. See [design](./design.md). The suggest endpoint also loads the user’s saved recipe names, asks Gemini to avoid them, and drops exact name matches when at least one fresh idea remains.
 
 Create meal plan (`POST /meal-plans/`):
 
@@ -153,3 +153,9 @@ Root `.env.example` covers Compose/API. Frontend uses `frontend/.env.example`.
 | `PORT` | API | Bind port in the container (Compose uses 8000) |
 
 On Render, bind the HTTP server to `0.0.0.0` and the platform `$PORT`. Local disk is ephemeral there; keep real data in Postgres.
+
+## Doc history
+
+- 6 Aug 2026: First technical overview (stack, routes, deploy notes).
+- 8 Aug 2026: Documented DELETE `/recipes/{id}` 409 when the recipe is referenced by a meal plan; Notable errors table; env examples for `VITE_API_URL`.
+- 9 Aug 2026: Suggest endpoint loads saved recipe names, asks Gemini to avoid them, and drops exact name matches when a fresh idea remains.

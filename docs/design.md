@@ -52,7 +52,9 @@ As the product catches up to the plan, the prompt should also lean on soon-to-ex
 
 The AI only knows ingredient names from the prompt. It does not know your database IDs, and we should not ask it to invent them.
 
-So when you save a suggestion as a recipe, the app matches each suggested name to a pantry item by name (capitalization ignored). That can miss close variants (onion vs onions). When that happens, the recipe still saves and the user is told what was skipped. See FR-8 to FR-10 in [requirements](./requirements.md).
+So when you save a suggestion as a recipe, the app matches each suggested name to a pantry item by name (capitalization and surrounding spaces ignored). That can miss close variants (onion vs onions). When that happens, the recipe still saves and the user is told what was skipped. If nothing matches, the recipe is not created. See FR-8 to FR-10 in [requirements](./requirements.md).
+
+When asking for suggestions, the API also lists the user’s already-saved recipe names and asks Gemini to avoid the same (or near-identical) dishes. The website may hide any leftover exact name matches and explain if the run was all duplicates.
 
 Manual recipe creation already picks pantry items directly, so it does not need this name step.
 
@@ -60,6 +62,14 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 
 - No automatic retries yet when Gemini fails
 - Recipe and meal-plan lists are not paginated (fine at current size); ingredients support skip/limit
-- Name matching is exact after normalizing case, not fuzzy
+- Name matching is exact after normalizing case and trimming spaces, not fuzzy
 - Expiry notices and cook-and-update are on the [project plan](./project-plan.md) and not shipped yet
 - Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching
+- Avoiding already-saved recipes is by name only (not ingredients or “similar dish” detection)
+
+## Doc history
+
+- 6 Aug 2026: First design notes aligned with the API and frontend.
+- 7 Aug 2026: Documented save-from-suggestion name matching.
+- 8 Aug 2026: Deleting a recipe still on a meal plan is rejected (API conflict; Recipes page explains next step).
+- 9 Aug 2026: Trimmed name match; no recipe create when nothing matches; suggest path avoids already-saved names (exact match hide + prompt).

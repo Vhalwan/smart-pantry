@@ -22,8 +22,8 @@ IDs (FR-1, and so on) are for tracking. The statements are written in plain lang
 | FR-6 | The app can generate recipe suggestions from the user’s current pantry using an AI model (Gemini). |
 | FR-7 | Each suggestion includes a name, description, prep time, ingredients used (with quantity and unit), and step-by-step instructions. |
 | FR-8 | A user can save an AI suggestion as a permanent recipe. |
-| FR-9 | When saving a suggestion, the app matches each suggested ingredient to the pantry by name (capitalization ignored) and links the matching pantry item. |
-| FR-10 | If a suggested ingredient cannot be matched, the recipe still saves with the matched ones, and the user is told what was skipped. |
+| FR-9 | When saving a suggestion, the app matches each suggested ingredient to the pantry by name (capitalization and surrounding spaces ignored) and links the matching pantry item. |
+| FR-10 | If a suggested ingredient cannot be matched, the recipe still saves with the matched ones, and the user is told what was skipped. If none match, the recipe is not saved and the user is told. |
 | FR-11 | A user can view, create, update, and delete their own recipes. |
 | FR-12 | A user can create, view, update, and delete meal plans that point at their saved recipes (a date plus breakfast, lunch, or dinner). |
 | FR-13 | A user can adjust an ingredient’s quantity without deleting and re-adding it. |
@@ -61,3 +61,5 @@ These are intentionally out for now:
 | 6 Aug 2026 | First version from project notes, matched to the current API and deploy shape. |
 | 6 Aug 2026 | Added FR-13–FR-16 for quantity edits, expiry notices, use-it-up bias, and cook-and-update. Softened wording so non-technical readers can follow. Aligned with the project plan. |
 | 7 Aug 2026 | Noted FR-8–FR-10 as shipped in the UI; FR-13–FR-16 still open. |
+| 8 Aug 2026 | Clarified delete-recipe behavior with meal plans: conflict (not a silent failure) when a recipe is still planned. Recipes list search/polish is UX only. |
+| 9 Aug 2026 | FR-9/FR-10: matching also trims spaces; if nothing matches, the recipe is not saved. Save UI: no double-save, View in Recipes after save. Suggestions avoid already-saved recipe names (exact name). |

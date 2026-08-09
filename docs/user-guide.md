@@ -35,7 +35,7 @@ Category and expiry date exist in the system, but adding them from the form is s
 
 1. On the Pantry page, click Suggest recipes.
 2. The app looks at what you currently have and returns a few ideas. Each one usually includes a name, short description, prep time, ingredients with amounts, and steps.
-3. If the ideas are thin, try adding a couple more staples. Suggestions only know about what is in your pantry right now.
+3. If the ideas are thin, try adding a couple of staples. Suggestions only know about what is in your pantry right now. The app also tries not to repeat recipes you already saved (by name). If everything it comes back with is already under Recipes, you will see a short note instead of duplicate cards.
 4. If something goes wrong, you should see an error on the page. The rest of the app should still work.
 
 ## Saving recipes
@@ -48,9 +48,9 @@ On each saved recipe card, if there are instructions, use View instructions to e
 
 ### Save an AI suggestion
 
-On a suggestion card, click Save recipe. The app matches ingredient names to your pantry (ignoring capitalization) and creates a normal recipe you can find under Recipes.
+On a suggestion card, click Save recipe. The app matches ingredient names to your pantry (ignoring capitalization and extra spaces) and creates a normal recipe you can find under Recipes. After a successful save, the button stays on Saved and you can open View in Recipes. Clicking Save again on that card does nothing until you run Suggest recipes again.
 
-If a name does not match, the recipe still saves and you get a note about what was skipped.
+If some names do not match, the recipe still saves and you get a note about what was skipped. If nothing matches, the recipe is not saved and you get a clear note instead.
 
 ## Meal plans
 
@@ -80,3 +80,10 @@ No. Each account only sees its own ingredients, recipes, and meal plans.
 
 **Does it work offline?**
 No. You need a network connection, and suggestions need the AI service to be reachable.
+
+## Doc history
+
+- 6 Aug 2026: First user guide for pantry, suggestions, recipes, and meal plans.
+- 7 Aug 2026: Save an AI suggestion (match note / skip note).
+- 8 Aug 2026: Recipes search; delete blocked by meal plan (clear message). Collapsible instructions shipped with the 7 Aug save flow.
+- 9 Aug 2026: Save-loop polish — Saved stays until next Suggest, View in Recipes, trimmed matching, no save when nothing matches; suggestions skip already-saved names.

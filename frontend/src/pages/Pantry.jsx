@@ -5,9 +5,13 @@ import {
   deleteIngredient,
   getIngredients,
 } from "../api/ingredients";
-import { createRecipe } from "../api/recipes";
+import { createRecipe, getRecipes } from "../api/recipes";
 import { getSuggestions } from "../api/suggestions";
 import { useAuth } from "../context/AuthContext";
+
+function normalizeName(value) {
+  return (value ?? "").trim().toLowerCase();
+}
 
 export default function Pantry() {
   const navigate = useNavigate();
@@ -22,8 +26,9 @@ export default function Pantry() {
   const [suggestions, setSuggestions] = useState([]);
   const [suggesting, setSuggesting] = useState(false);
   const [suggestError, setSuggestError] = useState("");
+  const [suggestNote, setSuggestNote] = useState("");
   const [savingIndex, setSavingIndex] = useState(null);
-  const [savedIndex, setSavedIndex] = useState(null);
+  const [savedIndexes, setSavedIndexes] = useState(() => new Set());
   const [saveNotes, setSaveNotes] = useState({});
 
   async function loadIngredients() {
@@ -76,12 +81,32 @@ export default function Pantry() {
   async function handleSuggest() {
     setSuggesting(true);
     setSuggestError("");
+    setSuggestNote("");
     setSuggestions([]);
     setSaveNotes({});
-    setSavedIndex(null);
+    setSavedIndexes(new Set());
     try {
-      const data = await getSuggestions();
-      setSuggestions(data);
+      const [data, recipes] = await Promise.all([
+        getSuggestions(),
+        getRecipes().catch(() => []),
+      ]);
+      const savedNames = new Set(
+        (recipes ?? []).map((recipe) => normalizeName(recipe.name)).filter(Boolean),
+      );
+      const fresh = (Array.isArray(data) ? data : []).filter(
+        (recipe) => !savedNames.has(normalizeName(recipe.name)),
+      );
+      const dropped = (Array.isArray(data) ? data : []).length - fresh.length;
+      setSuggestions(fresh);
+      if (fresh.length === 0 && dropped > 0) {
+        setSuggestNote(
+          "Those ideas match recipes you already saved. Add a couple of ingredients, or try Suggest again for something new.",
+        );
+      } else if (dropped > 0) {
+        setSuggestNote(
+          `Hid ${dropped} idea${dropped === 1 ? "" : "s"} you already have under Recipes.`,
+        );
+      }
     } catch (err) {
       const detail = err.response?.data?.detail;
       setSuggestError(
@@ -93,6 +118,10 @@ export default function Pantry() {
   }
 
   async function handleSaveSuggestion(recipe, index) {
+    if (savedIndexes.has(index)) {
+      return;
+    }
+
     setSavingIndex(index);
     setError("");
     setSaveNotes((prev) => {
@@ -104,8 +133,9 @@ export default function Pantry() {
     const matched = [];
     const unmatched = [];
     for (const used of recipe.ingredients_used ?? []) {
+      const usedName = normalizeName(used.name);
       const pantryItem = ingredients.find(
-        (item) => item.name.toLowerCase() === used.name.toLowerCase(),
+        (item) => normalizeName(item.name) === usedName,
       );
       if (pantryItem) {
         const qty = Number(used.quantity);
@@ -115,8 +145,20 @@ export default function Pantry() {
           unit: used.unit,
         });
       } else {
-        unmatched.push(used.name);
+        unmatched.push(used.name?.trim() || used.name);
       }
+    }
+
+    if (matched.length === 0) {
+      setSaveNotes((prev) => ({
+        ...prev,
+        [index]:
+          unmatched.length > 0
+            ? `Nothing matched your pantry, so this wasn't saved. Skipped: ${unmatched.join(", ")}`
+            : "Nothing matched your pantry, so this wasn't saved.",
+      }));
+      setSavingIndex(null);
+      return;
     }
 
     try {
@@ -127,16 +169,18 @@ export default function Pantry() {
         prep_time_minutes: recipe.prep_time_minutes ?? null,
         ingredients: matched,
       });
-      setSavedIndex(index);
+      setSavedIndexes((prev) => new Set(prev).add(index));
       if (unmatched.length > 0) {
         setSaveNotes((prev) => ({
           ...prev,
           [index]: `Saved, but couldn't match: ${unmatched.join(", ")}`,
         }));
+      } else {
+        setSaveNotes((prev) => ({
+          ...prev,
+          [index]: "Saved to Recipes.",
+        }));
       }
-      window.setTimeout(() => {
-        setSavedIndex((current) => (current === index ? null : current));
-      }, 2000);
     } catch {
       setError("Failed to save recipe.");
     } finally {
@@ -303,6 +347,12 @@ export default function Pantry() {
           </p>
         )}
 
+        {suggestNote && !suggesting && (
+          <p className="text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+            {suggestNote}
+          </p>
+        )}
+
         {(suggesting || suggestions.length > 0) && (
           <section className="space-y-4">
             <h2 className="text-lg font-medium text-slate-900">
@@ -312,7 +362,15 @@ export default function Pantry() {
               <p className="text-sm text-slate-500">Generating suggestions…</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {suggestions.map((recipe, index) => (
+                {suggestions.map((recipe, index) => {
+                  const isSaved = savedIndexes.has(index);
+                  const note = saveNotes[index];
+                  const noteIsWarning =
+                    typeof note === "string" &&
+                    (note.startsWith("Nothing matched") ||
+                      note.includes("couldn't match"));
+
+                  return (
                   <article
                     key={`${recipe.name}-${index}`}
                     className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3"
@@ -346,25 +404,42 @@ export default function Pantry() {
                         </pre>
                       </div>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => handleSaveSuggestion(recipe, index)}
-                      disabled={savingIndex === index}
-                      className="rounded-lg bg-slate-900 text-white px-3 py-1.5 text-sm font-medium hover:bg-slate-800 disabled:opacity-60"
-                    >
-                      {savingIndex === index
-                        ? "Saving..."
-                        : savedIndex === index
-                          ? "Saved!"
-                          : "Save recipe"}
-                    </button>
-                    {saveNotes[index] && (
-                      <p className="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-                        {saveNotes[index]}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleSaveSuggestion(recipe, index)}
+                        disabled={savingIndex === index || isSaved}
+                        className="rounded-lg bg-slate-900 text-white px-3 py-1.5 text-sm font-medium hover:bg-slate-800 disabled:opacity-60"
+                      >
+                        {savingIndex === index
+                          ? "Saving..."
+                          : isSaved
+                            ? "Saved"
+                            : "Save recipe"}
+                      </button>
+                      {isSaved && (
+                        <Link
+                          to="/recipes"
+                          className="text-sm font-medium text-slate-700 hover:text-slate-900"
+                        >
+                          View in Recipes
+                        </Link>
+                      )}
+                    </div>
+                    {note && (
+                      <p
+                        className={
+                          noteIsWarning
+                            ? "text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2"
+                            : "text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2"
+                        }
+                      >
+                        {note}
                       </p>
                     )}
                   </article>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>
