@@ -22,6 +22,8 @@ export default function Pantry() {
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [unit, setUnit] = useState("");
+  const [category, setCategory] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [suggesting, setSuggesting] = useState(false);
@@ -56,10 +58,14 @@ export default function Pantry() {
         name,
         quantity: Number(quantity),
         unit,
+        category: category || null,
+        expiry_date: expiryDate || null,
       });
       setName("");
       setQuantity("");
       setUnit("");
+      setCategory("");
+      setExpiryDate("");
       await loadIngredients();
     } catch {
       setError("Failed to add ingredient.");
@@ -248,7 +254,7 @@ export default function Pantry() {
           </h2>
           <form
             onSubmit={handleAdd}
-            className="grid grid-cols-1 sm:grid-cols-4 gap-3"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3"
           >
             <input
               type="text"
@@ -274,6 +280,25 @@ export default function Pantry() {
               placeholder="Unit (g, ml, pcs)"
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+            />
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+            >
+              <option value="">Select category (optional)</option>
+              <option value="Produce">Produce</option>
+              <option value="Meat">Meat</option>
+              <option value="Dairy">Dairy</option>
+              <option value="Grains">Grains</option>
+              <option value="Pantry Staples">Pantry Staples</option>
+              <option value="Other">Other</option>
+            </select>
+            <input
+              type="date"
+              value={expiryDate}
+              onChange={(e) => setExpiryDate(e.target.value)}
               className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
             />
             <button
