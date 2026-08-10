@@ -27,9 +27,9 @@ One thing to know about the live site: the backend runs on a free hosting plan, 
 
 ## Your pantry
 
-On the Pantry page, add what you have: a name, how much, and the unit (for example flour, 2, cup). Items show up in your list, and you can remove anything you used up or threw out.
+On the Pantry page, add what you have: a name, how much, and the unit (for example flour, 2, cup). Category and expiry date are optional. Items show up in your list with those fields when you set them.
 
-Category and expiry date exist in the system, but adding them from the form is still being finished. Same for quick quantity edits. The project plan covers when that lands.
+To change how much you have without deleting the row, use the − / + buttons next to the quantity, or click the number and type an exact value. Quantity will not go below zero. You can still delete a row when you are done with an item; a clearer “finished / remove” flow is still coming (see the project plan).
 
 ## Recipe suggestions
 
@@ -87,3 +87,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 7 Aug 2026: Save an AI suggestion (match note / skip note).
 - 8 Aug 2026: Recipes search; delete blocked by meal plan (clear message). Collapsible instructions shipped with the 7 Aug save flow.
 - 9 Aug 2026: Save-loop polish — Saved stays until next Suggest, View in Recipes, trimmed matching, no save when nothing matches; suggestions skip already-saved names.
+- 10 Aug 2026: Optional category and expiry on add; quantity stepper (− / +, click to type) with update without delete-and-readd.

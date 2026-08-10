@@ -4,6 +4,7 @@ import {
   createIngredient,
   deleteIngredient,
   getIngredients,
+  updateIngredient,
 } from "../api/ingredients";
 import { createRecipe, getRecipes } from "../api/recipes";
 import { getSuggestions } from "../api/suggestions";
@@ -11,6 +12,80 @@ import { useAuth } from "../context/AuthContext";
 
 function normalizeName(value) {
   return (value ?? "").trim().toLowerCase();
+}
+
+function QuantityStepper({ quantity, onChange }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(String(quantity));
+
+  function commitDraft() {
+    setEditing(false);
+    const parsed = Number(draft);
+    if (!Number.isFinite(parsed)) {
+      setDraft(String(quantity));
+      return;
+    }
+    const next = Math.max(0, parsed);
+    setDraft(String(next));
+    if (next !== quantity) {
+      onChange(next);
+    }
+  }
+
+  if (editing) {
+    return (
+      <input
+        type="number"
+        min="0"
+        step="any"
+        autoFocus
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commitDraft}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.currentTarget.blur();
+          } else if (e.key === "Escape") {
+            setDraft(String(quantity));
+            setEditing(false);
+          }
+        }}
+        className="w-16 rounded border border-slate-300 px-1.5 py-0.5 text-center text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+      />
+    );
+  }
+
+  return (
+    <div className="inline-flex items-center gap-1">
+      <button
+        type="button"
+        aria-label="Decrease quantity"
+        onClick={() => onChange(Math.max(0, quantity - 1))}
+        className="h-7 w-7 rounded border border-slate-300 text-slate-700 hover:bg-slate-50"
+      >
+        −
+      </button>
+      <button
+        type="button"
+        aria-label="Edit quantity"
+        onClick={() => {
+          setDraft(String(quantity));
+          setEditing(true);
+        }}
+        className="min-w-[2.5rem] px-1 py-0.5 text-center tabular-nums text-slate-800 hover:bg-slate-50 rounded"
+      >
+        {quantity}
+      </button>
+      <button
+        type="button"
+        aria-label="Increase quantity"
+        onClick={() => onChange(quantity + 1)}
+        className="h-7 w-7 rounded border border-slate-300 text-slate-700 hover:bg-slate-50"
+      >
+        +
+      </button>
+    </div>
+  );
 }
 
 export default function Pantry() {
@@ -81,6 +156,32 @@ export default function Pantry() {
       await loadIngredients();
     } catch {
       setError("Failed to delete ingredient.");
+    }
+  }
+
+  async function handleQuantityChange(id, nextQuantity) {
+    const clamped = Math.max(0, nextQuantity);
+    const previous = ingredients.find((item) => item.id === id);
+    if (!previous || previous.quantity === clamped) {
+      return;
+    }
+
+    setError("");
+    setIngredients((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, quantity: clamped } : item,
+      ),
+    );
+
+    try {
+      await updateIngredient(id, { quantity: clamped });
+    } catch {
+      setIngredients((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, quantity: previous.quantity } : item,
+        ),
+      );
+      setError("Failed to update quantity.");
     }
   }
 
@@ -345,7 +446,14 @@ export default function Pantry() {
                   {ingredients.map((item) => (
                     <tr key={item.id} className="text-slate-800">
                       <td className="px-6 py-3">{item.name}</td>
-                      <td className="px-6 py-3">{item.quantity}</td>
+                      <td className="px-6 py-3">
+                        <QuantityStepper
+                          quantity={item.quantity}
+                          onChange={(next) =>
+                            handleQuantityChange(item.id, next)
+                          }
+                        />
+                      </td>
                       <td className="px-6 py-3">{item.unit}</td>
                       <td className="px-6 py-3">{item.category ?? "—"}</td>
                       <td className="px-6 py-3">{item.expiry_date ?? "—"}</td>

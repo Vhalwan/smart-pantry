@@ -29,7 +29,9 @@ Useful rather than flashy. The interesting part is “use what is about to go ba
 Already working:
 
 - Accounts and login
-- Pantry list (name, quantity, unit)
+- Pantry list (name, quantity, unit, category, expiry)
+- Optional category and expiry on the add-ingredient form
+- Quick quantity adjust (− / + stepper, or type an exact value) without delete-and-readd
 - AI recipe suggestions from the current pantry
 - Save a suggestion as a recipe from the suggestion card (name match + skip note)
 - Manual recipes and meal plans
@@ -37,12 +39,12 @@ Already working:
 
 Still open:
 
-- Collecting category and expiry when adding food, and using them
-- Near-expiry notices
-- Easy quantity changes and a simple “I cooked this” update so the pantry stays true
+- Clear remove / finished action (including what happens when quantity hits 0)
+- Near-expiry notices, and using expiry in suggestions
+- A simple “I cooked this” update so the pantry stays true after a meal
 - Prompting the AI more clearly for rushed cooks with few ingredients
 
-Category and expiry already exist in the database and show as columns, but the add form does not collect them yet and nothing alerts on expiry.
+Category and expiry are collected and shown. Nothing alerts on expiry yet, and quantity can sit at 0 without auto-delete until the remove/finished work lands.
 
 ## Timeline (why not two full months)
 
@@ -79,10 +81,10 @@ Done when: Pantry, Suggest, Save works without rebuilding the recipe by hand.
 
 Make the pantry easy to keep honest.
 
-- [ ] Optional category and expiry on add
-- [ ] Quick quantity adjust without delete-and-readd
-- [ ] Clear remove / finished action
-- [ ] Show category and expiry in the list in a way that is actually useful
+- [x] Optional category and expiry on add (Day 1, 10 Aug)
+- [x] Quick quantity adjust without delete-and-readd (Day 1, 10 Aug)
+- [ ] Clear remove / finished action (also decide what happens at quantity 0)
+- [x] Show category and expiry in the list (already in the table; form wiring completed the pair)
 
 Done when: updating the pantry after a meal takes about a minute.
 
@@ -160,3 +162,4 @@ Spend a few minutes each Sunday:
 - 7 Aug 2026: Marked save-from-suggestion week complete (Save on suggestion cards, name matching, Recipes list, user guide).
 - 8 Aug 2026: Recipes polish — client-side title search, card layout/spacing pass, clearer error when delete is blocked by a meal plan (API 409 + UI message). Documented in technical, design, and user guide.
 - 9 Aug 2026: Save-loop polish (four items): (1) no double-save on the same suggestion card until Suggest runs again, (2) View in Recipes link after a successful save, (3) trim spaces when matching ingredient names, (4) do not create a recipe when nothing matches — show a clear note instead. Also: suggestions ask the model to avoid already-saved recipe names and hide leftover exact name matches.
+- 10 Aug 2026: Week 2 Day 1 — optional category and expiry on the add form (list columns were already there); quantity stepper with click-to-type, optimistic PUT, clamp at 0. One Week 2 item left: clear remove / finished (and quantity-at-0 behavior).

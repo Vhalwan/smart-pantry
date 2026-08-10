@@ -10,6 +10,11 @@ export async function createIngredient(data) {
   return response.data;
 }
 
+export async function updateIngredient(id, data) {
+  const response = await client.put(`/ingredients/${id}`, data);
+  return response.data;
+}
+
 export async function deleteIngredient(id) {
   const response = await client.delete(`/ingredients/${id}`);
   return response.data;

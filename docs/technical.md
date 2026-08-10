@@ -34,7 +34,7 @@ Auth means a valid bearer token from login.
 | GET | `/ingredients/` | Yes | List pantry (optional skip, limit) |
 | POST | `/ingredients/` | Yes | Add ingredient |
 | GET | `/ingredients/{id}` | Yes | Get one |
-| PUT | `/ingredients/{id}` | Yes | Update |
+| PUT | `/ingredients/{id}` | Yes | Partial update (`IngredientUpdate`; omit fields to leave them unchanged) |
 | DELETE | `/ingredients/{id}` | Yes | Delete |
 | GET | `/recipes/suggest` | Yes | AI suggestions for current pantry |
 | GET | `/recipes/` | Yes | List recipes |
@@ -111,7 +111,7 @@ The Recipes page shows a clearer inline message for that 409. Other delete failu
 
 - Route handlers should say what they do, whether auth is required, and how errors look when that is not obvious.
 - Pydantic schemas are the source of truth for shapes. Avoid comments that duplicate and drift.
-- Frontend `api/*.js` files stay thin. Matching logic and similar behavior live in the page or a dedicated helper.
+- Frontend `api/*.js` files stay thin. Matching logic and similar behavior live in the page or a dedicated helper. Pantry quantity edits use `updateIngredient(id, { quantity })` against the partial PUT above.
 
 ## Running locally
 
@@ -159,3 +159,4 @@ On Render, bind the HTTP server to `0.0.0.0` and the platform `$PORT`. Local dis
 - 6 Aug 2026: First technical overview (stack, routes, deploy notes).
 - 8 Aug 2026: Documented DELETE `/recipes/{id}` 409 when the recipe is referenced by a meal plan; Notable errors table; env examples for `VITE_API_URL`.
 - 9 Aug 2026: Suggest endpoint loads saved recipe names, asks Gemini to avoid them, and drops exact name matches when a fresh idea remains.
+- 10 Aug 2026: Noted PUT `/ingredients/{id}` as partial update; frontend `updateIngredient` for quantity stepper.
