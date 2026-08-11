@@ -29,7 +29,9 @@ One thing to know about the live site: the backend runs on a free hosting plan, 
 
 On the Pantry page, add what you have: a name, how much, and the unit (for example flour, 2, cup). Category and expiry date are optional. Items show up in your list with those fields when you set them.
 
-To change how much you have without deleting the row, use the − / + buttons next to the quantity, or click the number and type an exact value. Quantity will not go below zero. You can still delete a row when you are done with an item; a clearer “finished / remove” flow is still coming (see the project plan).
+To change how much you have without deleting the row, use the − / + buttons next to the quantity, or click the number and type an exact value. Quantity will not go below zero.
+
+When quantity hits zero (via the stepper or by typing 0), the item leaves the list right away and you get a short toast: Removed {name} · Undo. If you do nothing for about five seconds, the item is deleted for good. Click Undo in that window to put it back at its previous quantity. The Delete button on the row still removes an item immediately, with no toast.
 
 ## Recipe suggestions
 
@@ -88,3 +90,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 8 Aug 2026: Recipes search; delete blocked by meal plan (clear message). Collapsible instructions shipped with the 7 Aug save flow.
 - 9 Aug 2026: Save-loop polish — Saved stays until next Suggest, View in Recipes, trimmed matching, no save when nothing matches; suggestions skip already-saved names.
 - 10 Aug 2026: Optional category and expiry on add; quantity stepper (− / +, click to type) with update without delete-and-readd.
+- 11 Aug 2026: Quantity at 0 auto-removes the row with a 5-second Undo toast; Delete button stays immediate.

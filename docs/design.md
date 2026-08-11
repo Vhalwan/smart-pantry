@@ -63,7 +63,7 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - No automatic retries yet when Gemini fails
 - Recipe and meal-plan lists are not paginated (fine at current size); ingredients support skip/limit
 - Name matching is exact after normalizing case and trimming spaces, not fuzzy
-- Quantity can be set to 0; there is not yet a dedicated finished/remove flow or auto-delete at zero
+- Quantity at 0 removes the row from the UI immediately and schedules a per-item delayed DELETE (~5s) with an Undo toast; Undo cancels only that item’s countdown. Explicit Delete stays immediate. Timers live outside the Pantry page so navigate-away still deletes
 - Expiry notices and cook-and-update are on the [project plan](./project-plan.md) and not shipped yet
 - Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching
 - Avoiding already-saved recipes is by name only (not ingredients or “similar dish” detection)
@@ -75,3 +75,4 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - 8 Aug 2026: Deleting a recipe still on a meal plan is rejected (API conflict; Recipes page explains next step).
 - 9 Aug 2026: Trimmed name match; no recipe create when nothing matches; suggest path avoids already-saved names (exact match hide + prompt).
 - 10 Aug 2026: Pantry add collects optional category/expiry; quantity edits via stepper (optimistic PUT). Finished/remove and quantity-at-0 still open.
+- 11 Aug 2026: Quantity-at-0 auto-remove: optimistic list remove, Undo toast (display-only), per-id delayed DELETE in `pendingIngredientRemovals` (sessionStorage + rehydrate). No PUT to 0 before delete.

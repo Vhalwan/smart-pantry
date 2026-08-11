@@ -32,6 +32,7 @@ Already working:
 - Pantry list (name, quantity, unit, category, expiry)
 - Optional category and expiry on the add-ingredient form
 - Quick quantity adjust (− / + stepper, or type an exact value) without delete-and-readd
+- Quantity at 0 auto-removes the row (Undo toast, then DELETE); row Delete stays immediate
 - AI recipe suggestions from the current pantry
 - Save a suggestion as a recipe from the suggestion card (name match + skip note)
 - Manual recipes and meal plans
@@ -39,12 +40,11 @@ Already working:
 
 Still open:
 
-- Clear remove / finished action (including what happens when quantity hits 0)
 - Near-expiry notices, and using expiry in suggestions
 - A simple “I cooked this” update so the pantry stays true after a meal
 - Prompting the AI more clearly for rushed cooks with few ingredients
 
-Category and expiry are collected and shown. Nothing alerts on expiry yet, and quantity can sit at 0 without auto-delete until the remove/finished work lands.
+Category and expiry are collected and shown. Nothing alerts on expiry yet. Hitting quantity 0 removes the item after a short Undo window.
 
 ## Timeline (why not two full months)
 
@@ -83,7 +83,7 @@ Make the pantry easy to keep honest.
 
 - [x] Optional category and expiry on add (Day 1, 10 Aug)
 - [x] Quick quantity adjust without delete-and-readd (Day 1, 10 Aug)
-- [ ] Clear remove / finished action (also decide what happens at quantity 0)
+- [x] Clear remove / finished at quantity 0 (Day 2, 11 Aug) — Undo toast, then delayed DELETE; row Delete stays immediate
 - [x] Show category and expiry in the list (already in the table; form wiring completed the pair)
 
 Done when: updating the pantry after a meal takes about a minute.
@@ -163,3 +163,4 @@ Spend a few minutes each Sunday:
 - 8 Aug 2026: Recipes polish — client-side title search, card layout/spacing pass, clearer error when delete is blocked by a meal plan (API 409 + UI message). Documented in technical, design, and user guide.
 - 9 Aug 2026: Save-loop polish (four items): (1) no double-save on the same suggestion card until Suggest runs again, (2) View in Recipes link after a successful save, (3) trim spaces when matching ingredient names, (4) do not create a recipe when nothing matches — show a clear note instead. Also: suggestions ask the model to avoid already-saved recipe names and hide leftover exact name matches.
 - 10 Aug 2026: Week 2 Day 1 — optional category and expiry on the add form (list columns were already there); quantity stepper with click-to-type, optimistic PUT, clamp at 0. One Week 2 item left: clear remove / finished (and quantity-at-0 behavior).
+- 11 Aug 2026: Week 2 Day 2 — quantity at 0 removes the row optimistically with a 5s Undo toast; each item has its own delayed DELETE (survives navigate-away / refresh via module store + sessionStorage). Explicit Delete unchanged. Week 2 pantry checklist complete; next focus is Week 3 expiry / suggestions.

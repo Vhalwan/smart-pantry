@@ -6,12 +6,39 @@ import {
   getIngredients,
   updateIngredient,
 } from "../api/ingredients";
+import {
+  cancelPendingRemoval,
+  flushOverduePendingRemovals,
+  getPendingRemovalIds,
+  schedulePendingRemoval,
+  subscribePendingRemovals,
+} from "../api/pendingIngredientRemovals";
 import { createRecipe, getRecipes } from "../api/recipes";
 import { getSuggestions } from "../api/suggestions";
 import { useAuth } from "../context/AuthContext";
 
+const UNDO_TOAST_MS = 5000;
+
 function normalizeName(value) {
   return (value ?? "").trim().toLowerCase();
+}
+
+function UndoToast({ name, onUndo }) {
+  return (
+    <div
+      role="status"
+      className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-slate-900 px-4 py-3 text-sm text-white shadow-lg"
+    >
+      Removed {name} ·{" "}
+      <button
+        type="button"
+        onClick={onUndo}
+        className="font-medium underline underline-offset-2 hover:text-slate-200"
+      >
+        Undo
+      </button>
+    </div>
+  );
 }
 
 function QuantityStepper({ quantity, onChange }) {
@@ -107,12 +134,16 @@ export default function Pantry() {
   const [savingIndex, setSavingIndex] = useState(null);
   const [savedIndexes, setSavedIndexes] = useState(() => new Set());
   const [saveNotes, setSaveNotes] = useState({});
+  // Toast is display-only: which id was most recently zeroed. It never owns
+  // delete timers — those live in pendingIngredientRemovals keyed by id.
+  const [undoToast, setUndoToast] = useState(null);
 
   async function loadIngredients() {
     setError("");
     try {
       const data = await getIngredients();
-      setIngredients(data);
+      const pendingIds = getPendingRemovalIds();
+      setIngredients(data.filter((item) => !pendingIds.has(Number(item.id))));
     } catch {
       setError("Failed to load ingredients.");
     } finally {
@@ -122,6 +153,31 @@ export default function Pantry() {
 
   useEffect(() => {
     loadIngredients();
+    flushOverduePendingRemovals();
+  }, []);
+
+  // Cosmetic toast dismiss only — must NOT cancel any pending DELETE.
+  // When undoToast changes (A → B), React clears A's dismiss timer; B gets
+  // a new one. A's delete countdown in the store is untouched.
+  useEffect(() => {
+    if (!undoToast) {
+      return undefined;
+    }
+    const toastId = undoToast.id;
+    const timerId = setTimeout(() => {
+      setUndoToast((current) => (current?.id === toastId ? null : current));
+    }, UNDO_TOAST_MS);
+    return () => clearTimeout(timerId);
+  }, [undoToast]);
+
+  useEffect(() => {
+    return subscribePendingRemovals((event) => {
+      if (event.type === "deleted") {
+        setUndoToast((current) =>
+          current?.id === event.id ? null : current,
+        );
+      }
+    });
   }, []);
 
   async function handleAdd(e) {
@@ -151,6 +207,10 @@ export default function Pantry() {
 
   async function handleDelete(id) {
     setError("");
+    cancelPendingRemoval(id);
+    if (undoToast?.id === Number(id)) {
+      setUndoToast(null);
+    }
     try {
       await deleteIngredient(id);
       await loadIngredients();
@@ -159,17 +219,56 @@ export default function Pantry() {
     }
   }
 
+  function handleUndoRemoval(id) {
+    // Undo ONLY the toast ingredient — cancel that id's countdown alone.
+    const pending = cancelPendingRemoval(id);
+    if (!pending) {
+      return;
+    }
+    setUndoToast((current) => (current?.id === Number(id) ? null : current));
+    setIngredients((prev) => {
+      if (prev.some((item) => Number(item.id) === Number(id))) {
+        return prev;
+      }
+      const next = [...prev];
+      const index = Math.min(pending.index, next.length);
+      next.splice(index, 0, pending.item);
+      return next;
+    });
+  }
+
+  function scheduleRemovalAfterZero(previous, index) {
+    setIngredients((prev) =>
+      prev.filter((item) => Number(item.id) !== Number(previous.id)),
+    );
+    // Replace visible toast only. Does not cancel other ids' countdowns.
+    setUndoToast({ id: Number(previous.id), name: previous.name });
+    schedulePendingRemoval(previous, {
+      index,
+      delayMs: UNDO_TOAST_MS,
+    });
+  }
+
   async function handleQuantityChange(id, nextQuantity) {
     const clamped = Math.max(0, nextQuantity);
-    const previous = ingredients.find((item) => item.id === id);
+    const index = ingredients.findIndex(
+      (item) => Number(item.id) === Number(id),
+    );
+    const previous = index >= 0 ? ingredients[index] : null;
     if (!previous || previous.quantity === clamped) {
       return;
     }
 
     setError("");
+
+    if (clamped === 0) {
+      scheduleRemovalAfterZero(previous, index);
+      return;
+    }
+
     setIngredients((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, quantity: clamped } : item,
+        Number(item.id) === Number(id) ? { ...item, quantity: clamped } : item,
       ),
     );
 
@@ -178,7 +277,9 @@ export default function Pantry() {
     } catch {
       setIngredients((prev) =>
         prev.map((item) =>
-          item.id === id ? { ...item, quantity: previous.quantity } : item,
+          Number(item.id) === Number(id)
+            ? { ...item, quantity: previous.quantity }
+            : item,
         ),
       );
       setError("Failed to update quantity.");
@@ -578,6 +679,13 @@ export default function Pantry() {
           </section>
         )}
       </main>
+
+      {undoToast && (
+        <UndoToast
+          name={undoToast.name}
+          onUndo={() => handleUndoRemoval(undoToast.id)}
+        />
+      )}
     </div>
   );
 }

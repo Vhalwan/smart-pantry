@@ -17,7 +17,7 @@ backend/
 frontend/
   src/
     pages/           # Pantry, Recipes, MealPlans, Login, Register
-    api/             # thin fetch wrappers
+    api/             # thin fetch wrappers (+ pendingIngredientRemovals for delayed DELETE)
     context/         # AuthContext
 docker-compose.yml   # api + db
 ```
@@ -112,6 +112,7 @@ The Recipes page shows a clearer inline message for that 409. Other delete failu
 - Route handlers should say what they do, whether auth is required, and how errors look when that is not obvious.
 - Pydantic schemas are the source of truth for shapes. Avoid comments that duplicate and drift.
 - Frontend `api/*.js` files stay thin. Matching logic and similar behavior live in the page or a dedicated helper. Pantry quantity edits use `updateIngredient(id, { quantity })` against the partial PUT above.
+- Quantity → 0 does **not** PUT 0. The Pantry page removes the row optimistically and calls `schedulePendingRemoval` in `pendingIngredientRemovals.js`. After ~5s with no Undo, that module calls `DELETE /ingredients/{id}`. Each id has its own timer; the Undo toast is display-only (most recent zeroed item) and never cancels another id’s countdown. Deadlines are kept in `sessionStorage` and rehydrated on app boot / tab focus so navigate-away still deletes. Explicit row Delete stays an immediate `deleteIngredient` with no toast.
 
 ## Running locally
 
@@ -160,3 +161,4 @@ On Render, bind the HTTP server to `0.0.0.0` and the platform `$PORT`. Local dis
 - 8 Aug 2026: Documented DELETE `/recipes/{id}` 409 when the recipe is referenced by a meal plan; Notable errors table; env examples for `VITE_API_URL`.
 - 9 Aug 2026: Suggest endpoint loads saved recipe names, asks Gemini to avoid them, and drops exact name matches when a fresh idea remains.
 - 10 Aug 2026: Noted PUT `/ingredients/{id}` as partial update; frontend `updateIngredient` for quantity stepper.
+- 11 Aug 2026: Documented quantity-at-0 delayed DELETE via `pendingIngredientRemovals` (per-id timers, Undo toast, sessionStorage rehydrate); no PUT to 0.
