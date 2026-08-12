@@ -64,7 +64,7 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - Recipe and meal-plan lists are not paginated (fine at current size); ingredients support skip/limit
 - Name matching is exact after normalizing case and trimming spaces, not fuzzy
 - Quantity at 0 removes the row from the UI immediately and schedules a per-item delayed DELETE (~5s) with an Undo toast; Undo cancels only that item’s countdown. Explicit Delete stays immediate. Timers live outside the Pantry page so navigate-away still deletes
-- Expiry notices and cook-and-update are on the [project plan](./project-plan.md) and not shipped yet
+- Near-expiry / expired notices are frontend-only on the pantry list (calm per-row labels; calendar-day compare; 3-day near window). Biasing suggestions toward soon-to-expire items and cook-and-update are still on the [project plan](./project-plan.md)
 - Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching
 - Avoiding already-saved recipes is by name only (not ingredients or “similar dish” detection)
 
@@ -76,3 +76,4 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - 9 Aug 2026: Trimmed name match; no recipe create when nothing matches; suggest path avoids already-saved names (exact match hide + prompt).
 - 10 Aug 2026: Pantry add collects optional category/expiry; quantity edits via stepper (optimistic PUT). Finished/remove and quantity-at-0 still open.
 - 11 Aug 2026: Quantity-at-0 auto-remove: optimistic list remove, Undo toast (display-only), per-id delayed DELETE in `pendingIngredientRemovals` (sessionStorage + rehydrate). No PUT to 0 before delete.
+- 12 Aug 2026: Pantry list shows calm Expired / Expiring soon labels from client-side date compare (`NEAR_EXPIRY_DAYS = 3`); no API change.
