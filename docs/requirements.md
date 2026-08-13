@@ -31,7 +31,7 @@ IDs (FR-1, and so on) are for tracking. The statements are written in plain lang
 | FR-15 | When generating suggestions, the app may prefer recipes that use soon-to-expire items when those dates are available. |
 | FR-16 | A user can mark that they cooked a recipe (or finished using listed ingredients) and have pantry quantities updated accordingly. |
 
-FR-8 through FR-10 are in the UI (save from a suggestion card with name matching and a skip note). FR-4’s optional category and expiry are collected on the Pantry add form and shown in the list. FR-13 is in the UI (quantity stepper / direct edit via partial PUT). Quantity at 0 auto-removes the item after a short Undo window (delayed DELETE); the explicit Delete control remains immediate. FR-14 is in the UI (calm per-row Expired / Expiring soon labels next to the expiry date; client-side calendar-day compare, 3-day near window). FR-15 and FR-16 are still required for the plan’s “done” bar and are tracked in the [project plan](./project-plan.md).
+FR-8 through FR-10 are in the UI (save from a suggestion card with name matching and a skip note). FR-4’s optional category and expiry are collected on the Pantry add form and shown in the list. FR-13 is in the UI (quantity stepper / direct edit via partial PUT). Quantity at 0 auto-removes the item after a short Undo window (delayed DELETE); the explicit Delete control remains immediate. FR-14 is in the UI (calm per-row Expired / Expiring soon labels next to the expiry date; client-side calendar-day compare, 3-day near window). FR-15 is in the suggestion prompt (backend tags the same 3-day / expired window and asks Gemini to prefer those items when it reasonably can; also rush-friendly / thin-pantry wording). FR-16 is still required for the plan’s “done” bar and is tracked in the [project plan](./project-plan.md).
 
 ## Quality and safety expectations
 
@@ -53,6 +53,7 @@ These are intentionally out for now:
 - Shared pantries for multiple people
 - Fuzzy matching beyond ignoring capitalization on exact names
 - Heavy grocery-store integrations or a rigid weekly meal-prep product
+- Flagging a meal-plan entry when its recipe’s linked pantry ingredients are expired or expiring soon (parked; see the project plan buffer week)
 
 ## Doc history
 
@@ -66,3 +67,4 @@ These are intentionally out for now:
 | 10 Aug 2026 | FR-4 category/expiry on add form + list display confirmed; FR-13 quantity adjust shipped (stepper / type, clamp at 0). FR-14–FR-16 still open; remove/finished still pending. |
 | 11 Aug 2026 | Quantity at 0: optimistic remove + Undo toast + delayed DELETE (per item). Explicit Delete unchanged. Week 2 pantry remove/finished (at-zero) shipped; FR-14–FR-16 still open. |
 | 12 Aug 2026 | FR-14 shipped: calm Expired / Expiring soon labels on pantry rows (frontend-only, date-only compare, 3-day near window). FR-15–FR-16 still open. |
+| 13 Aug 2026 | FR-15 shipped: suggestion prompt tags expired / expiring-soon items (same 3-day window) and prefers them when reasonable; rush / thin-pantry prompt wording. FR-16 still open. Meal-plan expiry flags parked (not a requirement this version). |

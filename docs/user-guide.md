@@ -38,8 +38,8 @@ When quantity hits zero (via the stepper or by typing 0), the item leaves the li
 ## Recipe suggestions
 
 1. On the Pantry page, click Suggest recipes.
-2. The app looks at what you currently have and returns a few ideas. Each one usually includes a name, short description, prep time, ingredients with amounts, and steps.
-3. If the ideas are thin, try adding a couple of staples. Suggestions only know about what is in your pantry right now. The app also tries not to repeat recipes you already saved (by name). If everything it comes back with is already under Recipes, you will see a short note instead of duplicate cards.
+2. The app looks at what you currently have and returns a few ideas. Each one usually includes a name, short description, prep time, ingredients with amounts, and steps. If something is expired or expiring within the next three days, the ideas tend to use those items when they reasonably can. Suggestions are aimed at a rushed cook with a possibly thin pantry: shorter prep when it makes sense, simple steps, mostly what you already listed, and a note in the recipe if something extra is still needed.
+3. If the ideas are thin, try adding a couple of staples. Suggestions only know about what is in your pantry right now. A very short list can still return a simple idea (or an honest note that there is not much to work with). An empty pantry cannot suggest anything until you add at least one item. The app also tries not to repeat recipes you already saved (by name). If everything it comes back with is already under Recipes, you will see a short note instead of duplicate cards.
 4. If something goes wrong, you should see an error on the page. The rest of the app should still work.
 
 ## Saving recipes
@@ -58,7 +58,7 @@ If some names do not match, the recipe still saves and you get a note about what
 
 ## Meal plans
 
-Open Meal Plans from the navigation. Pick a saved recipe, a date, and breakfast, lunch, or dinner. Add it, or remove entries when plans change. Meal plans are optional. You can get value from the app without using them.
+Open Meal Plans from the navigation. Pick a saved recipe, a date, and breakfast, lunch, or dinner. Add it, or remove entries when plans change. Meal plans are optional. You can get value from the app without using them. Planned meals do not yet warn you if a linked pantry ingredient is expired or expiring soon (that is a later idea, not in this version).
 
 ## Troubleshooting
 
@@ -94,3 +94,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 10 Aug 2026: Optional category and expiry on add; quantity stepper (− / +, click to type) with update without delete-and-readd.
 - 11 Aug 2026: Quantity at 0 auto-removes the row with a 5-second Undo toast; Delete button stays immediate.
 - 12 Aug 2026: Calm Expired / Expiring soon notes next to pantry expiry dates (within 3 days, or past).
+- 13 Aug 2026: Suggestions prefer soon-to-expire items when dates are set, and lean toward simple, on-hand recipes for a thin pantry. Meal plans still do not flag expired ingredients on a planned meal.

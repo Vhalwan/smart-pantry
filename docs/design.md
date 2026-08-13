@@ -46,7 +46,7 @@ If a user account is deleted, their pantry, recipes, and meal plans go with it.
 5. The website shows each suggestion as a card.
 6. If the AI key is missing, the call fails, or the response is garbage, the API returns an error and the UI shows a message instead of crashing.
 
-As the product catches up to the plan, the prompt should also lean on soon-to-expire items and favor recipes that work for someone with little time and a thin pantry.
+The prompt tags pantry items that are expired or expiring within 3 days (same window as the pantry badge) and asks Gemini to prefer those when it reasonably can. It also favors shorter prep, simple steps, mostly on-hand ingredients, and honesty about missing items. A fully empty pantry still refuses the request; a very thin pantry (1–2 items) gets an extra prompt note instead of a new API error.
 
 ## Saving a suggestion: matching by name
 
@@ -64,7 +64,8 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - Recipe and meal-plan lists are not paginated (fine at current size); ingredients support skip/limit
 - Name matching is exact after normalizing case and trimming spaces, not fuzzy
 - Quantity at 0 removes the row from the UI immediately and schedules a per-item delayed DELETE (~5s) with an Undo toast; Undo cancels only that item’s countdown. Explicit Delete stays immediate. Timers live outside the Pantry page so navigate-away still deletes
-- Near-expiry / expired notices are frontend-only on the pantry list (calm per-row labels; calendar-day compare; 3-day near window). Biasing suggestions toward soon-to-expire items and cook-and-update are still on the [project plan](./project-plan.md)
+- Near-expiry / expired notices on the pantry list are frontend-only (calm per-row labels; calendar-day compare; 3-day near window). The suggestion prompt uses the same 3-day window on the backend (`NEAR_EXPIRY_DAYS = 3`) to tag items and bias recipes; cook-and-update is still on the [project plan](./project-plan.md)
+- Meal plans do not yet flag a planned recipe when its linked pantry ingredients are expired or expiring (parked for the buffer week, after cook-and-update)
 - Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching
 - Avoiding already-saved recipes is by name only (not ingredients or “similar dish” detection)
 
@@ -77,3 +78,4 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - 10 Aug 2026: Pantry add collects optional category/expiry; quantity edits via stepper (optimistic PUT). Finished/remove and quantity-at-0 still open.
 - 11 Aug 2026: Quantity-at-0 auto-remove: optimistic list remove, Undo toast (display-only), per-id delayed DELETE in `pendingIngredientRemovals` (sessionStorage + rehydrate). No PUT to 0 before delete.
 - 12 Aug 2026: Pantry list shows calm Expired / Expiring soon labels from client-side date compare (`NEAR_EXPIRY_DAYS = 3`); no API change.
+- 13 Aug 2026: Suggestion prompt tags expired / expiring-soon items and prefers them when reasonable; rush / thin-pantry wording. Meal-plan expiry flags parked.

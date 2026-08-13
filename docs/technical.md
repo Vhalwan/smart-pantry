@@ -85,7 +85,7 @@ Create recipe (`POST /recipes/`):
 }
 ```
 
-Suggestions use ingredient names. Creating a recipe expects pantry ingredient ids. Name-to-id matching for save-from-suggestion belongs in the page or a helper, not in the thin `api/*.js` wrappers. See [design](./design.md). The suggest endpoint also loads the user’s saved recipe names, asks Gemini to avoid them, and drops exact name matches when at least one fresh idea remains.
+Suggestions use ingredient names. Creating a recipe expects pantry ingredient ids. Name-to-id matching for save-from-suggestion belongs in the page or a helper, not in the thin `api/*.js` wrappers. See [design](./design.md). The suggest endpoint also loads the user’s saved recipe names, asks Gemini to avoid them, and drops exact name matches when at least one fresh idea remains. It tags pantry lines that are expired or expiring within `NEAR_EXPIRY_DAYS` (3, calendar days, inclusive of today — same window as the pantry badge) and asks Gemini to prefer those when reasonable; items with no expiry date stay unmarked. The prompt also favors short prep, simple steps, mostly on-hand ingredients, and honesty about gaps; a pantry of 1–2 items gets an extra “keep it simple” note. An empty pantry still returns 400 before Gemini is called. Response JSON shape is unchanged.
 
 Create meal plan (`POST /meal-plans/`):
 
@@ -113,7 +113,7 @@ The Recipes page shows a clearer inline message for that 409. Other delete failu
 - Pydantic schemas are the source of truth for shapes. Avoid comments that duplicate and drift.
 - Frontend `api/*.js` files stay thin. Matching logic and similar behavior live in the page or a dedicated helper. Pantry quantity edits use `updateIngredient(id, { quantity })` against the partial PUT above.
 - Quantity → 0 does **not** PUT 0. The Pantry page removes the row optimistically and calls `schedulePendingRemoval` in `pendingIngredientRemovals.js`. After ~5s with no Undo, that module calls `DELETE /ingredients/{id}`. Each id has its own timer; the Undo toast is display-only (most recent zeroed item) and never cancels another id’s countdown. Deadlines are kept in `sessionStorage` and rehydrated on app boot / tab focus so navigate-away still deletes. Explicit row Delete stays an immediate `deleteIngredient` with no toast.
-- Expiry status is computed only in the Pantry page: parse `YYYY-MM-DD` as a local calendar date, compare to today with UTC day numbers (time-of-day and DST safe), and show Expired / Expiring soon when past or within `NEAR_EXPIRY_DAYS` (3). No backend field or endpoint for this.
+- Pantry-list expiry status is computed only in the Pantry page: parse `YYYY-MM-DD` as a local calendar date, compare to today with UTC day numbers (time-of-day and DST safe), and show Expired / Expiring soon when past or within `NEAR_EXPIRY_DAYS` (3). The suggest route uses the same 3-day idea on the backend (`NEAR_EXPIRY_DAYS` in `suggestions.py`, `date.today()` vs `expiry_date`) to tag prompt lines; there is still no dedicated expiry API field or meal-plan flag.
 
 ## Running locally
 
@@ -164,3 +164,4 @@ On Render, bind the HTTP server to `0.0.0.0` and the platform `$PORT`. Local dis
 - 10 Aug 2026: Noted PUT `/ingredients/{id}` as partial update; frontend `updateIngredient` for quantity stepper.
 - 11 Aug 2026: Documented quantity-at-0 delayed DELETE via `pendingIngredientRemovals` (per-id timers, Undo toast, sessionStorage rehydrate); no PUT to 0.
 - 12 Aug 2026: Documented client-side near-expiry / expired labels on the Pantry list (`NEAR_EXPIRY_DAYS = 3`, calendar-day compare).
+- 13 Aug 2026: Suggest prompt tags expired / expiring-soon items (`NEAR_EXPIRY_DAYS = 3` in `suggestions.py`), bias + rush / thin-pantry wording; empty pantry still 400. No meal-plan expiry flags.
