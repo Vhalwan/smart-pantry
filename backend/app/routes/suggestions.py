@@ -126,7 +126,7 @@ def suggest_recipes(
     if not ingredients:
         raise HTTPException(
             status_code=400,
-            detail="No ingredients found. Add ingredients to your pantry first.",
+            detail="Add a few ingredients to get suggestions.",
         )
 
     saved_recipes = (

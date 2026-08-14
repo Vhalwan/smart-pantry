@@ -20,6 +20,8 @@ import { useAuth } from "../context/AuthContext";
 const UNDO_TOAST_MS = 5000;
 const NEAR_EXPIRY_DAYS = 3;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const EMPTY_PANTRY_SUGGEST_MESSAGE =
+  "Add a few ingredients to get suggestions.";
 
 function normalizeName(value) {
   return (value ?? "").trim().toLowerCase();
@@ -357,12 +359,16 @@ export default function Pantry() {
   }
 
   async function handleSuggest() {
-    setSuggesting(true);
     setSuggestError("");
     setSuggestNote("");
     setSuggestions([]);
     setSaveNotes({});
     setSavedIndexes(new Set());
+    if (ingredients.length === 0) {
+      setSuggestNote(EMPTY_PANTRY_SUGGEST_MESSAGE);
+      return;
+    }
+    setSuggesting(true);
     try {
       const [data, recipes] = await Promise.all([
         getSuggestions(),
@@ -387,9 +393,18 @@ export default function Pantry() {
       }
     } catch (err) {
       const detail = err.response?.data?.detail;
-      setSuggestError(
-        typeof detail === "string" ? detail : "Failed to get recipe suggestions."
-      );
+      const isEmptyPantry =
+        err.response?.status === 400 &&
+        typeof detail === "string" &&
+        (/no ingredients/i.test(detail) ||
+          /add a few ingredients/i.test(detail));
+      if (isEmptyPantry) {
+        setSuggestNote(EMPTY_PANTRY_SUGGEST_MESSAGE);
+      } else {
+        setSuggestError(
+          typeof detail === "string" ? detail : "Failed to get recipe suggestions."
+        );
+      }
     } finally {
       setSuggesting(false);
     }
@@ -509,15 +524,20 @@ export default function Pantry() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-        <div className="flex justify-end">
+        <div className="flex flex-col items-end gap-2">
           <button
             type="button"
             onClick={handleSuggest}
-            disabled={suggesting}
+            disabled={suggesting || (!loading && ingredients.length === 0)}
             className="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 disabled:opacity-60"
           >
             {suggesting ? "Suggesting…" : "Suggest recipes"}
           </button>
+          {!loading && ingredients.length === 0 && (
+            <p className="text-sm text-slate-500">
+              {EMPTY_PANTRY_SUGGEST_MESSAGE}
+            </p>
+          )}
         </div>
 
         <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
