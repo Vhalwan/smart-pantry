@@ -18,7 +18,7 @@ IDs (FR-1, and so on) are for tracking. The statements are written in plain lang
 | FR-2 | A registered user can log in and get a session token so the app knows who they are. |
 | FR-3 | Requests for personal data are rejected if the user is not logged in. |
 | FR-4 | A user can add an ingredient with name, quantity, and unit. Category and expiry date are optional. |
-| FR-5 | A user can view, change, and delete only their own pantry items. |
+| FR-5 | A user can view, change, and delete only their own pantry items. Deleting an item still used in a recipe is refused, and the user is told which recipes. |
 | FR-6 | The app can generate recipe suggestions from the user’s current pantry using an AI model (Gemini). |
 | FR-7 | Each suggestion includes a name, description, prep time, ingredients used (with quantity and unit), and step-by-step instructions. |
 | FR-8 | A user can save an AI suggestion as a permanent recipe. |
@@ -31,7 +31,7 @@ IDs (FR-1, and so on) are for tracking. The statements are written in plain lang
 | FR-15 | When generating suggestions, the app may prefer recipes that use soon-to-expire items when those dates are available. |
 | FR-16 | A user can mark that they cooked a recipe (or finished using listed ingredients) and have pantry quantities updated accordingly. |
 
-FR-8 through FR-10 are in the UI (save from a suggestion card with name matching and a skip note). FR-4’s optional category and expiry are collected on the Pantry add form and shown in the list. FR-13 is in the UI (quantity stepper / direct edit via partial PUT). Quantity at 0 auto-removes the item after a short Undo window (delayed DELETE); the explicit Delete control remains immediate. FR-14 is in the UI (calm per-row Expired / Expiring soon labels next to the expiry date; client-side calendar-day compare, 3-day near window). FR-15 is in the suggestion prompt (backend tags the same 3-day / expired window and asks Gemini to prefer those items when it reasonably can; also rush-friendly / thin-pantry wording). FR-16 is still required for the plan’s “done” bar and is tracked in the [project plan](./project-plan.md).
+FR-8 through FR-10 are in the UI (save from a suggestion card with name matching and a skip note). FR-4’s optional category and expiry are collected on the Pantry add form and shown in the list. FR-5: delete is refused with a named-recipe message when the item is still linked to a recipe (including after quantity hits 0). FR-13 is in the UI (quantity stepper / direct edit via partial PUT). Quantity at 0 auto-removes the item after a short Undo window (delayed DELETE); the explicit Delete control remains immediate. FR-14 is in the UI (calm per-row Expired / Expiring soon labels next to the expiry date; client-side calendar-day compare, 3-day near window). FR-15 is in the suggestion prompt (backend tags the same 3-day / expired window and asks Gemini to prefer those items when it reasonably can; also rush-friendly / thin-pantry wording). An empty pantry does not call the model; the UI tells the user to add a few ingredients. FR-16 is still required for the plan’s “done” bar and is tracked in the [project plan](./project-plan.md).
 
 ## Quality and safety expectations
 
@@ -68,3 +68,4 @@ These are intentionally out for now:
 | 11 Aug 2026 | Quantity at 0: optimistic remove + Undo toast + delayed DELETE (per item). Explicit Delete unchanged. Week 2 pantry remove/finished (at-zero) shipped; FR-14–FR-16 still open. |
 | 12 Aug 2026 | FR-14 shipped: calm Expired / Expiring soon labels on pantry rows (frontend-only, date-only compare, 3-day near window). FR-15–FR-16 still open. |
 | 13 Aug 2026 | FR-15 shipped: suggestion prompt tags expired / expiring-soon items (same 3-day window) and prefers them when reasonable; rush / thin-pantry prompt wording. FR-16 still open. Meal-plan expiry flags parked (not a requirement this version). |
+| 14 Aug 2026 | Empty-pantry Suggest helper (no Gemini call). FR-5: delete ingredient refused with recipe names when still used in a recipe. FR-16 still open. |

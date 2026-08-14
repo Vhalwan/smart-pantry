@@ -1,11 +1,14 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.dependencies import get_current_user
 from app.models.ingredient import Ingredient
+from app.models.recipe import Recipe
+from app.models.recipe_ingredient import RecipeIngredient
 from app.models.user import User
 from app.schemas.ingredient import IngredientCreate, IngredientResponse, IngredientUpdate
 
@@ -98,5 +101,34 @@ def delete_ingredient(
     if not db_ingredient:
         raise HTTPException(status_code=404, detail="Ingredient not found")
 
+    used_in = (
+        db.query(Recipe.name)
+        .join(RecipeIngredient, RecipeIngredient.recipe_id == Recipe.id)
+        .filter(RecipeIngredient.ingredient_id == db_ingredient.id)
+        .filter(Recipe.user_id == current_user.id)
+        .distinct()
+        .all()
+    )
+    recipe_names = [name for (name,) in used_in if name]
+    if recipe_names:
+        listed = ", ".join(recipe_names)
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Can't delete {db_ingredient.name} — it's used in {listed}. "
+                "Remove it from those recipes first."
+            ),
+        )
+
     db.delete(db_ingredient)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Can't delete {db_ingredient.name} — it's still used in a recipe. "
+                "Remove it from those recipes first."
+            ),
+        ) from exc

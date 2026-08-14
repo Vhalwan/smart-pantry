@@ -114,7 +114,9 @@ async function executeDelete(id) {
     if (err?.response?.status === 404) {
       return { ok: true };
     }
-    return { ok: false, error: err };
+    const status = err?.response?.status;
+    const permanent = status === 409 || status === 400;
+    return { ok: false, permanent, error: err };
   }
 }
 
@@ -141,6 +143,20 @@ async function flushRemoval(id) {
   }
 
   if (!result.ok) {
+    if (result.permanent) {
+      pendingRemovals.delete(key);
+      writeStorage();
+      const detail = result.error?.response?.data?.detail;
+      emit({
+        type: "delete-failed",
+        id: key,
+        item: entry.item,
+        index: entry.index,
+        message:
+          typeof detail === "string" ? detail : "Failed to delete ingredient.",
+      });
+      return;
+    }
     entry.flushing = false;
     // Silent retry — do not emit UI errors that could look like they belong
     // to a different ingredient's toast/undo.

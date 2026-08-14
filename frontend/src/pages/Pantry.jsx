@@ -27,6 +27,11 @@ function normalizeName(value) {
   return (value ?? "").trim().toLowerCase();
 }
 
+function apiErrorMessage(err, fallback) {
+  const detail = err?.response?.data?.detail;
+  return typeof detail === "string" ? detail : fallback;
+}
+
 /** Parse YYYY-MM-DD (or ISO datetime prefix) as a local calendar date. */
 function parseLocalDate(value) {
   if (value == null || value === "") {
@@ -249,6 +254,21 @@ export default function Pantry() {
           current?.id === event.id ? null : current,
         );
       }
+      if (event.type === "delete-failed") {
+        setUndoToast((current) =>
+          current?.id === event.id ? null : current,
+        );
+        setIngredients((prev) => {
+          if (prev.some((item) => Number(item.id) === Number(event.id))) {
+            return prev;
+          }
+          const next = [...prev];
+          const index = Math.min(event.index ?? next.length, next.length);
+          next.splice(index, 0, event.item);
+          return next;
+        });
+        setError(event.message || "Failed to delete ingredient.");
+      }
     });
   }, []);
 
@@ -286,8 +306,8 @@ export default function Pantry() {
     try {
       await deleteIngredient(id);
       await loadIngredients();
-    } catch {
-      setError("Failed to delete ingredient.");
+    } catch (err) {
+      setError(apiErrorMessage(err, "Failed to delete ingredient."));
     }
   }
 

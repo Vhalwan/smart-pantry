@@ -35,11 +35,13 @@ To change how much you have without deleting the row, use the − / + buttons ne
 
 When quantity hits zero (via the stepper or by typing 0), the item leaves the list right away and you get a short toast: Removed {name} · Undo. If you do nothing for about five seconds, the item is deleted for good. Click Undo in that window to put it back at its previous quantity. The Delete button on the row still removes an item immediately, with no toast.
 
+If that item is still used in a saved recipe, it cannot be deleted yet. You will see a message that names those recipes. Remove it from the recipes first, then delete it from the pantry. If you hit zero on an item that is still in a recipe, the row comes back with that same message instead of disappearing for good.
+
 ## Recipe suggestions
 
 1. On the Pantry page, click Suggest recipes.
 2. The app looks at what you currently have and returns a few ideas. Each one usually includes a name, short description, prep time, ingredients with amounts, and steps. If something is expired or expiring within the next three days, the ideas tend to use those items when they reasonably can. Suggestions are aimed at a rushed cook with a possibly thin pantry: shorter prep when it makes sense, simple steps, mostly what you already listed, and a note in the recipe if something extra is still needed.
-3. If the ideas are thin, try adding a couple of staples. Suggestions only know about what is in your pantry right now. A very short list can still return a simple idea (or an honest note that there is not much to work with). An empty pantry cannot suggest anything until you add at least one item. The app also tries not to repeat recipes you already saved (by name). If everything it comes back with is already under Recipes, you will see a short note instead of duplicate cards.
+3. If the ideas are thin, try adding a couple of staples. Suggestions only know about what is in your pantry right now. A very short list can still return a simple idea (or an honest note that there is not much to work with). If the pantry is empty, Suggest recipes stays disabled and you will see “Add a few ingredients to get suggestions.” The app also tries not to repeat recipes you already saved (by name). If everything it comes back with is already under Recipes, you will see a short note instead of duplicate cards.
 4. If something goes wrong, you should see an error on the page. The rest of the app should still work.
 
 ## Saving recipes
@@ -63,7 +65,7 @@ Open Meal Plans from the navigation. Pick a saved recipe, a date, and breakfast,
 ## Troubleshooting
 
 **Suggest recipes fails or returns nothing**
-Make sure you have a few ingredients. On the live app, wait for the backend to wake up if it was idle. If you run locally, check that the Gemini API key is set (see the technical doc).
+If the pantry is empty, add at least one ingredient — the button stays off until then. On the live app, wait for the backend to wake up if it was idle. If you run locally, check that the Gemini API key is set (see the technical doc).
 
 **Login fails**
 Check the email and password. Email is matched the way it was stored when you registered.
@@ -73,6 +75,9 @@ If you saved from a suggestion, check the skip note. Names have to match your pa
 
 **Can't delete a recipe**
 If you see a message about a meal plan, open Meal Plans, remove that recipe from the plan, then try deleting again.
+
+**Can't delete a pantry item**
+If you see a message that it is used in a recipe, open Recipes, take that ingredient off those recipes, then try deleting again.
 
 **The page hangs on the first request**
 On the live app, give it 30 to 60 seconds and try again. Locally, confirm Docker is running and the frontend can reach the API.
@@ -95,3 +100,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 11 Aug 2026: Quantity at 0 auto-removes the row with a 5-second Undo toast; Delete button stays immediate.
 - 12 Aug 2026: Calm Expired / Expiring soon notes next to pantry expiry dates (within 3 days, or past).
 - 13 Aug 2026: Suggestions prefer soon-to-expire items when dates are set, and lean toward simple, on-hand recipes for a thin pantry. Meal plans still do not flag expired ingredients on a planned meal.
+- 14 Aug 2026: Empty pantry: Suggest recipes is disabled with “Add a few ingredients to get suggestions.” Can’t delete a pantry item that is still on a recipe — the message names those recipes.

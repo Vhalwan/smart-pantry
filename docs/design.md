@@ -40,13 +40,13 @@ If a user account is deleted, their pantry, recipes, and meal plans go with it.
 ## How suggestions work
 
 1. The website asks the API for suggestions.
-2. The API loads the user’s current pantry. If it is empty, it refuses the request.
+2. The website skips the request when the pantry is empty (helper message). If the API is called anyway with an empty pantry, it refuses.
 3. The API asks Gemini for a small set of recipes in a fixed JSON shape (name, description, instructions, prep time, ingredients used).
 4. The API cleans and parses the response, then sends it to the website.
 5. The website shows each suggestion as a card.
 6. If the AI key is missing, the call fails, or the response is garbage, the API returns an error and the UI shows a message instead of crashing.
 
-The prompt tags pantry items that are expired or expiring within 3 days (same window as the pantry badge) and asks Gemini to prefer those when it reasonably can. It also favors shorter prep, simple steps, mostly on-hand ingredients, and honesty about missing items. A fully empty pantry still refuses the request; a very thin pantry (1–2 items) gets an extra prompt note instead of a new API error.
+The prompt tags pantry items that are expired or expiring within 3 days (same window as the pantry badge) and asks Gemini to prefer those when it reasonably can. It also favors shorter prep, simple steps, mostly on-hand ingredients, and honesty about missing items. A fully empty pantry never calls Gemini: the website disables Suggest recipes and shows “Add a few ingredients to get suggestions.” The API still refuses an empty pantry if called anyway. A very thin pantry (1–2 items) still generates, with an extra prompt note to keep ideas simple and honest.
 
 ## Saving a suggestion: matching by name
 
@@ -63,7 +63,8 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - No automatic retries yet when Gemini fails
 - Recipe and meal-plan lists are not paginated (fine at current size); ingredients support skip/limit
 - Name matching is exact after normalizing case and trimming spaces, not fuzzy
-- Quantity at 0 removes the row from the UI immediately and schedules a per-item delayed DELETE (~5s) with an Undo toast; Undo cancels only that item’s countdown. Explicit Delete stays immediate. Timers live outside the Pantry page so navigate-away still deletes
+- Quantity at 0 removes the row from the UI immediately and schedules a per-item delayed DELETE (~5s) with an Undo toast; Undo cancels only that item’s countdown. Explicit Delete stays immediate. Timers live outside the Pantry page so navigate-away still deletes. If DELETE is blocked because the item is still used in a recipe, the API returns a conflict, the row is restored, and the page names those recipes
+- Deleting a pantry item still linked to a recipe is rejected (same idea as deleting a recipe still on a meal plan)
 - Near-expiry / expired notices on the pantry list are frontend-only (calm per-row labels; calendar-day compare; 3-day near window). The suggestion prompt uses the same 3-day window on the backend (`NEAR_EXPIRY_DAYS = 3`) to tag items and bias recipes; cook-and-update is still on the [project plan](./project-plan.md)
 - Meal plans do not yet flag a planned recipe when its linked pantry ingredients are expired or expiring (parked for the buffer week, after cook-and-update)
 - Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching
@@ -79,3 +80,4 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - 11 Aug 2026: Quantity-at-0 auto-remove: optimistic list remove, Undo toast (display-only), per-id delayed DELETE in `pendingIngredientRemovals` (sessionStorage + rehydrate). No PUT to 0 before delete.
 - 12 Aug 2026: Pantry list shows calm Expired / Expiring soon labels from client-side date compare (`NEAR_EXPIRY_DAYS = 3`); no API change.
 - 13 Aug 2026: Suggestion prompt tags expired / expiring-soon items and prefers them when reasonable; rush / thin-pantry wording. Meal-plan expiry flags parked.
+- 14 Aug 2026: Empty pantry: UI helper, no Gemini call. Delete ingredient blocked when used in a recipe (API conflict; Pantry explains next step; delayed DELETE restores the row).

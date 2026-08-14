@@ -33,7 +33,8 @@ Already working:
 - Optional category and expiry on the add-ingredient form
 - Quick quantity adjust (− / + stepper, or type an exact value) without delete-and-readd
 - Quantity at 0 auto-removes the row (Undo toast, then DELETE); row Delete stays immediate
-- AI recipe suggestions from the current pantry (prefer soon-to-expire items; rush / thin-pantry prompt)
+- Clear message if you try to delete a pantry item that is still used in a recipe
+- AI recipe suggestions from the current pantry (prefer soon-to-expire items; rush / thin-pantry prompt; empty pantry shows a helper instead of a generic error)
 - Save a suggestion as a recipe from the suggestion card (name match + skip note)
 - Manual recipes and meal plans
 - Live site (frontend on Vercel, API on Render)
@@ -42,7 +43,7 @@ Still open:
 
 - A simple “I cooked this” update so the pantry stays true after a meal
 
-Category and expiry are collected and shown. Rows with an expiry date show a calm Expired or Expiring soon label when the date is past or within the next 3 days. Suggestions tag those same items in the Gemini prompt and bias toward using them when it is reasonable. Hitting quantity 0 removes the item after a short Undo window.
+Category and expiry are collected and shown. Rows with an expiry date show a calm Expired or Expiring soon label when the date is past or within the next 3 days. Suggestions tag those same items in the Gemini prompt and bias toward using them when it is reasonable. An empty pantry shows a helper instead of calling the model. Hitting quantity 0 removes the item after a short Undo window, unless the item is still used in a recipe — then it comes back with a named-recipe message.
 
 ## Timeline (why not two full months)
 
@@ -93,7 +94,7 @@ Make expiry matter, and make suggestions better for rushed cooks.
 - [x] Calm near-expiry notice (and expired items) on the pantry (Day 1, 12 Aug) — per-row labels; client-side; 3-day near window
 - [x] Tell the AI which items are expiring soon and ask it to prefer those (Day 2, 13 Aug) — same 3-day window; bias, not a hard requirement
 - [x] Prompt for short prep when possible, clear steps, mostly on-hand ingredients, honest gaps, reliable response shape (Day 2, 13 Aug)
-- [x] Thin pantry: prompt tells Gemini a 1–2 item list is OK to keep simple / honest; empty pantry still refuses the request (unchanged)
+- [x] Thin pantry: prompt tells Gemini a 1–2 item list is OK to keep simple / honest; empty pantry: Suggest is disabled with “Add a few ingredients to get suggestions” (no Gemini call; API still 400 if called anyway) (Day 3, 14 Aug)
 
 Done when: setting an expiry changes what you notice and what you tend to get suggested.
 
@@ -166,3 +167,4 @@ Spend a few minutes each Sunday:
 - 11 Aug 2026: Week 2 Day 2 — quantity at 0 removes the row optimistically with a 5s Undo toast; each item has its own delayed DELETE (survives navigate-away / refresh via module store + sessionStorage). Explicit Delete unchanged. Week 2 pantry checklist complete; next focus is Week 3 expiry / suggestions.
 - 12 Aug 2026: Week 3 Day 1 — calm Expired / Expiring soon labels on pantry rows (frontend-only calendar-day compare; `NEAR_EXPIRY_DAYS = 3`). Suggestion bias / prompt work still open.
 - 13 Aug 2026: Week 3 Day 2 — suggestion prompt tags expired / expiring-soon pantry items (backend `NEAR_EXPIRY_DAYS = 3`, same window as the badge), biases toward using them, and favors rush-friendly / thin-pantry recipes. Empty pantry still 400. Parked: meal-plan expiry flags (buffer / after Week 4 cook-and-update).
+- 14 Aug 2026: Week 3 Day 3 — empty-pantry Suggest helper (“Add a few ingredients to get suggestions”; button disabled, no Gemini call). Delete ingredient blocked when still used in a recipe (API 409 + recipe names; UI message; delayed zero-quantity DELETE restores the row instead of retrying). Week 3 checklist complete.
