@@ -34,8 +34,9 @@ Already working:
 - Quick quantity adjust (− / + stepper, or type an exact value) without delete-and-readd
 - Quantity at 0 auto-removes the row (Undo toast, then DELETE); row Delete stays immediate
 - Clear message if you try to delete a pantry item that is still used in a recipe
+- Pantry list ordered so expired and expiring-soon items sit at the top
 - AI recipe suggestions from the current pantry (prefer soon-to-expire items; rush / thin-pantry prompt; empty pantry shows a helper instead of a generic error)
-- Save a suggestion as a recipe from the suggestion card (name match + skip note)
+- Save a suggestion as a recipe from the suggestion card (name match including simple plurals + skip note)
 - Manual recipes and meal plans
 - Live site (frontend on Vercel, API on Render)
 
@@ -43,7 +44,7 @@ Still open:
 
 - A simple “I cooked this” update so the pantry stays true after a meal
 
-Category and expiry are collected and shown. Rows with an expiry date show a calm Expired or Expiring soon label when the date is past or within the next 3 days. Suggestions tag those same items in the Gemini prompt and bias toward using them when it is reasonable. An empty pantry shows a helper instead of calling the model. Hitting quantity 0 removes the item after a short Undo window, unless the item is still used in a recipe — then it comes back with a named-recipe message.
+Category and expiry are collected and shown. Rows with an expiry date show a calm Expired or Expiring soon label when the date is past or within the next 3 days, and those rows sit at the top of the list. Suggestions tag those same items in the Gemini prompt and bias toward using them when it is reasonable. An empty pantry shows a helper instead of calling the model. Hitting quantity 0 removes the item after a short Undo window, unless the item is still used in a recipe — then it comes back with a named-recipe message. Save-from-suggestion matching covers simple last-word singular/plural as well as case and spaces.
 
 ## Timeline (why not two full months)
 
@@ -168,3 +169,4 @@ Spend a few minutes each Sunday:
 - 12 Aug 2026: Week 3 Day 1 — calm Expired / Expiring soon labels on pantry rows (frontend-only calendar-day compare; `NEAR_EXPIRY_DAYS = 3`). Suggestion bias / prompt work still open.
 - 13 Aug 2026: Week 3 Day 2 — suggestion prompt tags expired / expiring-soon pantry items (backend `NEAR_EXPIRY_DAYS = 3`, same window as the badge), biases toward using them, and favors rush-friendly / thin-pantry recipes. Empty pantry still 400. Parked: meal-plan expiry flags (buffer / after Week 4 cook-and-update).
 - 14 Aug 2026: Week 3 Day 3 — empty-pantry Suggest helper (“Add a few ingredients to get suggestions”; button disabled, no Gemini call). Delete ingredient blocked when still used in a recipe (API 409 + recipe names; UI message; delayed zero-quantity DELETE restores the row instead of retrying). Week 3 checklist complete.
+- 15 Aug 2026: Ahead-of-schedule polish (Week 3 still done 14 Aug; checkpoints unchanged). Pantry list sorts expired / expiring-soon to the top. Save matching: simple last-word singular/plural. Week 4 cook-and-update still next.

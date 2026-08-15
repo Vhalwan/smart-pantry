@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   createIngredient,
@@ -24,7 +24,64 @@ const EMPTY_PANTRY_SUGGEST_MESSAGE =
   "Add a few ingredients to get suggestions.";
 
 function normalizeName(value) {
-  return (value ?? "").trim().toLowerCase();
+  return (value ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+/** Last-word singular/plural variants only — not fuzzy / substring matching. */
+function lastWordInflections(word) {
+  const variants = new Set([word]);
+  if (word.length < 3) {
+    return variants;
+  }
+  if (word.endsWith("ies") && word.length > 4) {
+    variants.add(word.slice(0, -3) + "y");
+  } else if (word.endsWith("y") && !/[aeiou]y$/.test(word)) {
+    variants.add(word.slice(0, -1) + "ies");
+  }
+  if (word.endsWith("oes") && word.length > 4) {
+    variants.add(word.slice(0, -2));
+  } else if (word.endsWith("o")) {
+    variants.add(`${word}es`);
+  }
+  if (/(?:ch|sh|ss|x|z)es$/.test(word) && word.length > 4) {
+    variants.add(word.slice(0, -2));
+  } else if (/(?:ch|sh|ss|x|z)$/.test(word)) {
+    variants.add(`${word}es`);
+  }
+  if (word.endsWith("s") && !word.endsWith("ss") && !word.endsWith("us")) {
+    variants.add(word.slice(0, -1));
+  } else if (!word.endsWith("s")) {
+    variants.add(`${word}s`);
+  }
+  return variants;
+}
+
+function namesMatch(left, right) {
+  const a = normalizeName(left);
+  const b = normalizeName(right);
+  if (!a || !b) {
+    return false;
+  }
+  if (a === b) {
+    return true;
+  }
+  const aParts = a.split(" ");
+  const bParts = b.split(" ");
+  if (aParts.slice(0, -1).join(" ") !== bParts.slice(0, -1).join(" ")) {
+    return false;
+  }
+  return lastWordInflections(aParts[aParts.length - 1]).has(
+    bParts[bParts.length - 1],
+  );
+}
+
+function findPantryMatch(items, usedName) {
+  const used = normalizeName(usedName);
+  const exact = items.find((item) => normalizeName(item.name) === used);
+  if (exact) {
+    return exact;
+  }
+  return items.find((item) => namesMatch(item.name, usedName));
 }
 
 function apiErrorMessage(err, fallback) {
@@ -80,6 +137,39 @@ function getExpiryStatus(expiryDate) {
     return "expiring_soon";
   }
   return null;
+}
+
+function expiryUrgencyRank(status) {
+  if (status === "expired") {
+    return 0;
+  }
+  if (status === "expiring_soon") {
+    return 1;
+  }
+  return 2;
+}
+
+function sortIngredientsForDisplay(items) {
+  return items
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => {
+      const statusA = getExpiryStatus(a.item.expiry_date);
+      const statusB = getExpiryStatus(b.item.expiry_date);
+      const rankA = expiryUrgencyRank(statusA);
+      const rankB = expiryUrgencyRank(statusB);
+      if (rankA !== rankB) {
+        return rankA - rankB;
+      }
+      if (rankA < 2) {
+        const dateA = parseLocalDate(a.item.expiry_date);
+        const dateB = parseLocalDate(b.item.expiry_date);
+        if (dateA && dateB && dateA.getTime() !== dateB.getTime()) {
+          return dateA.getTime() - dateB.getTime();
+        }
+      }
+      return a.index - b.index;
+    })
+    .map(({ item }) => item);
 }
 
 function ExpiryNotice({ status }) {
@@ -214,6 +304,10 @@ export default function Pantry() {
   // Toast is display-only: which id was most recently zeroed. It never owns
   // delete timers — those live in pendingIngredientRemovals keyed by id.
   const [undoToast, setUndoToast] = useState(null);
+  const displayedIngredients = useMemo(
+    () => sortIngredientsForDisplay(ingredients),
+    [ingredients],
+  );
 
   async function loadIngredients() {
     setError("");
@@ -446,10 +540,7 @@ export default function Pantry() {
     const matched = [];
     const unmatched = [];
     for (const used of recipe.ingredients_used ?? []) {
-      const usedName = normalizeName(used.name);
-      const pantryItem = ingredients.find(
-        (item) => normalizeName(item.name) === usedName,
-      );
+      const pantryItem = findPantryMatch(ingredients, used.name);
       if (pantryItem) {
         const qty = Number(used.quantity);
         matched.push({
@@ -654,7 +745,7 @@ export default function Pantry() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {ingredients.map((item) => {
+                  {displayedIngredients.map((item) => {
                     const expiryStatus = getExpiryStatus(item.expiry_date);
                     return (
                       <tr key={item.id} className="text-slate-800">

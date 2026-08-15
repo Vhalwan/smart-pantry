@@ -29,7 +29,7 @@ One thing to know about the live site: the backend runs on a free hosting plan, 
 
 On the Pantry page, add what you have: a name, how much, and the unit (for example flour, 2, cup). Category and expiry date are optional. Items show up in your list with those fields when you set them.
 
-If you set an expiry date, the list may show a small note next to it: Expired when the date is in the past, or Expiring soon when it falls within the next three days (including today). Items without an expiry date look the same as before.
+If you set an expiry date, the list may show a small note next to it: Expired when the date is in the past, or Expiring soon when it falls within the next three days (including today). Items without an expiry date look the same as before. Expired items sit at the top of the list, then expiring-soon, then everything else (soonest date first within those groups).
 
 To change how much you have without deleting the row, use the − / + buttons next to the quantity, or click the number and type an exact value. Quantity will not go below zero.
 
@@ -54,7 +54,7 @@ On each saved recipe card, if there are instructions, use View instructions to e
 
 ### Save an AI suggestion
 
-On a suggestion card, click Save recipe. The app matches ingredient names to your pantry (ignoring capitalization and extra spaces) and creates a normal recipe you can find under Recipes. After a successful save, the button stays on Saved and you can open View in Recipes. Clicking Save again on that card does nothing until you run Suggest recipes again.
+On a suggestion card, click Save recipe. The app matches ingredient names to your pantry (ignoring capitalization and extra spaces, and simple singular/plural on the last word — tomato and tomatoes, berry and berries) and creates a normal recipe you can find under Recipes. After a successful save, the button stays on Saved and you can open View in Recipes. Clicking Save again on that card does nothing until you run Suggest recipes again.
 
 If some names do not match, the recipe still saves and you get a note about what was skipped. If nothing matches, the recipe is not saved and you get a clear note instead.
 
@@ -71,7 +71,7 @@ If the pantry is empty, add at least one ingredient — the button stays off unt
 Check the email and password. Email is matched the way it was stored when you registered.
 
 **A saved recipe is missing some ingredients**
-If you saved from a suggestion, check the skip note. Names have to match your pantry entries closely.
+If you saved from a suggestion, check the skip note. Names have to match your pantry entries closely (case, spaces, and simple plurals on the last word). Different words still skip — tomato will not match cherry tomatoes.
 
 **Can't delete a recipe**
 If you see a message about a meal plan, open Meal Plans, remove that recipe from the plan, then try deleting again.
@@ -101,3 +101,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 12 Aug 2026: Calm Expired / Expiring soon notes next to pantry expiry dates (within 3 days, or past).
 - 13 Aug 2026: Suggestions prefer soon-to-expire items when dates are set, and lean toward simple, on-hand recipes for a thin pantry. Meal plans still do not flag expired ingredients on a planned meal.
 - 14 Aug 2026: Empty pantry: Suggest recipes is disabled with “Add a few ingredients to get suggestions.” Can’t delete a pantry item that is still on a recipe — the message names those recipes.
+- 15 Aug 2026: Pantry list puts expired items first, then expiring soon. Save from a suggestion also matches simple singular/plural on the last word.

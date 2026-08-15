@@ -52,7 +52,7 @@ The prompt tags pantry items that are expired or expiring within 3 days (same wi
 
 The AI only knows ingredient names from the prompt. It does not know your database IDs, and we should not ask it to invent them.
 
-So when you save a suggestion as a recipe, the app matches each suggested name to a pantry item by name (capitalization and surrounding spaces ignored). That can miss close variants (onion vs onions). When that happens, the recipe still saves and the user is told what was skipped. If nothing matches, the recipe is not created. See FR-8 to FR-10 in [requirements](./requirements.md).
+So when you save a suggestion as a recipe, the app matches each suggested name to a pantry item by name (capitalization and surrounding spaces ignored, plus simple singular/plural on the last word — onion/onions, tomato/tomatoes, berry/berries). Exact match wins if both exist. It still misses different phrases (tomato vs cherry tomatoes). When that happens, the recipe still saves and the user is told what was skipped. If nothing matches, the recipe is not created. See FR-8 to FR-10 in [requirements](./requirements.md).
 
 When asking for suggestions, the API also lists the user’s already-saved recipe names and asks Gemini to avoid the same (or near-identical) dishes. The website may hide any leftover exact name matches and explain if the run was all duplicates.
 
@@ -62,10 +62,11 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 
 - No automatic retries yet when Gemini fails
 - Recipe and meal-plan lists are not paginated (fine at current size); ingredients support skip/limit
-- Name matching is exact after normalizing case and trimming spaces, not fuzzy
+- Name matching is case/space normalized, plus simple last-word singular/plural, not fuzzy or substring
+- Pantry list order is client-side: expired, then expiring soon (soonest date first), then the rest in API order
 - Quantity at 0 removes the row from the UI immediately and schedules a per-item delayed DELETE (~5s) with an Undo toast; Undo cancels only that item’s countdown. Explicit Delete stays immediate. Timers live outside the Pantry page so navigate-away still deletes. If DELETE is blocked because the item is still used in a recipe, the API returns a conflict, the row is restored, and the page names those recipes
 - Deleting a pantry item still linked to a recipe is rejected (same idea as deleting a recipe still on a meal plan)
-- Near-expiry / expired notices on the pantry list are frontend-only (calm per-row labels; calendar-day compare; 3-day near window). The suggestion prompt uses the same 3-day window on the backend (`NEAR_EXPIRY_DAYS = 3`) to tag items and bias recipes; cook-and-update is still on the [project plan](./project-plan.md)
+- Near-expiry / expired notices on the pantry list are frontend-only (calm per-row labels; calendar-day compare; 3-day near window; list sorted so those rows sit at the top). The suggestion prompt uses the same 3-day window on the backend (`NEAR_EXPIRY_DAYS = 3`) to tag items and bias recipes; cook-and-update is still on the [project plan](./project-plan.md)
 - Meal plans do not yet flag a planned recipe when its linked pantry ingredients are expired or expiring (parked for the buffer week, after cook-and-update)
 - Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching
 - Avoiding already-saved recipes is by name only (not ingredients or “similar dish” detection)
@@ -81,3 +82,4 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - 12 Aug 2026: Pantry list shows calm Expired / Expiring soon labels from client-side date compare (`NEAR_EXPIRY_DAYS = 3`); no API change.
 - 13 Aug 2026: Suggestion prompt tags expired / expiring-soon items and prefers them when reasonable; rush / thin-pantry wording. Meal-plan expiry flags parked.
 - 14 Aug 2026: Empty pantry: UI helper, no Gemini call. Delete ingredient blocked when used in a recipe (API conflict; Pantry explains next step; delayed DELETE restores the row).
+- 15 Aug 2026: Pantry list sorts expired / expiring-soon to the top (client-side). Save matching adds simple last-word singular/plural.
