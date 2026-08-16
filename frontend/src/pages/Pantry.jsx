@@ -84,6 +84,59 @@ function findPantryMatch(items, usedName) {
   return items.find((item) => namesMatch(item.name, usedName));
 }
 
+function normalizeUnit(value) {
+  return (value ?? "").trim().toLowerCase();
+}
+
+function unitsMatch(left, right) {
+  const a = normalizeUnit(left);
+  const b = normalizeUnit(right);
+  return Boolean(a) && a === b;
+}
+
+function describeUnitSkip(item) {
+  const suggestionUnit = item.suggestionUnit?.trim() || "—";
+  const pantryUnit = item.pantryUnit?.trim() || "—";
+  return `${item.name} (suggestion: ${suggestionUnit}, pantry: ${pantryUnit})`;
+}
+
+function saveNoteFromMatch({ unmatched, unitMismatches, saved }) {
+  const unitHint =
+    "Use the same unit on the pantry item as the suggestion if you want it linked next time.";
+
+  if (!saved) {
+    const parts = ["Nothing matched your pantry, so this wasn't saved."];
+    if (unmatched.length > 0) {
+      parts.push(`No name match: ${unmatched.join(", ")}.`);
+    }
+    if (unitMismatches.length > 0) {
+      parts.push(`Skipped ${unitMismatches.map(describeUnitSkip).join(", ")}.`);
+      parts.push(unitHint);
+    }
+    return parts.join(" ");
+  }
+
+  if (unmatched.length === 0 && unitMismatches.length === 0) {
+    return "Saved to Recipes.";
+  }
+
+  const clauses = [];
+  if (unmatched.length > 0) {
+    clauses.push(`couldn't match ${unmatched.join(", ")}`);
+  }
+  if (unitMismatches.length > 0) {
+    clauses.push(`skipped ${unitMismatches.map(describeUnitSkip).join(", ")}`);
+  }
+  let text = `Saved, but ${clauses.join("; ")}.`;
+  if (unitMismatches.length > 0) {
+    text += ` ${unitHint}`;
+  }
+  return text;
+}
+
+const UNIT_DATALIST_ID = "pantry-unit-suggestions";
+const COMMON_UNITS = ["g", "kg", "ml", "cup", "tbsp", "tsp", "pcs", "lb", "oz"];
+
 function apiErrorMessage(err, fallback) {
   const detail = err?.response?.data?.detail;
   return typeof detail === "string" ? detail : fallback;
@@ -539,27 +592,37 @@ export default function Pantry() {
 
     const matched = [];
     const unmatched = [];
+    const unitMismatches = [];
     for (const used of recipe.ingredients_used ?? []) {
       const pantryItem = findPantryMatch(ingredients, used.name);
-      if (pantryItem) {
-        const qty = Number(used.quantity);
-        matched.push({
-          ingredient_id: pantryItem.id,
-          quantity: Number.isFinite(qty) ? qty : 0,
-          unit: used.unit,
-        });
-      } else {
+      if (!pantryItem) {
         unmatched.push(used.name?.trim() || used.name);
+        continue;
       }
+      if (!unitsMatch(used.unit, pantryItem.unit)) {
+        unitMismatches.push({
+          name: used.name?.trim() || pantryItem.name,
+          suggestionUnit: used.unit,
+          pantryUnit: pantryItem.unit,
+        });
+        continue;
+      }
+      const qty = Number(used.quantity);
+      matched.push({
+        ingredient_id: pantryItem.id,
+        quantity: Number.isFinite(qty) ? qty : 0,
+        unit: used.unit,
+      });
     }
 
     if (matched.length === 0) {
       setSaveNotes((prev) => ({
         ...prev,
-        [index]:
-          unmatched.length > 0
-            ? `Nothing matched your pantry, so this wasn't saved. Skipped: ${unmatched.join(", ")}`
-            : "Nothing matched your pantry, so this wasn't saved.",
+        [index]: saveNoteFromMatch({
+          unmatched,
+          unitMismatches,
+          saved: false,
+        }),
       }));
       setSavingIndex(null);
       return;
@@ -574,17 +637,14 @@ export default function Pantry() {
         ingredients: matched,
       });
       setSavedIndexes((prev) => new Set(prev).add(index));
-      if (unmatched.length > 0) {
-        setSaveNotes((prev) => ({
-          ...prev,
-          [index]: `Saved, but couldn't match: ${unmatched.join(", ")}`,
-        }));
-      } else {
-        setSaveNotes((prev) => ({
-          ...prev,
-          [index]: "Saved to Recipes.",
-        }));
-      }
+      setSaveNotes((prev) => ({
+        ...prev,
+        [index]: saveNoteFromMatch({
+          unmatched,
+          unitMismatches,
+          saved: true,
+        }),
+      }));
     } catch {
       setError("Failed to save recipe.");
     } finally {
@@ -680,11 +740,17 @@ export default function Pantry() {
             <input
               type="text"
               required
-              placeholder="Unit (g, ml, pcs)"
+              list={UNIT_DATALIST_ID}
+              placeholder="Unit (g, ml, cup)"
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
               className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
             />
+            <datalist id={UNIT_DATALIST_ID}>
+              {COMMON_UNITS.map((option) => (
+                <option key={option} value={option} />
+              ))}
+            </datalist>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -712,6 +778,10 @@ export default function Pantry() {
               {submitting ? "Adding…" : "Add"}
             </button>
           </form>
+          <p className="mt-3 text-sm text-slate-500">
+            Pick a unit you will stick with. Save and Cook this skip an item when
+            the recipe says cup and the pantry says lbs — they have to match.
+          </p>
         </section>
 
         {error && (
@@ -810,8 +880,9 @@ export default function Pantry() {
                   const note = saveNotes[index];
                   const noteIsWarning =
                     typeof note === "string" &&
-                    (note.startsWith("Nothing matched") ||
-                      note.includes("couldn't match"));
+                    (/^nothing matched/i.test(note) ||
+                      /couldn't match/i.test(note) ||
+                      /skipped /i.test(note));
 
                   return (
                   <article

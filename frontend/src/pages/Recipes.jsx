@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getIngredients } from "../api/ingredients";
-import { createRecipe, deleteRecipe, getRecipes } from "../api/recipes";
+import { cookRecipe, createRecipe, deleteRecipe, getRecipes } from "../api/recipes";
 import { useAuth } from "../context/AuthContext";
 
 const emptyIngredientLine = () => ({
@@ -10,9 +10,65 @@ const emptyIngredientLine = () => ({
   unit: "",
 });
 
-function RecipeCard({ recipe, ingredientName, onDelete }) {
+const RECIPE_UNIT_DATALIST_ID = "recipe-unit-suggestions";
+const COMMON_UNITS = ["g", "kg", "ml", "cup", "tbsp", "tsp", "pcs", "lb", "oz"];
+
+function formatQuantity(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) {
+    return String(value ?? "");
+  }
+  return Number.isInteger(n) ? String(n) : String(n);
+}
+
+function cookNoteFromResult(result) {
+  const updated = result?.updated ?? [];
+  const short = result?.short ?? [];
+  const skipped = result?.skipped ?? [];
+  const parts = [];
+
+  if (updated.length + short.length > 0) {
+    parts.push("Pantry updated.");
+  } else if (skipped.length === 0) {
+    parts.push("This recipe has no ingredients to subtract.");
+  } else {
+    parts.push("Pantry unchanged.");
+  }
+
+  for (const line of short) {
+    parts.push(
+      `Used ${formatQuantity(line.used)} ${line.unit} ${line.name}, recipe needed ${formatQuantity(line.needed)}.`,
+    );
+  }
+  for (const line of skipped) {
+    if (line.reason === "missing") {
+      parts.push(`Skipped ${line.name} (no longer in pantry).`);
+    } else if (line.reason === "unit_mismatch") {
+      parts.push(
+        `Skipped ${line.name} (recipe: ${line.recipe_unit}, pantry: ${line.pantry_unit}). Use the same unit on the pantry item if you want it subtracted next time.`,
+      );
+    } else {
+      parts.push(`Skipped ${line.name}.`);
+    }
+  }
+
+  return {
+    text: parts.join(" "),
+    warning: short.length > 0 || skipped.length > 0,
+  };
+}
+
+function RecipeCard({
+  recipe,
+  ingredientName,
+  onDelete,
+  onCook,
+  cooking,
+  cookNote,
+}) {
   const [showInstructions, setShowInstructions] = useState(false);
   const hasInstructions = Boolean(recipe.instructions?.trim());
+  const hasIngredientLines = (recipe.ingredients ?? []).length > 0;
 
   return (
     <article className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
@@ -59,6 +115,32 @@ function RecipeCard({ recipe, ingredientName, onDelete }) {
               )}
             </div>
           )}
+          <div>
+            <button
+              type="button"
+              onClick={() => onCook(recipe)}
+              disabled={cooking || !hasIngredientLines}
+              className="rounded-lg bg-slate-900 text-white px-3 py-1.5 text-sm font-medium hover:bg-slate-800 disabled:opacity-60"
+            >
+              {cooking ? "Updating…" : "Cook this"}
+            </button>
+            {!hasIngredientLines && (
+              <p className="mt-2 text-sm text-slate-500">
+                This recipe has no ingredients to subtract.
+              </p>
+            )}
+            {cookNote && (
+              <p
+                className={
+                  cookNote.warning
+                    ? "mt-2 text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2"
+                    : "mt-2 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2"
+                }
+              >
+                {cookNote.text}
+              </p>
+            )}
+          </div>
         </div>
         <button
           type="button"
@@ -88,6 +170,8 @@ export default function Recipes() {
     emptyIngredientLine(),
   ]);
   const [submitting, setSubmitting] = useState(false);
+  const [cookingId, setCookingId] = useState(null);
+  const [cookNotes, setCookNotes] = useState({});
 
   const filteredRecipes = recipes.filter((r) =>
     r.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -120,9 +204,21 @@ export default function Recipes() {
 
   function updateIngredientLine(index, field, value) {
     setIngredientLines((lines) =>
-      lines.map((line, i) =>
-        i === index ? { ...line, [field]: value } : line,
-      ),
+      lines.map((line, i) => {
+        if (i !== index) {
+          return line;
+        }
+        const next = { ...line, [field]: value };
+        if (field === "ingredient_id") {
+          const pantryItem = ingredients.find(
+            (item) => String(item.id) === String(value),
+          );
+          if (pantryItem?.unit) {
+            next.unit = pantryItem.unit;
+          }
+        }
+        return next;
+      }),
     );
   }
 
@@ -166,6 +262,39 @@ export default function Recipes() {
       setError("Failed to add recipe.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleCook(recipe) {
+    if (!(recipe.ingredients ?? []).length) {
+      setCookNotes((prev) => ({
+        ...prev,
+        [recipe.id]: {
+          text: "This recipe has no ingredients to subtract.",
+          warning: false,
+        },
+      }));
+      return;
+    }
+
+    setCookingId(recipe.id);
+    setError("");
+    try {
+      const result = await cookRecipe(recipe.id);
+      setCookNotes((prev) => ({
+        ...prev,
+        [recipe.id]: cookNoteFromResult(result),
+      }));
+      try {
+        const ingredientsData = await getIngredients();
+        setIngredients(ingredientsData);
+      } catch {
+        // Cook already applied; Pantry reloads on the next visit.
+      }
+    } catch {
+      setError("Failed to update pantry after cooking.");
+    } finally {
+      setCookingId(null);
     }
   }
 
@@ -275,6 +404,10 @@ export default function Recipes() {
               <h3 className="text-sm font-medium text-slate-700">
                 Ingredients
               </h3>
+              <p className="text-sm text-slate-500">
+                Unit is filled from the pantry item so Cook this can subtract it.
+                Keep it the same as the pantry row.
+              </p>
               {ingredientLines.map((line, index) => (
                 <div
                   key={index}
@@ -296,6 +429,7 @@ export default function Recipes() {
                     {ingredients.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item.name}
+                        {item.unit ? ` (${item.unit})` : ""}
                       </option>
                     ))}
                   </select>
@@ -314,6 +448,7 @@ export default function Recipes() {
                   <input
                     type="text"
                     required
+                    list={RECIPE_UNIT_DATALIST_ID}
                     placeholder="Unit"
                     value={line.unit}
                     onChange={(e) =>
@@ -338,6 +473,11 @@ export default function Recipes() {
               >
                 Add another ingredient line
               </button>
+              <datalist id={RECIPE_UNIT_DATALIST_ID}>
+                {COMMON_UNITS.map((option) => (
+                  <option key={option} value={option} />
+                ))}
+              </datalist>
             </div>
 
             <button
@@ -387,6 +527,9 @@ export default function Recipes() {
                   recipe={recipe}
                   ingredientName={ingredientName}
                   onDelete={handleDelete}
+                  onCook={handleCook}
+                  cooking={cookingId === recipe.id}
+                  cookNote={cookNotes[recipe.id]}
                 />
               ))}
             </div>

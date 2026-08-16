@@ -6,12 +6,33 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.db import get_db
 from app.dependencies import get_current_user
+from app.models.ingredient import Ingredient
 from app.models.recipe import Recipe
 from app.models.recipe_ingredient import RecipeIngredient
 from app.models.user import User
-from app.schemas.recipe import RecipeCreate, RecipeResponse, RecipeUpdate
+from app.schemas.recipe import (
+    CookRecipeResponse,
+    CookShortLine,
+    CookSkippedLine,
+    CookUpdatedLine,
+    RecipeCreate,
+    RecipeResponse,
+    RecipeUpdate,
+)
 
 router = APIRouter(prefix="/recipes", tags=["recipes"])
+
+
+def _normalize_unit(unit: str | None) -> str:
+    return (unit or "").strip().casefold()
+
+
+def _units_match(recipe_unit: str | None, pantry_unit: str | None) -> bool:
+    return _normalize_unit(recipe_unit) == _normalize_unit(pantry_unit)
+
+
+def _missing_name(ingredient_id: int) -> str:
+    return f"Ingredient #{ingredient_id}"
 
 
 @router.post("/", response_model=RecipeResponse, status_code=201)
@@ -53,6 +74,113 @@ def get_recipes(
         .options(joinedload(Recipe.ingredients))
         .filter(Recipe.user_id == current_user.id)
         .all()
+    )
+
+
+@router.post("/{id}/cook", response_model=CookRecipeResponse)
+def cook_recipe(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Subtract this recipe's linked pantry amounts. Rows that hit 0 stay at 0."""
+    recipe = (
+        db.query(Recipe)
+        .options(joinedload(Recipe.ingredients))
+        .filter(Recipe.id == id)
+        .filter(Recipe.user_id == current_user.id)
+        .first()
+    )
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    lines = list(recipe.ingredients or [])
+    updated: List[CookUpdatedLine] = []
+    short: List[CookShortLine] = []
+    skipped: List[CookSkippedLine] = []
+
+    if not lines:
+        return CookRecipeResponse(
+            recipe_id=recipe.id,
+            recipe_name=recipe.name,
+            updated=[],
+            short=[],
+            skipped=[],
+        )
+
+    line_ids = {line.ingredient_id for line in lines}
+    pantry_items = (
+        db.query(Ingredient)
+        .filter(Ingredient.id.in_(line_ids))
+        .filter(Ingredient.user_id == current_user.id)
+        .all()
+    )
+    pantry_by_id = {item.id: item for item in pantry_items}
+
+    for line in lines:
+        pantry_item = pantry_by_id.get(line.ingredient_id)
+        if pantry_item is None:
+            skipped.append(
+                CookSkippedLine(
+                    ingredient_id=line.ingredient_id,
+                    name=_missing_name(line.ingredient_id),
+                    reason="missing",
+                    recipe_unit=line.unit,
+                )
+            )
+            continue
+
+        if not _units_match(line.unit, pantry_item.unit):
+            skipped.append(
+                CookSkippedLine(
+                    ingredient_id=pantry_item.id,
+                    name=pantry_item.name,
+                    reason="unit_mismatch",
+                    recipe_unit=line.unit,
+                    pantry_unit=pantry_item.unit,
+                )
+            )
+            continue
+
+        needed = float(line.quantity)
+        previous = float(pantry_item.quantity)
+        used = min(previous, needed)
+        pantry_item.quantity = max(0.0, previous - needed)
+        new_quantity = float(pantry_item.quantity)
+
+        if used < needed:
+            short.append(
+                CookShortLine(
+                    ingredient_id=pantry_item.id,
+                    name=pantry_item.name,
+                    unit=pantry_item.unit,
+                    needed=needed,
+                    used=used,
+                    previous_quantity=previous,
+                    quantity=new_quantity,
+                )
+            )
+        else:
+            updated.append(
+                CookUpdatedLine(
+                    ingredient_id=pantry_item.id,
+                    name=pantry_item.name,
+                    unit=pantry_item.unit,
+                    needed=needed,
+                    used=used,
+                    previous_quantity=previous,
+                    quantity=new_quantity,
+                )
+            )
+
+    db.commit()
+
+    return CookRecipeResponse(
+        recipe_id=recipe.id,
+        recipe_name=recipe.name,
+        updated=updated,
+        short=short,
+        skipped=skipped,
     )
 
 

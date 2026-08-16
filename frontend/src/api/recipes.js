@@ -14,3 +14,8 @@ export async function deleteRecipe(id) {
   const response = await client.delete(`/recipes/${id}`);
   return response.data;
 }
+
+export async function cookRecipe(id) {
+  const response = await client.post(`/recipes/${id}/cook`);
+  return response.data;
+}

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -44,3 +44,39 @@ class RecipeResponse(BaseModel):
     ingredients: List[RecipeIngredientResponse]
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CookUpdatedLine(BaseModel):
+    ingredient_id: int
+    name: str
+    unit: str
+    needed: float
+    used: float
+    previous_quantity: float
+    quantity: float
+
+
+class CookShortLine(BaseModel):
+    ingredient_id: int
+    name: str
+    unit: str
+    needed: float
+    used: float
+    previous_quantity: float
+    quantity: float
+
+
+class CookSkippedLine(BaseModel):
+    ingredient_id: int
+    name: str
+    reason: Literal["missing", "unit_mismatch"]
+    recipe_unit: Optional[str] = None
+    pantry_unit: Optional[str] = None
+
+
+class CookRecipeResponse(BaseModel):
+    recipe_id: int
+    recipe_name: str
+    updated: List[CookUpdatedLine]
+    short: List[CookShortLine]
+    skipped: List[CookSkippedLine]
