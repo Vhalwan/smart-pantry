@@ -41,6 +41,7 @@ Auth means a valid bearer token from login.
 | POST | `/recipes/` | Yes | Create recipe |
 | GET | `/recipes/{id}` | Yes | Get one |
 | PUT | `/recipes/{id}` | Yes | Update recipe fields (not ingredient lines) |
+| POST | `/recipes/{id}/cook` | Yes | Subtract this recipe’s linked pantry amounts (see below) |
 | DELETE | `/recipes/{id}` | Yes | Delete (409 if the recipe is used in a meal plan) |
 | GET | `/meal-plans/` | Yes | List meal plans |
 | POST | `/meal-plans/` | Yes | Create |
@@ -85,7 +86,56 @@ Create recipe (`POST /recipes/`):
 }
 ```
 
-Suggestions use ingredient names. Creating a recipe expects pantry ingredient ids. Name-to-id matching for save-from-suggestion belongs in the page or a helper, not in the thin `api/*.js` wrappers (case/space plus simple last-word singular/plural; exact match wins). The pantry list is also sorted in the page: expired, then expiring soon, then the rest — GET `/ingredients/` order is unchanged. See [design](./design.md). The suggest endpoint also loads the user’s saved recipe names, asks Gemini to avoid them, and drops exact name matches when at least one fresh idea remains. It tags pantry lines that are expired or expiring within `NEAR_EXPIRY_DAYS` (3, calendar days, inclusive of today — same window as the pantry badge) and asks Gemini to prefer those when reasonable; items with no expiry date stay unmarked. The prompt also favors short prep, simple steps, mostly on-hand ingredients, and honesty about gaps; a pantry of 1–2 items gets an extra “keep it simple” note. An empty pantry returns 400 before Gemini is called (`Add a few ingredients to get suggestions.`). The Pantry page does not call Suggest when the list is empty: the button is disabled and the same helper is shown as a note, not a red error. Response JSON shape is unchanged.
+Suggestions use ingredient names. Creating a recipe expects pantry ingredient ids. Name-to-id matching for save-from-suggestion belongs in the page or a helper, not in the thin `api/*.js` wrappers (case/space plus simple last-word singular/plural; exact match wins). A name match is only linked if units also match after trim/casefold (`cup` vs `lbs` is skipped, with a note). The pantry list is also sorted in the page: expired, then expiring soon, then the rest — GET `/ingredients/` order is unchanged. See [design](./design.md). The suggest endpoint also loads the user’s saved recipe names, asks Gemini to avoid them, and drops exact name matches when at least one fresh idea remains. It tags pantry lines that are expired or expiring within `NEAR_EXPIRY_DAYS` (3, calendar days, inclusive of today — same window as the pantry badge) and asks Gemini to prefer those when reasonable; items with no expiry date stay unmarked. The prompt also favors short prep, simple steps, mostly on-hand ingredients, and honesty about gaps; a pantry of 1–2 items gets an extra “keep it simple” note. An empty pantry returns 400 before Gemini is called (`Add a few ingredients to get suggestions.`). The Pantry page does not call Suggest when the list is empty: the button is disabled and the same helper is shown as a note, not a red error. Response JSON shape is unchanged.
+
+Cook (`POST /recipes/{id}/cook`) is one transaction on the current user’s recipe. It subtracts each `recipe_ingredients` line from the pantry row with that `ingredient_id` (not by name). It clamps at 0 and does not delete. The three lists are mutually exclusive:
+
+```json
+{
+  "recipe_id": 12,
+  "recipe_name": "Fried rice",
+  "updated": [
+    {
+      "ingredient_id": 4,
+      "name": "egg",
+      "unit": "pcs",
+      "needed": 2.0,
+      "used": 2.0,
+      "previous_quantity": 6.0,
+      "quantity": 4.0
+    }
+  ],
+  "short": [
+    {
+      "ingredient_id": 2,
+      "name": "rice",
+      "unit": "cup",
+      "needed": 2.0,
+      "used": 1.0,
+      "previous_quantity": 1.0,
+      "quantity": 0.0
+    }
+  ],
+  "skipped": [
+    {
+      "ingredient_id": 9,
+      "name": "Ingredient #9",
+      "reason": "missing",
+      "recipe_unit": "tbsp",
+      "pantry_unit": null
+    },
+    {
+      "ingredient_id": 8,
+      "name": "soy sauce",
+      "reason": "unit_mismatch",
+      "recipe_unit": "tbsp",
+      "pantry_unit": "ml"
+    }
+  ]
+}
+```
+
+`reason` is `missing` or `unit_mismatch`. A recipe with no ingredient lines returns 200 with empty arrays (the Recipes page disables Cook this and does not call the API). Unknown recipe: 404. Cook math stays in the route, not in a loop of frontend PUTs. The Recipes page shows a short card note (same tone as the save skip note) and refetches ingredients. After a response with any `updated` or `short` line, that card’s Cook this stays disabled as Cooked and shows View pantry (`/pantry`) until the page remounts. An all-`skipped` result does not lock the button. Cook does not use `pendingIngredientRemovals`. The Pantry page shows a calm note on rows whose quantity is 0 (cook leftovers; the stepper still removes at 0 instead of leaving a 0 row).
 
 Create meal plan (`POST /meal-plans/`):
 
@@ -113,8 +163,9 @@ The Recipes page shows a clearer inline message for the recipe 409. The Pantry p
 
 - Route handlers should say what they do, whether auth is required, and how errors look when that is not obvious.
 - Pydantic schemas are the source of truth for shapes. Avoid comments that duplicate and drift.
-- Frontend `api/*.js` files stay thin. Matching logic and similar behavior live in the page or a dedicated helper. Pantry quantity edits use `updateIngredient(id, { quantity })` against the partial PUT above.
-- Quantity → 0 does **not** PUT 0. The Pantry page removes the row optimistically and calls `schedulePendingRemoval` in `pendingIngredientRemovals.js`. After ~5s with no Undo, that module calls `DELETE /ingredients/{id}`. Each id has its own timer; the Undo toast is display-only (most recent zeroed item) and never cancels another id’s countdown. Deadlines are kept in `sessionStorage` and rehydrated on app boot / tab focus so navigate-away still deletes. Explicit row Delete stays an immediate `deleteIngredient` with no toast. A 409 (ingredient still used in a recipe) is treated as a permanent failure: no silent retry; emit `delete-failed` so the Pantry page can restore the row and show the API message.
+- Frontend `api/*.js` files stay thin. Matching logic and similar behavior live in the page or a dedicated helper. Pantry quantity edits use `updateIngredient(id, { quantity })` against the partial PUT above. Cook uses `cookRecipe(id)` → `POST /recipes/{id}/cook`.
+- Quantity → 0 on the **Pantry stepper** does **not** PUT 0. The Pantry page removes the row optimistically and calls `schedulePendingRemoval` in `pendingIngredientRemovals.js`. After ~5s with no Undo, that module calls `DELETE /ingredients/{id}`. Each id has its own timer; the Undo toast is display-only (most recent zeroed item) and never cancels another id’s countdown. Deadlines are kept in `sessionStorage` and rehydrated on app boot / tab focus so navigate-away still deletes. Explicit row Delete stays an immediate `deleteIngredient` with no toast. A 409 (ingredient still used in a recipe) is treated as a permanent failure: no silent retry; emit `delete-failed` so the Pantry page can restore the row and show the API message.
+- **Cook this** does PUT remaining quantity, including `0`, and keeps the row. Linked ingredients cannot be deleted (same 409), so cook must not schedule delayed DELETE. No per-ingredient undo toast for cook.
 - Pantry-list expiry status is computed only in the Pantry page: parse `YYYY-MM-DD` as a local calendar date, compare to today with UTC day numbers (time-of-day and DST safe), and show Expired / Expiring soon when past or within `NEAR_EXPIRY_DAYS` (3). The suggest route uses the same 3-day idea on the backend (`NEAR_EXPIRY_DAYS` in `suggestions.py`, `date.today()` vs `expiry_date`) to tag prompt lines; there is still no dedicated expiry API field or meal-plan flag.
 
 ## Running locally
@@ -169,3 +220,5 @@ On Render, bind the HTTP server to `0.0.0.0` and the platform `$PORT`. Local dis
 - 13 Aug 2026: Suggest prompt tags expired / expiring-soon items (`NEAR_EXPIRY_DAYS = 3` in `suggestions.py`), bias + rush / thin-pantry wording; empty pantry still 400. No meal-plan expiry flags.
 - 14 Aug 2026: Empty-pantry Suggest 400 detail + UI helper (no Gemini call). DELETE `/ingredients/{id}` 409 when the item is still on a recipe; Pantry shows the message; delayed DELETE does not retry a 409.
 - 15 Aug 2026: Pantry page sorts expired / expiring-soon for display; save-from-suggestion matching adds last-word singular/plural. No API change.
+- 16 Aug 2026: `POST /recipes/{id}/cook` (subtract by id, clamp 0, keep rows, `updated` / `short` / `skipped`). Recipes page Cook this. Save-from-suggestion also requires matching units. Cook does not use delayed DELETE.
+- 17 Aug 2026: Recipes UI locks Cook this after a subtract and links to Pantry. Pantry shows a quantity-0 cook leftover note. No API change.

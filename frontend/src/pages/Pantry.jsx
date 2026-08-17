@@ -827,6 +827,11 @@ export default function Pantry() {
                               handleQuantityChange(item.id, next)
                             }
                           />
+                          {Number(item.quantity) === 0 && (
+                            <p className="mt-1 text-xs text-slate-500">
+                              Still on a recipe — Cook this left this at 0.
+                            </p>
+                          )}
                         </td>
                         <td className="px-6 py-3">{item.unit}</td>
                         <td className="px-6 py-3">{item.category ?? "—"}</td>

@@ -22,8 +22,8 @@ IDs (FR-1, and so on) are for tracking. The statements are written in plain lang
 | FR-6 | The app can generate recipe suggestions from the user’s current pantry using an AI model (Gemini). |
 | FR-7 | Each suggestion includes a name, description, prep time, ingredients used (with quantity and unit), and step-by-step instructions. |
 | FR-8 | A user can save an AI suggestion as a permanent recipe. |
-| FR-9 | When saving a suggestion, the app matches each suggested ingredient to the pantry by name (capitalization and surrounding spaces ignored, and simple singular/plural on the last word) and links the matching pantry item. |
-| FR-10 | If a suggested ingredient cannot be matched, the recipe still saves with the matched ones, and the user is told what was skipped. If none match, the recipe is not saved and the user is told. |
+| FR-9 | When saving a suggestion, the app matches each suggested ingredient to the pantry by name (capitalization and surrounding spaces ignored, and simple singular/plural on the last word) and links the matching pantry item only when the unit also matches (trim and capitalization ignored; no unit conversion). |
+| FR-10 | If a suggested ingredient cannot be matched (name or unit), the recipe still saves with the matched ones, and the user is told what was skipped and what to do next. If none can be linked, the recipe is not saved and the user is told. |
 | FR-11 | A user can view, create, update, and delete their own recipes. |
 | FR-12 | A user can create, view, update, and delete meal plans that point at their saved recipes (a date plus breakfast, lunch, or dinner). |
 | FR-13 | A user can adjust an ingredient’s quantity without deleting and re-adding it. |
@@ -31,7 +31,7 @@ IDs (FR-1, and so on) are for tracking. The statements are written in plain lang
 | FR-15 | When generating suggestions, the app may prefer recipes that use soon-to-expire items when those dates are available. |
 | FR-16 | A user can mark that they cooked a recipe (or finished using listed ingredients) and have pantry quantities updated accordingly. |
 
-FR-8 through FR-10 are in the UI (save from a suggestion card with name matching and a skip note; matching also covers simple last-word singular/plural). FR-4’s optional category and expiry are collected on the Pantry add form and shown in the list. FR-5: delete is refused with a named-recipe message when the item is still linked to a recipe (including after quantity hits 0). FR-13 is in the UI (quantity stepper / direct edit via partial PUT). Quantity at 0 auto-removes the item after a short Undo window (delayed DELETE); the explicit Delete control remains immediate. FR-14 is in the UI (calm per-row Expired / Expiring soon labels next to the expiry date; client-side calendar-day compare, 3-day near window; those rows sort to the top of the list). FR-15 is in the suggestion prompt (backend tags the same 3-day / expired window and asks Gemini to prefer those items when it reasonably can; also rush-friendly / thin-pantry wording). An empty pantry does not call the model; the UI tells the user to add a few ingredients. FR-16 is still required for the plan’s “done” bar and is tracked in the [project plan](./project-plan.md).
+FR-8 through FR-10 are in the UI (save from a suggestion card with name matching, unit matching, and a skip note that says what to do next; matching also covers simple last-word singular/plural). FR-4’s optional category and expiry are collected on the Pantry add form and shown in the list. FR-5: delete is refused with a named-recipe message when the item is still linked to a recipe (including after the pantry stepper hits 0). FR-13 is in the UI (quantity stepper / direct edit via partial PUT). Quantity at 0 on the stepper auto-removes the item after a short Undo window (delayed DELETE); the explicit Delete control remains immediate. FR-14 is in the UI (calm per-row Expired / Expiring soon labels next to the expiry date; client-side calendar-day compare, 3-day near window; those rows sort to the top of the list). FR-15 is in the suggestion prompt (backend tags the same 3-day / expired window and asks Gemini to prefer those items when it reasonably can; also rush-friendly / thin-pantry wording). An empty pantry does not call the model; the UI tells the user to add a few ingredients. FR-16 is in the UI: Cook this on a saved recipe card updates pantry quantities (clamp at 0, keep linked rows at 0, report short or skipped lines). After a subtract, the button stays Cooked on that card with a View pantry link; an all-skipped result stays retryable. Pantry rows at 0 after cook show that they are still on a recipe. Not on suggestion cards or meal plans.
 
 ## Quality and safety expectations
 
@@ -54,6 +54,7 @@ These are intentionally out for now:
 - Fuzzy matching beyond case, trim, and simple singular/plural on the last word
 - Heavy grocery-store integrations or a rigid weekly meal-prep product
 - Flagging a meal-plan entry when its recipe’s linked pantry ingredients are expired or expiring soon (parked; see the project plan buffer week)
+- Cook this on a meal-plan row or on an unsaved suggestion (parked; cook stays on saved recipes)
 
 ## Doc history
 
@@ -70,3 +71,5 @@ These are intentionally out for now:
 | 13 Aug 2026 | FR-15 shipped: suggestion prompt tags expired / expiring-soon items (same 3-day window) and prefers them when reasonable; rush / thin-pantry prompt wording. FR-16 still open. Meal-plan expiry flags parked (not a requirement this version). |
 | 14 Aug 2026 | Empty-pantry Suggest helper (no Gemini call). FR-5: delete ingredient refused with recipe names when still used in a recipe. FR-16 still open. |
 | 15 Aug 2026 | FR-14: pantry list sorts expired, then expiring soon, to the top. FR-9: simple last-word singular/plural on save. FR-16 still open. |
+| 16 Aug 2026 | FR-16 shipped: Cook this on saved recipes (subtract, clamp 0, keep linked rows, honest gaps). FR-9/FR-10: unit must match to link; skip note includes a next step. |
+| 17 Aug 2026 | FR-16: Cook this locks after a subtract (Cooked + View pantry); pantry quantity-0 rows explain the cook leftover. |

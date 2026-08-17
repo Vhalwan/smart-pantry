@@ -52,11 +52,21 @@ The prompt tags pantry items that are expired or expiring within 3 days (same wi
 
 The AI only knows ingredient names from the prompt. It does not know your database IDs, and we should not ask it to invent them.
 
-So when you save a suggestion as a recipe, the app matches each suggested name to a pantry item by name (capitalization and surrounding spaces ignored, plus simple singular/plural on the last word — onion/onions, tomato/tomatoes, berry/berries). Exact match wins if both exist. It still misses different phrases (tomato vs cherry tomatoes). When that happens, the recipe still saves and the user is told what was skipped. If nothing matches, the recipe is not created. See FR-8 to FR-10 in [requirements](./requirements.md).
+So when you save a suggestion as a recipe, the app matches each suggested name to a pantry item by name (capitalization and surrounding spaces ignored, plus simple singular/plural on the last word — onion/onions, tomato/tomatoes, berry/berries). Exact match wins if both exist. It still misses different phrases (tomato vs cherry tomatoes). Units must also match after trim and case (`cup` vs `lbs` is not converted). A name match with a different unit is skipped, not linked, and the note says so plus what to do (use the same unit on the pantry item, then save again). When names or units do not match, the recipe still saves with the linked lines. If nothing can be linked, the recipe is not created. See FR-8 to FR-10 in [requirements](./requirements.md).
 
 When asking for suggestions, the API also lists the user’s already-saved recipe names and asks Gemini to avoid the same (or near-identical) dishes. The website may hide any leftover exact name matches and explain if the run was all duplicates.
 
-Manual recipe creation already picks pantry items directly, so it does not need this name step.
+Manual recipe creation already picks pantry items directly, so it does not need this name step. The add form fills the unit from the pantry item so Cook this can subtract later.
+
+## Cooking a saved recipe
+
+Cook this lives on saved recipe cards only (not suggestion cards, not meal plans). A suggestion is names until you save it; a meal plan is “I meant to eat this,” including on a future date, so subtracting the pantry there would be too early.
+
+The API subtracts each linked line from the pantry by `ingredient_id`. Quantities never go negative. If the pantry has less than the recipe needs, it uses what is there and reports the shortfall. If the pantry row is gone, or units do not match, that line is skipped and named. Rows that hit 0 stay in the pantry at 0 — they are still on the recipe, so delete would be refused. The pantry stepper’s Undo / delayed DELETE path is unchanged and is not used for cook.
+
+The Recipes page shows a short confirmation (Pantry updated, plus skipped or short lines). After any line is subtracted, Cook this on that card stays Cooked until you leave the page (same idea as Saved on a suggestion). View pantry sits next to it. If every line was skipped, the button stays enabled so you can fix units and try again.
+
+Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete) show a calm note that they are still on a recipe.
 
 ## Known limits (today)
 
@@ -64,11 +74,12 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - Recipe and meal-plan lists are not paginated (fine at current size); ingredients support skip/limit
 - Name matching is case/space normalized, plus simple last-word singular/plural, not fuzzy or substring
 - Pantry list order is client-side: expired, then expiring soon (soonest date first), then the rest in API order
-- Quantity at 0 removes the row from the UI immediately and schedules a per-item delayed DELETE (~5s) with an Undo toast; Undo cancels only that item’s countdown. Explicit Delete stays immediate. Timers live outside the Pantry page so navigate-away still deletes. If DELETE is blocked because the item is still used in a recipe, the API returns a conflict, the row is restored, and the page names those recipes
+- Quantity at 0 **on the pantry stepper** removes the row from the UI immediately and schedules a per-item delayed DELETE (~5s) with an Undo toast; Undo cancels only that item’s countdown. Explicit Delete stays immediate. Timers live outside the Pantry page so navigate-away still deletes. If DELETE is blocked because the item is still used in a recipe, the API returns a conflict, the row is restored, and the page names those recipes. Cook this is a separate path: it PUTs remaining quantity (including 0) and keeps the row. Those leftover 0 rows show a calm “still on a recipe” note on Pantry.
 - Deleting a pantry item still linked to a recipe is rejected (same idea as deleting a recipe still on a meal plan)
-- Near-expiry / expired notices on the pantry list are frontend-only (calm per-row labels; calendar-day compare; 3-day near window; list sorted so those rows sit at the top). The suggestion prompt uses the same 3-day window on the backend (`NEAR_EXPIRY_DAYS = 3`) to tag items and bias recipes; cook-and-update is still on the [project plan](./project-plan.md)
-- Meal plans do not yet flag a planned recipe when its linked pantry ingredients are expired or expiring (parked for the buffer week, after cook-and-update)
-- Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching
+- Near-expiry / expired notices on the pantry list are frontend-only (calm per-row labels; calendar-day compare; 3-day near window; list sorted so those rows sit at the top). The suggestion prompt uses the same 3-day window on the backend (`NEAR_EXPIRY_DAYS = 3`) to tag items and bias recipes
+- Meal plans do not flag a planned recipe when its linked pantry ingredients are expired or expiring (parked for the buffer week). Cook this is not on meal-plan rows (parked: only if the plan date is today, still via the recipe cook endpoint)
+- Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching. Unit mismatches skip linking too (no conversion)
+- Cook this does not convert units and does not delete pantry rows that hit 0 while they are still on a recipe. The Cooked lock is UI-only for that page visit; the API still accepts another cook after remount.
 - Avoiding already-saved recipes is by name only (not ingredients or “similar dish” detection)
 
 ## Doc history
@@ -83,3 +94,5 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 - 13 Aug 2026: Suggestion prompt tags expired / expiring-soon items and prefers them when reasonable; rush / thin-pantry wording. Meal-plan expiry flags parked.
 - 14 Aug 2026: Empty pantry: UI helper, no Gemini call. Delete ingredient blocked when used in a recipe (API conflict; Pantry explains next step; delayed DELETE restores the row).
 - 15 Aug 2026: Pantry list sorts expired / expiring-soon to the top (client-side). Save matching adds simple last-word singular/plural.
+- 16 Aug 2026: Cook this on saved recipes (subtract by id, clamp 0, keep linked rows, honest skip/short notes). Save matching requires matching units. No cook on suggestions or meal plans.
+- 17 Aug 2026: Cook this locks after a subtract (Cooked + View pantry). Quantity-0 pantry rows note they were left by cook because they are still linked.

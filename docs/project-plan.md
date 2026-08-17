@@ -12,7 +12,7 @@ When this plan is done, using the app should feel light:
 - Expiry dates and categories do something useful, not just sit in unused fields.
 - Nothing forces a big meal-prep workflow. Optional fields stay optional.
 
-Success looks like this: open the app, fix the pantry, get a usable idea, save it if you want, and get on with your evening.
+Success looks like this: open the app, fix the pantry, get a usable idea, save it if you want, cook it, and get on with your evening.
 
 ## How this product should feel
 
@@ -36,15 +36,16 @@ Already working:
 - Clear message if you try to delete a pantry item that is still used in a recipe
 - Pantry list ordered so expired and expiring-soon items sit at the top
 - AI recipe suggestions from the current pantry (prefer soon-to-expire items; rush / thin-pantry prompt; empty pantry shows a helper instead of a generic error)
-- Save a suggestion as a recipe from the suggestion card (name match including simple plurals + skip note)
+- Save a suggestion as a recipe from the suggestion card (name match including simple plurals; units must match too, or that line is skipped with a note)
+- Cook this on a saved recipe (subtract pantry amounts; keep rows at 0 if they are still linked; Cooked + View pantry after a subtract)
 - Manual recipes and meal plans
 - Live site (frontend on Vercel, API on Render)
 
 Still open:
 
-- A simple “I cooked this” update so the pantry stays true after a meal
+- Ship-week polish (phone layout, clearer API/AI errors, docs/README check) — checkpoint Sunday 6 September
 
-Category and expiry are collected and shown. Rows with an expiry date show a calm Expired or Expiring soon label when the date is past or within the next 3 days, and those rows sit at the top of the list. Suggestions tag those same items in the Gemini prompt and bias toward using them when it is reasonable. An empty pantry shows a helper instead of calling the model. Hitting quantity 0 removes the item after a short Undo window, unless the item is still used in a recipe — then it comes back with a named-recipe message. Save-from-suggestion matching covers simple last-word singular/plural as well as case and spaces.
+Category and expiry are collected and shown. Rows with an expiry date show a calm Expired or Expiring soon label when the date is past or within the next 3 days, and those rows sit at the top of the list. Suggestions tag those same items in the Gemini prompt and bias toward using them when it is reasonable. An empty pantry shows a helper instead of calling the model. Hitting quantity 0 on the pantry stepper removes the item after a short Undo window, unless the item is still used in a recipe — then it comes back with a named-recipe message. Cook this is different: it lowers quantities in one action and leaves a linked item at 0 instead of deleting it. After a subtract, Cook this stays Cooked on that card (with View pantry) so a second tap does not empty the list; leave and come back to cook it again. Pantry rows sitting at 0 after cook show they are still on a recipe. Save-from-suggestion matching covers simple last-word singular/plural as well as case, spaces, and the same unit (cup vs lbs is skipped, with a next step).
 
 ## Timeline (why not two full months)
 
@@ -103,9 +104,11 @@ Done when: setting an expiry changes what you notice and what you tend to get su
 
 Close the loop after cooking.
 
-- [ ] “I cooked this” (or similar) from a saved recipe, and from a suggestion if it fits cleanly
-- [ ] Lower quantities or remove items that hit zero
-- [ ] Refresh the pantry so the next suggestion run is accurate
+- [x] “I cooked this” from a saved recipe (16 Aug) — not from suggestion cards or meal plans (does not fit cleanly)
+- [x] Lower quantities; rows that hit zero stay at 0 when they are still on the recipe (no delayed DELETE / Undo toast for cook)
+- [x] Refresh the pantry after cook so the next suggestion run is accurate
+- [x] After a successful subtract, Cook this stays Cooked on that card (no double-tap); View pantry link (17 Aug)
+- [x] Pantry rows at 0 after cook show a calm “still on a recipe” note (17 Aug)
 
 Done when: you do not have to delete every ingredient by hand after dinner.
 
@@ -126,6 +129,8 @@ Ship what you meant to build. This is not another feature week.
 Only if the 6 September checklist failed, or one small stretch is clearly worth it (better name matching, shopping hints, category filter, AI retries, optional “similar to a saved recipe” badge for near-dupes, meal-plan expiry flags — see below). If you already passed on the 6th, stop.
 
 Parked (13 Aug 2026): on Meal Plans, flag a planned recipe when its linked pantry ingredients are expired or expiring soon (same 3-day window), and show which ones. Adjacent to “what do I cook tonight,” but not Week 3 work. Cleaner after Week 4 cook-and-update, when meal plans and pantry quantities start interacting more directly. Candidate for this buffer week, next to better name matching.
+
+Parked (16 Aug 2026): Cook this on meal-plan rows (or suggestion cards). Cook stays on saved recipes. A plan is “I meant to eat this”; cook is “I actually cooked it.” Cook on a future plan would subtract the pantry too early. Optional later: Cook this only when the plan date is today, still using `POST /recipes/{id}/cook`.
 
 ## In scope / out of scope
 
@@ -170,3 +175,5 @@ Spend a few minutes each Sunday:
 - 13 Aug 2026: Week 3 Day 2 — suggestion prompt tags expired / expiring-soon pantry items (backend `NEAR_EXPIRY_DAYS = 3`, same window as the badge), biases toward using them, and favors rush-friendly / thin-pantry recipes. Empty pantry still 400. Parked: meal-plan expiry flags (buffer / after Week 4 cook-and-update).
 - 14 Aug 2026: Week 3 Day 3 — empty-pantry Suggest helper (“Add a few ingredients to get suggestions”; button disabled, no Gemini call). Delete ingredient blocked when still used in a recipe (API 409 + recipe names; UI message; delayed zero-quantity DELETE restores the row instead of retrying). Week 3 checklist complete.
 - 15 Aug 2026: Ahead-of-schedule polish (Week 3 still done 14 Aug; checkpoints unchanged). Pantry list sorts expired / expiring-soon to the top. Save matching: simple last-word singular/plural. Week 4 cook-and-update still next.
+- 16 Aug 2026: Week 4 cook-and-update (checkpoint still 30 Aug). Cook this on saved recipe cards; `POST /recipes/{id}/cook` subtracts by ingredient id, clamps at 0, keeps linked rows; skip/short notes; no cook on suggestions or meal plans. Save matching also requires the same unit (case/trim) or that line is skipped with a next-step note. Add-ingredient unit hints; add-recipe prefills pantry unit.
+- 17 Aug 2026: Week 4 close — Cook this locks to Cooked after a subtract (retry stays available if every line was skipped); View pantry after cook; pantry quantity-0 rows note that Cook this left them because they are still on a recipe.

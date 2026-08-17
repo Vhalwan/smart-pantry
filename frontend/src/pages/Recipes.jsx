@@ -64,6 +64,7 @@ function RecipeCard({
   onDelete,
   onCook,
   cooking,
+  cooked,
   cookNote,
 }) {
   const [showInstructions, setShowInstructions] = useState(false);
@@ -116,14 +117,24 @@ function RecipeCard({
             </div>
           )}
           <div>
-            <button
-              type="button"
-              onClick={() => onCook(recipe)}
-              disabled={cooking || !hasIngredientLines}
-              className="rounded-lg bg-slate-900 text-white px-3 py-1.5 text-sm font-medium hover:bg-slate-800 disabled:opacity-60"
-            >
-              {cooking ? "Updating…" : "Cook this"}
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => onCook(recipe)}
+                disabled={cooking || cooked || !hasIngredientLines}
+                className="rounded-lg bg-slate-900 text-white px-3 py-1.5 text-sm font-medium hover:bg-slate-800 disabled:opacity-60"
+              >
+                {cooking ? "Updating…" : cooked ? "Cooked" : "Cook this"}
+              </button>
+              {cooked && (
+                <Link
+                  to="/pantry"
+                  className="text-sm font-medium text-slate-700 hover:text-slate-900"
+                >
+                  View pantry
+                </Link>
+              )}
+            </div>
             {!hasIngredientLines && (
               <p className="mt-2 text-sm text-slate-500">
                 This recipe has no ingredients to subtract.
@@ -171,6 +182,7 @@ export default function Recipes() {
   ]);
   const [submitting, setSubmitting] = useState(false);
   const [cookingId, setCookingId] = useState(null);
+  const [cookedIds, setCookedIds] = useState(() => new Set());
   const [cookNotes, setCookNotes] = useState({});
 
   const filteredRecipes = recipes.filter((r) =>
@@ -285,6 +297,11 @@ export default function Recipes() {
         ...prev,
         [recipe.id]: cookNoteFromResult(result),
       }));
+      const subtracted =
+        (result?.updated?.length ?? 0) + (result?.short?.length ?? 0) > 0;
+      if (subtracted) {
+        setCookedIds((prev) => new Set(prev).add(recipe.id));
+      }
       try {
         const ingredientsData = await getIngredients();
         setIngredients(ingredientsData);
@@ -529,6 +546,7 @@ export default function Recipes() {
                   onDelete={handleDelete}
                   onCook={handleCook}
                   cooking={cookingId === recipe.id}
+                  cooked={cookedIds.has(recipe.id)}
                   cookNote={cookNotes[recipe.id]}
                 />
               ))}

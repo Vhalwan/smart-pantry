@@ -27,7 +27,7 @@ One thing to know about the live site: the backend runs on a free hosting plan, 
 
 ## Your pantry
 
-On the Pantry page, add what you have: a name, how much, and the unit (for example flour, 2, cup). Category and expiry date are optional. Items show up in your list with those fields when you set them.
+On the Pantry page, add what you have: a name, how much, and the unit (for example flour, 2, cup). Category and expiry date are optional. Items show up in your list with those fields when you set them. The unit field offers common choices (cup, g, lbs, and so on). Use a unit you will stick with — Save recipe and Cook this skip an ingredient when the recipe says cup and the pantry says lbs.
 
 If you set an expiry date, the list may show a small note next to it: Expired when the date is in the past, or Expiring soon when it falls within the next three days (including today). Items without an expiry date look the same as before. Expired items sit at the top of the list, then expiring-soon, then everything else (soonest date first within those groups).
 
@@ -48,19 +48,29 @@ If that item is still used in a saved recipe, it cannot be deleted yet. You will
 
 ### Write one yourself
 
-Go to Recipes, create a recipe with a name, and pick ingredients from your pantry. You can add description, instructions, and prep time if you want. Use the search box at the top of your list to filter by recipe name as you type. Delete anything you no longer need — if that recipe is still on a meal plan, the app will tell you to remove it from the plan first.
+Go to Recipes, create a recipe with a name, and pick ingredients from your pantry. The unit is filled from that pantry item so Cook this can subtract it later — keep it the same as the pantry row. You can add description, instructions, and prep time if you want. Use the search box at the top of your list to filter by recipe name as you type. Delete anything you no longer need — if that recipe is still on a meal plan, the app will tell you to remove it from the plan first.
 
 On each saved recipe card, if there are instructions, use View instructions to expand them (and Hide instructions to collapse). Recipes without instructions omit that control.
 
 ### Save an AI suggestion
 
-On a suggestion card, click Save recipe. The app matches ingredient names to your pantry (ignoring capitalization and extra spaces, and simple singular/plural on the last word — tomato and tomatoes, berry and berries) and creates a normal recipe you can find under Recipes. After a successful save, the button stays on Saved and you can open View in Recipes. Clicking Save again on that card does nothing until you run Suggest recipes again.
+On a suggestion card, click Save recipe. The app matches ingredient names to your pantry (ignoring capitalization and extra spaces, and simple singular/plural on the last word — tomato and tomatoes, berry and berries) and creates a normal recipe you can find under Recipes. The unit has to match too (cup and lbs do not count as the same; the app does not convert). After a successful save, the button stays on Saved and you can open View in Recipes. Clicking Save again on that card does nothing until you run Suggest recipes again.
 
-If some names do not match, the recipe still saves and you get a note about what was skipped. If nothing matches, the recipe is not saved and you get a clear note instead.
+If some names do not match, or the name matches but the unit does not, the recipe still saves with the linked ones and you get a note — for example Saved, but skipped rice (suggestion: cup, pantry: lbs), plus a reminder to use the same unit on the pantry item if you want it linked next time. If nothing can be linked, the recipe is not saved and you get a clear note instead.
+
+## After you cook
+
+On a saved recipe card, click Cook this. The app subtracts that recipe’s linked amounts from your pantry. If you did not have enough of something, it uses what you had (never below zero) and tells you. If an item is missing or the units do not match, that line is skipped and named; the rest still updates. After a successful subtract, the button stays on Cooked so a second tap does not take the pantry down twice; use View pantry to see the new amounts. If every line was skipped (for example a unit mismatch), Cook this stays available so you can fix the pantry and try again.
+
+Items that hit zero stay on the pantry list at 0 while they are still used in the recipe (they cannot be deleted until you take them off the recipe). Those rows show a short note: Still on a recipe — Cook this left this at 0. There is no Undo toast for this action — if you used a different amount, change the quantity on Pantry. Leave the page and come back if you cook the same recipe again later.
+
+Cook this is not on suggestion cards or on Meal Plans. Save the suggestion first, then cook from Recipes. A meal plan is for a date you chose; cooking from a future plan would take food off the list too soon.
+
+If a recipe has no ingredient lines, Cook this stays off.
 
 ## Meal plans
 
-Open Meal Plans from the navigation. Pick a saved recipe, a date, and breakfast, lunch, or dinner. Add it, or remove entries when plans change. Meal plans are optional. You can get value from the app without using them. Planned meals do not yet warn you if a linked pantry ingredient is expired or expiring soon (that is a later idea, not in this version).
+Open Meal Plans from the navigation. Pick a saved recipe, a date, and breakfast, lunch, or dinner. Add it, or remove entries when plans change. Meal plans are optional. You can get value from the app without using them. Planned meals do not warn you if a linked pantry ingredient is expired or expiring soon, and they do not have Cook this (cook from the recipe under Recipes after you actually make it).
 
 ## Troubleshooting
 
@@ -71,7 +81,10 @@ If the pantry is empty, add at least one ingredient — the button stays off unt
 Check the email and password. Email is matched the way it was stored when you registered.
 
 **A saved recipe is missing some ingredients**
-If you saved from a suggestion, check the skip note. Names have to match your pantry entries closely (case, spaces, and simple plurals on the last word). Different words still skip — tomato will not match cherry tomatoes.
+If you saved from a suggestion, check the skip note. Names have to match your pantry entries closely (case, spaces, and simple plurals on the last word). Units have to match too — rice in cup will not link to rice in lbs. Different words still skip — tomato will not match cherry tomatoes.
+
+**Cook this skipped an ingredient**
+If the note says the recipe uses one unit and the pantry uses another, change the pantry unit to match (and the amount if needed), then cook again. The app does not convert cup to lbs.
 
 **Can't delete a recipe**
 If you see a message about a meal plan, open Meal Plans, remove that recipe from the plan, then try deleting again.
@@ -102,3 +115,5 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 13 Aug 2026: Suggestions prefer soon-to-expire items when dates are set, and lean toward simple, on-hand recipes for a thin pantry. Meal plans still do not flag expired ingredients on a planned meal.
 - 14 Aug 2026: Empty pantry: Suggest recipes is disabled with “Add a few ingredients to get suggestions.” Can’t delete a pantry item that is still on a recipe — the message names those recipes.
 - 15 Aug 2026: Pantry list puts expired items first, then expiring soon. Save from a suggestion also matches simple singular/plural on the last word.
+- 16 Aug 2026: Cook this on saved recipes (pantry amounts go down; short or skipped lines are named). Save also skips when units do not match, with a next-step note. Meal plans still do not cook.
+- 17 Aug 2026: Cook this stays Cooked after a subtract, with View pantry. Pantry rows at 0 after cooking explain they are still on a recipe.
