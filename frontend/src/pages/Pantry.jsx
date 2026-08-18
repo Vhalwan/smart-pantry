@@ -247,13 +247,13 @@ function UndoToast({ name, onUndo }) {
   return (
     <div
       role="status"
-      className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-slate-900 px-4 py-3 text-sm text-white shadow-lg"
+      className="fixed bottom-4 left-4 right-4 z-50 mx-auto flex max-w-md items-center justify-between gap-3 rounded-lg bg-slate-900 px-4 py-3 text-base text-white shadow-lg sm:left-1/2 sm:right-auto sm:w-auto sm:max-w-[min(28rem,calc(100vw-2rem))] sm:-translate-x-1/2"
     >
-      Removed {name} ·{" "}
+      <p className="min-w-0 break-words">Removed {name}</p>
       <button
         type="button"
         onClick={onUndo}
-        className="font-medium underline underline-offset-2 hover:text-slate-200"
+        className="inline-flex h-11 shrink-0 items-center justify-center rounded-md px-3 font-medium underline underline-offset-2 hover:text-slate-200"
       >
         Undo
       </button>
@@ -297,18 +297,18 @@ function QuantityStepper({ quantity, onChange }) {
             setEditing(false);
           }
         }}
-        className="w-16 rounded border border-slate-300 px-1.5 py-0.5 text-center text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+        className="h-11 w-20 rounded border border-slate-300 px-2 text-center text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 md:h-8 md:w-16 md:px-1.5 md:text-sm"
       />
     );
   }
 
   return (
-    <div className="inline-flex items-center gap-1">
+    <div className="inline-flex items-center gap-2 md:gap-1">
       <button
         type="button"
         aria-label="Decrease quantity"
         onClick={() => onChange(Math.max(0, quantity - 1))}
-        className="h-7 w-7 rounded border border-slate-300 text-slate-700 hover:bg-slate-50"
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded border border-slate-300 text-lg text-slate-700 hover:bg-slate-50 md:h-7 md:w-7 md:text-sm"
       >
         −
       </button>
@@ -319,7 +319,7 @@ function QuantityStepper({ quantity, onChange }) {
           setDraft(String(quantity));
           setEditing(true);
         }}
-        className="min-w-[2.5rem] px-1 py-0.5 text-center tabular-nums text-slate-800 hover:bg-slate-50 rounded"
+        className="inline-flex min-h-11 min-w-[2.75rem] items-center justify-center rounded px-2 py-1 text-center text-base tabular-nums text-slate-800 hover:bg-slate-50 md:min-h-0 md:min-w-[2.5rem] md:px-1 md:py-0.5 md:text-sm"
       >
         {quantity}
       </button>
@@ -327,7 +327,7 @@ function QuantityStepper({ quantity, onChange }) {
         type="button"
         aria-label="Increase quantity"
         onClick={() => onChange(quantity + 1)}
-        className="h-7 w-7 rounded border border-slate-300 text-slate-700 hover:bg-slate-50"
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded border border-slate-300 text-lg text-slate-700 hover:bg-slate-50 md:h-7 md:w-7 md:text-sm"
       >
         +
       </button>
@@ -658,27 +658,27 @@ export default function Pantry() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen min-w-0 bg-slate-100">
       <header className="bg-white border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-6">
+        <div className="mx-auto flex max-w-5xl min-w-0 flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
             <h1 className="text-xl font-semibold text-slate-900">My Pantry</h1>
-            <nav className="flex gap-4 text-sm">
+            <nav className="flex flex-wrap items-center gap-1 text-base sm:gap-2 sm:text-sm">
               <Link
                 to="/pantry"
-                className="font-medium text-slate-900"
+                className="inline-flex min-h-11 items-center px-2 font-medium text-slate-900"
               >
                 Pantry
               </Link>
               <Link
                 to="/recipes"
-                className="text-slate-600 hover:text-slate-900"
+                className="inline-flex min-h-11 items-center px-2 text-slate-600 hover:text-slate-900"
               >
                 Recipes
               </Link>
               <Link
                 to="/meal-plans"
-                className="text-slate-600 hover:text-slate-900"
+                className="inline-flex min-h-11 items-center px-2 text-slate-600 hover:text-slate-900"
               >
                 Meal Plans
               </Link>
@@ -687,37 +687,37 @@ export default function Pantry() {
           <button
             type="button"
             onClick={handleLogout}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 sm:w-auto"
           >
             Logout
           </button>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-        <div className="flex flex-col items-end gap-2">
+      <main className={`mx-auto max-w-5xl min-w-0 space-y-6 px-4 py-6 sm:py-8 ${undoToast ? "pb-28" : ""}`}>
+        <div className="flex flex-col items-stretch gap-2 sm:items-end">
           <button
             type="button"
             onClick={handleSuggest}
             disabled={suggesting || (!loading && ingredients.length === 0)}
-            className="rounded-lg bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 disabled:opacity-60"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-base font-medium text-white hover:bg-slate-800 disabled:opacity-60 sm:w-auto sm:text-sm"
           >
             {suggesting ? "Suggesting…" : "Suggest recipes"}
           </button>
           {!loading && ingredients.length === 0 && (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 sm:text-right">
               {EMPTY_PANTRY_SUGGEST_MESSAGE}
             </p>
           )}
         </div>
 
-        <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-          <h2 className="text-lg font-medium text-slate-900 mb-4">
+        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+          <h2 className="mb-4 text-lg font-medium text-slate-900">
             Add ingredient
           </h2>
           <form
             onSubmit={handleAdd}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+            className="grid grid-cols-1 gap-3 sm:grid-cols-3"
           >
             <input
               type="text"
@@ -725,7 +725,7 @@ export default function Pantry() {
               placeholder="Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
             />
             <input
               type="number"
@@ -735,7 +735,7 @@ export default function Pantry() {
               placeholder="Quantity"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
             />
             <input
               type="text"
@@ -744,7 +744,7 @@ export default function Pantry() {
               placeholder="Unit (g, ml, cup)"
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
             />
             <datalist id={UNIT_DATALIST_ID}>
               {COMMON_UNITS.map((option) => (
@@ -754,7 +754,7 @@ export default function Pantry() {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
             >
               <option value="">Select category (optional)</option>
               <option value="Produce">Produce</option>
@@ -768,12 +768,12 @@ export default function Pantry() {
               type="date"
               value={expiryDate}
               onChange={(e) => setExpiryDate(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
             />
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-slate-900 text-white py-2 font-medium hover:bg-slate-800 disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-slate-900 py-2 text-base font-medium text-white hover:bg-slate-800 disabled:opacity-60"
             >
               {submitting ? "Adding…" : "Add"}
             </button>
@@ -785,88 +785,145 @@ export default function Pantry() {
         </section>
 
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          <p className="break-words rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600">
             {error}
           </p>
         )}
 
-        <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200">
+        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-200 px-4 py-4 sm:px-6">
             <h2 className="text-lg font-medium text-slate-900">Ingredients</h2>
           </div>
 
           {loading ? (
-            <p className="px-6 py-8 text-slate-500 text-sm">Loading…</p>
+            <p className="px-4 py-8 text-sm text-slate-500 sm:px-6">Loading…</p>
           ) : ingredients.length === 0 ? (
-            <p className="px-6 py-8 text-slate-500 text-sm">
+            <p className="px-4 py-8 text-sm text-slate-500 sm:px-6">
               No ingredients yet. Add one above.
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 text-slate-600">
-                  <tr>
-                    <th className="px-6 py-3 font-medium">Name</th>
-                    <th className="px-6 py-3 font-medium">Quantity</th>
-                    <th className="px-6 py-3 font-medium">Unit</th>
-                    <th className="px-6 py-3 font-medium">Category</th>
-                    <th className="px-6 py-3 font-medium">Expiry</th>
-                    <th className="px-6 py-3 font-medium"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {displayedIngredients.map((item) => {
-                    const expiryStatus = getExpiryStatus(item.expiry_date);
-                    return (
-                      <tr key={item.id} className="text-slate-800">
-                        <td className="px-6 py-3">{item.name}</td>
-                        <td className="px-6 py-3">
-                          <QuantityStepper
-                            quantity={item.quantity}
-                            onChange={(next) =>
-                              handleQuantityChange(item.id, next)
-                            }
-                          />
-                          {Number(item.quantity) === 0 && (
-                            <p className="mt-1 text-xs text-slate-500">
-                              Still on a recipe — Cook this left this at 0.
-                            </p>
-                          )}
-                        </td>
-                        <td className="px-6 py-3">{item.unit}</td>
-                        <td className="px-6 py-3">{item.category ?? "—"}</td>
-                        <td className="px-6 py-3">
-                          {item.expiry_date != null && item.expiry_date !== ""
-                            ? item.expiry_date
-                            : "—"}
+            <>
+              <ul className="divide-y divide-slate-100 md:hidden">
+                {displayedIngredients.map((item) => {
+                  const expiryStatus = getExpiryStatus(item.expiry_date);
+                  return (
+                    <li
+                      key={item.id}
+                      className="space-y-3 px-4 py-4 text-slate-800"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="min-w-0 break-words text-base font-medium">
+                          {item.name}
                           <ExpiryNotice status={expiryStatus} />
-                        </td>
-                        <td className="px-6 py-3 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(item.id)}
-                            className="text-red-600 hover:text-red-700 font-medium"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(item.id)}
+                          className="inline-flex h-11 shrink-0 items-center justify-center rounded-lg px-3 font-medium text-red-600 hover:bg-red-50 hover:text-red-700"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                        <QuantityStepper
+                          quantity={item.quantity}
+                          onChange={(next) =>
+                            handleQuantityChange(item.id, next)
+                          }
+                        />
+                        <span className="text-sm text-slate-600">
+                          {item.unit}
+                        </span>
+                      </div>
+                      {Number(item.quantity) === 0 && (
+                        <p className="text-sm text-slate-500">
+                          Still on a recipe — Cook this left this at 0.
+                        </p>
+                      )}
+                      <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm text-slate-600">
+                        <div className="min-w-0">
+                          <dt className="text-slate-500">Category</dt>
+                          <dd className="break-words">{item.category ?? "—"}</dd>
+                        </div>
+                        <div className="min-w-0">
+                          <dt className="text-slate-500">Expiry</dt>
+                          <dd className="break-words">
+                            {item.expiry_date != null && item.expiry_date !== ""
+                              ? item.expiry_date
+                              : "—"}
+                          </dd>
+                        </div>
+                      </dl>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="hidden overflow-x-auto md:block">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-slate-600">
+                    <tr>
+                      <th className="px-6 py-3 font-medium">Name</th>
+                      <th className="px-6 py-3 font-medium">Quantity</th>
+                      <th className="px-6 py-3 font-medium">Unit</th>
+                      <th className="px-6 py-3 font-medium">Category</th>
+                      <th className="px-6 py-3 font-medium">Expiry</th>
+                      <th className="px-6 py-3 font-medium"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {displayedIngredients.map((item) => {
+                      const expiryStatus = getExpiryStatus(item.expiry_date);
+                      return (
+                        <tr key={item.id} className="text-slate-800">
+                          <td className="px-6 py-3">{item.name}</td>
+                          <td className="px-6 py-3">
+                            <QuantityStepper
+                              quantity={item.quantity}
+                              onChange={(next) =>
+                                handleQuantityChange(item.id, next)
+                              }
+                            />
+                            {Number(item.quantity) === 0 && (
+                              <p className="mt-1 text-xs text-slate-500">
+                                Still on a recipe — Cook this left this at 0.
+                              </p>
+                            )}
+                          </td>
+                          <td className="px-6 py-3">{item.unit}</td>
+                          <td className="px-6 py-3">{item.category ?? "—"}</td>
+                          <td className="px-6 py-3">
+                            {item.expiry_date != null && item.expiry_date !== ""
+                              ? item.expiry_date
+                              : "—"}
+                            <ExpiryNotice status={expiryStatus} />
+                          </td>
+                          <td className="px-6 py-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(item.id)}
+                              className="inline-flex min-h-8 items-center rounded-lg px-2 py-1 font-medium text-red-600 hover:text-red-700"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </section>
 
         {suggestError && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          <p className="break-words rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600">
             {suggestError}
           </p>
         )}
 
         {suggestNote && !suggesting && (
-          <p className="text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+          <p className="break-words rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
             {suggestNote}
           </p>
         )}
@@ -879,7 +936,7 @@ export default function Pantry() {
             {suggesting ? (
               <p className="text-sm text-slate-500">Generating suggestions…</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-3">
                 {suggestions.map((recipe, index) => {
                   const isSaved = savedIndexes.has(index);
                   const note = saveNotes[index];
@@ -892,43 +949,43 @@ export default function Pantry() {
                   return (
                   <article
                     key={`${recipe.name}-${index}`}
-                    className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3"
+                    className="min-w-0 space-y-3 break-words rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
                   >
-                    <h3 className="text-base font-semibold text-slate-900">
+                    <h3 className="text-lg font-semibold text-slate-900 md:text-base">
                       {recipe.name}
                     </h3>
-                    <p className="text-sm text-slate-600">{recipe.description}</p>
+                    <p className="text-base text-slate-600 md:text-sm">{recipe.description}</p>
                     <p className="text-sm text-slate-500">
                       Prep time: {recipe.prep_time_minutes} min
                     </p>
                     <div>
-                      <p className="text-sm font-medium text-slate-800 mb-1">
+                      <p className="mb-1 text-sm font-medium text-slate-800">
                         Ingredients used
                       </p>
-                      <ul className="list-disc list-inside text-sm text-slate-600 space-y-0.5">
+                      <ul className="list-inside list-disc space-y-1 text-base text-slate-600 md:text-sm">
                         {(recipe.ingredients_used ?? []).map((ing) => (
-                          <li key={ing.name}>
+                          <li key={ing.name} className="break-words">
                             {`${ing.quantity} ${ing.unit} ${ing.name}`}
                           </li>
                         ))}
                       </ul>
                     </div>
                     {recipe.instructions && (
-                      <div>
-                        <p className="text-sm font-medium text-slate-800 mb-1">
+                      <div className="min-w-0">
+                        <p className="mb-1 text-sm font-medium text-slate-800">
                           Instructions
                         </p>
-                        <pre className="text-sm text-slate-600 whitespace-pre-wrap font-sans">
+                        <pre className="whitespace-pre-wrap break-words font-sans text-base text-slate-600 md:text-sm">
                           {recipe.instructions}
                         </pre>
                       </div>
                     )}
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
                       <button
                         type="button"
                         onClick={() => handleSaveSuggestion(recipe, index)}
                         disabled={savingIndex === index || isSaved}
-                        className="rounded-lg bg-slate-900 text-white px-3 py-1.5 text-sm font-medium hover:bg-slate-800 disabled:opacity-60"
+                        className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-base font-medium text-white hover:bg-slate-800 disabled:opacity-60 sm:w-auto sm:text-sm"
                       >
                         {savingIndex === index
                           ? "Saving..."
@@ -939,7 +996,7 @@ export default function Pantry() {
                       {isSaved && (
                         <Link
                           to="/recipes"
-                          className="text-sm font-medium text-slate-700 hover:text-slate-900"
+                          className="inline-flex min-h-11 items-center justify-center px-1 text-base font-medium text-slate-700 hover:text-slate-900 sm:text-sm"
                         >
                           View in Recipes
                         </Link>
@@ -949,8 +1006,8 @@ export default function Pantry() {
                       <p
                         className={
                           noteIsWarning
-                            ? "text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2"
-                            : "text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2"
+                            ? "break-words rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-sm text-amber-700"
+                            : "break-words rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
                         }
                       >
                         {note}

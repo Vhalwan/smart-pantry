@@ -81,6 +81,7 @@ Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete
 - Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching. Unit mismatches skip linking too (no conversion)
 - Cook this does not convert units and does not delete pantry rows that hit 0 while they are still on a recipe. The Cooked lock is UI-only for that page visit; the API still accepts another cook after remount.
 - Avoiding already-saved recipes is by name only (not ingredients or “similar dish” detection)
+- Phone layout is done for Pantry and suggestion cards (stacked list, tappable controls). Recipes and Meal Plans have not had that pass yet.
 
 ## Doc history
 
@@ -96,3 +97,4 @@ Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete
 - 15 Aug 2026: Pantry list sorts expired / expiring-soon to the top (client-side). Save matching adds simple last-word singular/plural.
 - 16 Aug 2026: Cook this on saved recipes (subtract by id, clamp 0, keep linked rows, honest skip/short notes). Save matching requires matching units. No cook on suggestions or meal plans.
 - 17 Aug 2026: Cook this locks after a subtract (Cooked + View pantry). Quantity-0 pantry rows note they were left by cook because they are still linked.
+- 18 Aug 2026: Pantry and suggestion cards usable on a phone-sized screen (layout only). Recipes / Meal Plans phone layout still open.

@@ -27,7 +27,7 @@ One thing to know about the live site: the backend runs on a free hosting plan, 
 
 ## Your pantry
 
-On the Pantry page, add what you have: a name, how much, and the unit (for example flour, 2, cup). Category and expiry date are optional. Items show up in your list with those fields when you set them. The unit field offers common choices (cup, g, lbs, and so on). Use a unit you will stick with — Save recipe and Cook this skip an ingredient when the recipe says cup and the pantry says lbs.
+On the Pantry page, add what you have: a name, how much, and the unit (for example flour, 2, cup). Category and expiry date are optional. Items show up in your list with those fields when you set them. On a phone, the list stacks as cards instead of a wide table, and the main buttons (add, quantity − / +, delete, suggest, save) are sized for tapping. The unit field offers common choices (cup, g, lbs, and so on). Use a unit you will stick with — Save recipe and Cook this skip an ingredient when the recipe says cup and the pantry says lbs.
 
 If you set an expiry date, the list may show a small note next to it: Expired when the date is in the past, or Expiring soon when it falls within the next three days (including today). Items without an expiry date look the same as before. Expired items sit at the top of the list, then expiring-soon, then everything else (soonest date first within those groups).
 
@@ -54,7 +54,7 @@ On each saved recipe card, if there are instructions, use View instructions to e
 
 ### Save an AI suggestion
 
-On a suggestion card, click Save recipe. The app matches ingredient names to your pantry (ignoring capitalization and extra spaces, and simple singular/plural on the last word — tomato and tomatoes, berry and berries) and creates a normal recipe you can find under Recipes. The unit has to match too (cup and lbs do not count as the same; the app does not convert). After a successful save, the button stays on Saved and you can open View in Recipes. Clicking Save again on that card does nothing until you run Suggest recipes again.
+On a suggestion card, tap Save recipe (full-width on a phone). The app matches ingredient names to your pantry (ignoring capitalization and extra spaces, and simple singular/plural on the last word — tomato and tomatoes, berry and berries) and creates a normal recipe you can find under Recipes. The unit has to match too (cup and lbs do not count as the same; the app does not convert). After a successful save, the button stays on Saved and you can open View in Recipes. Clicking Save again on that card does nothing until you run Suggest recipes again.
 
 If some names do not match, or the name matches but the unit does not, the recipe still saves with the linked ones and you get a note — for example Saved, but skipped rice (suggestion: cup, pantry: lbs), plus a reminder to use the same unit on the pantry item if you want it linked next time. If nothing can be linked, the recipe is not saved and you get a clear note instead.
 
@@ -117,3 +117,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 15 Aug 2026: Pantry list puts expired items first, then expiring soon. Save from a suggestion also matches simple singular/plural on the last word.
 - 16 Aug 2026: Cook this on saved recipes (pantry amounts go down; short or skipped lines are named). Save also skips when units do not match, with a next-step note. Meal plans still do not cook.
 - 17 Aug 2026: Cook this stays Cooked after a subtract, with View pantry. Pantry rows at 0 after cooking explain they are still on a recipe.
+- 18 Aug 2026: Pantry list and suggestion cards work on a phone (stacked cards, larger tap targets). Recipes and Meal Plans are unchanged.

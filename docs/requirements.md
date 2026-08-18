@@ -73,3 +73,4 @@ These are intentionally out for now:
 | 15 Aug 2026 | FR-14: pantry list sorts expired, then expiring soon, to the top. FR-9: simple last-word singular/plural on save. FR-16 still open. |
 | 16 Aug 2026 | FR-16 shipped: Cook this on saved recipes (subtract, clamp 0, keep linked rows, honest gaps). FR-9/FR-10: unit must match to link; skip note includes a next step. |
 | 17 Aug 2026 | FR-16: Cook this locks after a subtract (Cooked + View pantry); pantry quantity-0 rows explain the cook leftover. |
+| 18 Aug 2026 | UX only: Pantry list and suggestion cards usable on a phone (stacked cards, larger tap targets). No new FR. Recipes / Meal Plans layout not in this pass. |
