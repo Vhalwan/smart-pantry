@@ -22,6 +22,16 @@ const NEAR_EXPIRY_DAYS = 3;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const EMPTY_PANTRY_SUGGEST_MESSAGE =
   "Add a few ingredients to get suggestions.";
+const SUGGEST_SLOW_MS = 3000;
+const SUGGEST_LOADING_MESSAGE = "Generating suggestions…";
+const SUGGEST_WAKING_MESSAGE =
+  "The recipe service is waking up. This can take a few seconds.";
+const SUGGEST_FAIL_MESSAGE =
+  "Couldn't get recipe ideas right now. Try again in a moment.";
+const SUGGEST_TIMEOUT_MESSAGE =
+  "Recipe ideas are taking too long. The service may be waking up — try again in a moment.";
+const SUGGEST_NETWORK_MESSAGE =
+  "Couldn't reach the recipe service. Check your connection and try again.";
 
 function normalizeName(value) {
   return (value ?? "").trim().toLowerCase().replace(/\s+/g, " ");
@@ -140,6 +150,26 @@ const COMMON_UNITS = ["g", "kg", "ml", "cup", "tbsp", "tsp", "pcs", "lb", "oz"];
 function apiErrorMessage(err, fallback) {
   const detail = err?.response?.data?.detail;
   return typeof detail === "string" ? detail : fallback;
+}
+
+function isEmptyPantrySuggestError(err) {
+  const detail = err?.response?.data?.detail;
+  return (
+    err?.response?.status === 400 &&
+    typeof detail === "string" &&
+    (/no ingredients/i.test(detail) || /add a few ingredients/i.test(detail))
+  );
+}
+
+/** Plain-language copy only — never status codes or API/Gemini detail. */
+function suggestFailureMessage(err) {
+  if (err?.code === "ECONNABORTED") {
+    return SUGGEST_TIMEOUT_MESSAGE;
+  }
+  if (!err?.response) {
+    return SUGGEST_NETWORK_MESSAGE;
+  }
+  return SUGGEST_FAIL_MESSAGE;
 }
 
 /** Parse YYYY-MM-DD (or ISO datetime prefix) as a local calendar date. */
@@ -349,6 +379,7 @@ export default function Pantry() {
   const [submitting, setSubmitting] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [suggesting, setSuggesting] = useState(false);
+  const [suggestSlow, setSuggestSlow] = useState(false);
   const [suggestError, setSuggestError] = useState("");
   const [suggestNote, setSuggestNote] = useState("");
   const [savingIndex, setSavingIndex] = useState(null);
@@ -379,6 +410,15 @@ export default function Pantry() {
     loadIngredients();
     flushOverduePendingRemovals();
   }, []);
+
+  useEffect(() => {
+    if (!suggesting) {
+      setSuggestSlow(false);
+      return undefined;
+    }
+    const timerId = setTimeout(() => setSuggestSlow(true), SUGGEST_SLOW_MS);
+    return () => clearTimeout(timerId);
+  }, [suggesting]);
 
   // Cosmetic toast dismiss only — must NOT cancel any pending DELETE.
   // When undoToast changes (A → B), React clears A's dismiss timer; B gets
@@ -559,18 +599,10 @@ export default function Pantry() {
         );
       }
     } catch (err) {
-      const detail = err.response?.data?.detail;
-      const isEmptyPantry =
-        err.response?.status === 400 &&
-        typeof detail === "string" &&
-        (/no ingredients/i.test(detail) ||
-          /add a few ingredients/i.test(detail));
-      if (isEmptyPantry) {
+      if (isEmptyPantrySuggestError(err)) {
         setSuggestNote(EMPTY_PANTRY_SUGGEST_MESSAGE);
       } else {
-        setSuggestError(
-          typeof detail === "string" ? detail : "Failed to get recipe suggestions."
-        );
+        setSuggestError(suggestFailureMessage(err));
       }
     } finally {
       setSuggesting(false);
@@ -916,10 +948,17 @@ export default function Pantry() {
           )}
         </section>
 
-        {suggestError && (
-          <p className="break-words rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600">
-            {suggestError}
-          </p>
+        {suggestError && !suggesting && (
+          <div className="flex flex-col gap-3 rounded-lg border border-red-100 bg-red-50 px-3 py-3 text-sm text-red-600 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <p className="min-w-0 break-words">{suggestError}</p>
+            <button
+              type="button"
+              onClick={handleSuggest}
+              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-base font-medium text-white hover:bg-slate-800 sm:w-auto sm:text-sm"
+            >
+              Try again
+            </button>
+          </div>
         )}
 
         {suggestNote && !suggesting && (
@@ -934,7 +973,9 @@ export default function Pantry() {
               Recipe suggestions
             </h2>
             {suggesting ? (
-              <p className="text-sm text-slate-500">Generating suggestions…</p>
+              <p className="break-words rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                {suggestSlow ? SUGGEST_WAKING_MESSAGE : SUGGEST_LOADING_MESSAGE}
+              </p>
             ) : (
               <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-3">
                 {suggestions.map((recipe, index) => {

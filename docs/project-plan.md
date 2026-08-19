@@ -41,10 +41,11 @@ Already working:
 - Manual recipes and meal plans
 - Live site (frontend on Vercel, API on Render)
 - Pantry page and suggestion cards usable on a phone (stacked list, tappable controls; 18 Aug)
+- Suggest recipes: waking-up note on a slow call; plain-language error + Try again on failure (19 Aug)
 
 Still open:
 
-- Rest of ship-week polish (clearer API/AI errors, Recipes/Meal Plans phone layout, docs/README check) — checkpoint Sunday 6 September
+- Rest of ship-week polish (Recipes/Meal Plans phone layout, docs/README check, live done-checklist) — checkpoint Sunday 6 September
 
 Category and expiry are collected and shown. Rows with an expiry date show a calm Expired or Expiring soon label when the date is past or within the next 3 days, and those rows sit at the top of the list. Suggestions tag those same items in the Gemini prompt and bias toward using them when it is reasonable. An empty pantry shows a helper instead of calling the model. Hitting quantity 0 on the pantry stepper removes the item after a short Undo window, unless the item is still used in a recipe — then it comes back with a named-recipe message. Cook this is different: it lowers quantities in one action and leaves a linked item at 0 instead of deleting it. After a subtract, Cook this stays Cooked on that card (with View pantry) so a second tap does not empty the list; leave and come back to cook it again. Pantry rows sitting at 0 after cook show they are still on a recipe. Save-from-suggestion matching covers simple last-word singular/plural as well as case, spaces, and the same unit (cup vs lbs is skipped, with a next step).
 
@@ -118,7 +119,7 @@ Done when: you do not have to delete every ingredient by hand after dinner.
 Ship what you meant to build. This is not another feature week.
 
 - [x] Pantry and suggestion cards readable on a phone, with clear main actions (18 Aug) — stacked ingredient cards below `md`; larger tap targets; Undo toast inset. Recipes / Meal Plans not in this pass.
-- [ ] Clearer errors when the API is waking up or the AI call fails, plus a way to try again
+- [x] Clearer errors when the API is waking up or the AI call fails, plus a way to try again (19 Aug) — delayed waking-up note; mapped errors; Try again; 90s timeout; no silent retry
 - [ ] Clear next steps when the pantry is empty or a save skips ingredients
 - [ ] Leave meal plans alone unless a small bug blocks basic use
 - [ ] Bring the user guide (and other docs if behavior changed) in line with what shipped
@@ -179,3 +180,4 @@ Spend a few minutes each Sunday:
 - 16 Aug 2026: Week 4 cook-and-update (checkpoint still 30 Aug). Cook this on saved recipe cards; `POST /recipes/{id}/cook` subtracts by ingredient id, clamps at 0, keeps linked rows; skip/short notes; no cook on suggestions or meal plans. Save matching also requires the same unit (case/trim) or that line is skipped with a next-step note. Add-ingredient unit hints; add-recipe prefills pantry unit.
 - 17 Aug 2026: Week 4 close — Cook this locks to Cooked after a subtract (retry stays available if every line was skipped); View pantry after cook; pantry quantity-0 rows note that Cook this left them because they are still on a recipe.
 - 18 Aug 2026: Ship-week start — Pantry + suggestion-card phone layout only (no behavior/API change). Remaining ship items: API/AI errors, Recipes/Meal Plans layout, docs/README, live done-checklist.
+- 19 Aug 2026: Ship-week item 2 — Suggest loading/error UI (waking-up note, mapped copy, Try again, 90s timeout). No silent retry; Gemini/cook logic unchanged. Remaining: Recipes/Meal Plans layout, README v1 note, live done-checklist.

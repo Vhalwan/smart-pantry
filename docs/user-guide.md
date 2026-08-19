@@ -42,7 +42,7 @@ If that item is still used in a saved recipe, it cannot be deleted yet. You will
 1. On the Pantry page, click Suggest recipes.
 2. The app looks at what you currently have and returns a few ideas. Each one usually includes a name, short description, prep time, ingredients with amounts, and steps. If something is expired or expiring within the next three days, the ideas tend to use those items when they reasonably can. Suggestions are aimed at a rushed cook with a possibly thin pantry: shorter prep when it makes sense, simple steps, mostly what you already listed, and a note in the recipe if something extra is still needed.
 3. If the ideas are thin, try adding a couple of staples. Suggestions only know about what is in your pantry right now. A very short list can still return a simple idea (or an honest note that there is not much to work with). If the pantry is empty, Suggest recipes stays disabled and you will see “Add a few ingredients to get suggestions.” The app also tries not to repeat recipes you already saved (by name). If everything it comes back with is already under Recipes, you will see a short note instead of duplicate cards.
-4. If something goes wrong, you should see an error on the page. The rest of the app should still work.
+4. While it thinks, you will see “Generating suggestions…”. If that sits for a few seconds (often the first try after the live site has been idle), it changes to a note that the recipe service is waking up and can take a few seconds. If it still fails, you get a short error and a Try again button — tap that to run the same request. The rest of the pantry still works.
 
 ## Saving recipes
 
@@ -75,7 +75,7 @@ Open Meal Plans from the navigation. Pick a saved recipe, a date, and breakfast,
 ## Troubleshooting
 
 **Suggest recipes fails or returns nothing**
-If the pantry is empty, add at least one ingredient — the button stays off until then. On the live app, wait for the backend to wake up if it was idle. If you run locally, check that the Gemini API key is set (see the technical doc).
+If the pantry is empty, add at least one ingredient — the button stays off until then. If you see a waking-up note, wait; that is the live backend starting up, not a broken page. If you get an error, tap Try again (or Suggest recipes again). If you run locally, check that the Gemini API key is set (see the technical doc).
 
 **Login fails**
 Check the email and password. Email is matched the way it was stored when you registered.
@@ -93,7 +93,7 @@ If you see a message about a meal plan, open Meal Plans, remove that recipe from
 If you see a message that it is used in a recipe, open Recipes, take that ingredient off those recipes, then try deleting again.
 
 **The page hangs on the first request**
-On the live app, give it 30 to 60 seconds and try again. Locally, confirm Docker is running and the frontend can reach the API.
+On the live app, give it 30 to 60 seconds. Suggest recipes will say the service is waking up, then show Try again if it still cannot finish. Locally, confirm Docker is running and the frontend can reach the API.
 
 ## FAQ
 
@@ -118,3 +118,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 16 Aug 2026: Cook this on saved recipes (pantry amounts go down; short or skipped lines are named). Save also skips when units do not match, with a next-step note. Meal plans still do not cook.
 - 17 Aug 2026: Cook this stays Cooked after a subtract, with View pantry. Pantry rows at 0 after cooking explain they are still on a recipe.
 - 18 Aug 2026: Pantry list and suggestion cards work on a phone (stacked cards, larger tap targets). Recipes and Meal Plans are unchanged.
+- 19 Aug 2026: Suggest recipes — waking-up note if it is slow; error plus Try again if it fails. Empty pantry helper unchanged.

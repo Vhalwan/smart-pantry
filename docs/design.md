@@ -43,8 +43,8 @@ If a user account is deleted, their pantry, recipes, and meal plans go with it.
 2. The website skips the request when the pantry is empty (helper message). If the API is called anyway with an empty pantry, it refuses.
 3. The API asks Gemini for a small set of recipes in a fixed JSON shape (name, description, instructions, prep time, ingredients used).
 4. The API cleans and parses the response, then sends it to the website.
-5. The website shows each suggestion as a card.
-6. If the AI key is missing, the call fails, or the response is garbage, the API returns an error and the UI shows a message instead of crashing.
+5. The website shows each suggestion as a card. While waiting, it shows “Generating suggestions…”. After a few seconds with no response, that note switches to “The recipe service is waking up. This can take a few seconds.” (cold start on the live API, or a slow Gemini call).
+6. If the AI key is missing, the call fails, times out, or the response is garbage, the API returns an error (or the website gives up after ~90 seconds). The UI shows a plain-language message and a Try again button — not raw API text or status codes. Retry is only when the user taps Try again (or Suggest recipes again); there is no silent auto-retry. Empty pantry stays the helper note, not that error path.
 
 The prompt tags pantry items that are expired or expiring within 3 days (same window as the pantry badge) and asks Gemini to prefer those when it reasonably can. It also favors shorter prep, simple steps, mostly on-hand ingredients, and honesty about missing items. A fully empty pantry never calls Gemini: the website disables Suggest recipes and shows “Add a few ingredients to get suggestions.” The API still refuses an empty pantry if called anyway. A very thin pantry (1–2 items) still generates, with an extra prompt note to keep ideas simple and honest.
 
@@ -70,7 +70,7 @@ Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete
 
 ## Known limits (today)
 
-- No automatic retries yet when Gemini fails
+- No silent auto-retry when Gemini or the API fails; the user taps Try again (same request, same page)
 - Recipe and meal-plan lists are not paginated (fine at current size); ingredients support skip/limit
 - Name matching is case/space normalized, plus simple last-word singular/plural, not fuzzy or substring
 - Pantry list order is client-side: expired, then expiring soon (soonest date first), then the rest in API order
@@ -98,3 +98,4 @@ Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete
 - 16 Aug 2026: Cook this on saved recipes (subtract by id, clamp 0, keep linked rows, honest skip/short notes). Save matching requires matching units. No cook on suggestions or meal plans.
 - 17 Aug 2026: Cook this locks after a subtract (Cooked + View pantry). Quantity-0 pantry rows note they were left by cook because they are still linked.
 - 18 Aug 2026: Pantry and suggestion cards usable on a phone-sized screen (layout only). Recipes / Meal Plans phone layout still open.
+- 19 Aug 2026: Suggest loading/error UI: waking-up note after a few seconds; plain-language failure + Try again (primary button). No auto-retry; suggestion logic unchanged.
