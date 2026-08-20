@@ -113,11 +113,14 @@ function describeUnitSkip(item) {
 function saveNoteFromMatch({ unmatched, unitMismatches, saved }) {
   const unitHint =
     "Use the same unit on the pantry item as the suggestion if you want it linked next time.";
+  const nameHint =
+    "Rename the pantry item to match the suggestion, or add the missing item, then save again.";
 
   if (!saved) {
     const parts = ["Nothing matched your pantry, so this wasn't saved."];
     if (unmatched.length > 0) {
       parts.push(`No name match: ${unmatched.join(", ")}.`);
+      parts.push(nameHint);
     }
     if (unitMismatches.length > 0) {
       parts.push(`Skipped ${unitMismatches.map(describeUnitSkip).join(", ")}.`);
@@ -138,6 +141,9 @@ function saveNoteFromMatch({ unmatched, unitMismatches, saved }) {
     clauses.push(`skipped ${unitMismatches.map(describeUnitSkip).join(", ")}`);
   }
   let text = `Saved, but ${clauses.join("; ")}.`;
+  if (unmatched.length > 0) {
+    text += ` ${nameHint}`;
+  }
   if (unitMismatches.length > 0) {
     text += ` ${unitHint}`;
   }
