@@ -46,7 +46,7 @@ If a user account is deleted, their pantry, recipes, and meal plans go with it.
 5. The website shows each suggestion as a card. While waiting, it shows “Generating suggestions…”. After a few seconds with no response, that note switches to “The recipe service is waking up. This can take a few seconds.” (cold start on the live API, or a slow Gemini call).
 6. If the AI key is missing, the call fails, times out, or the response is garbage, the API returns an error (or the website gives up after ~90 seconds). The UI shows a plain-language message and a Try again button — not raw API text or status codes. Retry is only when the user taps Try again (or Suggest recipes again); there is no silent auto-retry. Empty pantry stays the helper note, not that error path.
 
-The prompt tags pantry items that are expired or expiring within 3 days (same window as the pantry badge) and asks Gemini to prefer those when it reasonably can. It also favors shorter prep, simple steps, mostly on-hand ingredients, and honesty about missing items. A fully empty pantry never calls Gemini: the website disables Suggest recipes and shows “Add a few ingredients to get suggestions.” The API still refuses an empty pantry if called anyway. A very thin pantry (1–2 items) still generates, with an extra prompt note to keep ideas simple and honest.
+The prompt tags pantry items that are expired or expiring within 3 days (same window as the pantry badge) and asks Gemini to prefer those when it reasonably can. It also favors shorter prep, simple steps, mostly on-hand ingredients, and honesty about missing items. A fully empty pantry never calls Gemini: the website shows a first-use note (add a few ingredients, then Suggest recipes), disables Suggest recipes, and shows “Add a few ingredients to get suggestions.” The API still refuses an empty pantry if called anyway. A very thin pantry (1–2 items) still generates, with an extra prompt note to keep ideas simple and honest.
 
 ## Saving a suggestion: matching by name
 
@@ -56,7 +56,7 @@ So when you save a suggestion as a recipe, the app matches each suggested name t
 
 When asking for suggestions, the API also lists the user’s already-saved recipe names and asks Gemini to avoid the same (or near-identical) dishes. The website may hide any leftover exact name matches and explain if the run was all duplicates.
 
-Manual recipe creation already picks pantry items directly, so it does not need this name step. The add form fills the unit from the pantry item so Cook this can subtract later.
+Manual recipe creation already picks pantry items directly, so it does not need this name step. The add form fills the unit from the pantry item (canonical spelling from the shared common-unit list) so Cook this can subtract later. Pantry and recipe unit fields are required selects of those common measures; free-text nonsense is not allowed on new rows.
 
 ## Cooking a saved recipe
 
@@ -99,3 +99,4 @@ Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete
 - 17 Aug 2026: Cook this locks after a subtract (Cooked + View pantry). Quantity-0 pantry rows note they were left by cook because they are still linked.
 - 18 Aug 2026: Pantry and suggestion cards usable on a phone-sized screen (layout only). Recipes / Meal Plans phone layout still open.
 - 19 Aug 2026: Suggest loading/error UI: waking-up note after a few seconds; plain-language failure + Try again (primary button). No auto-retry; suggestion logic unchanged.
+- 21 Aug 2026: Empty pantry first-use note on the Pantry page (add, then Suggest). Save skip notes already included a next step. Unit fields are required selects of common kitchen measures (`frontend/src/units.js`).

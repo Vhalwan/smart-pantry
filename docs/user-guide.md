@@ -21,13 +21,13 @@ You do not need to open the backend URL yourself. The website talks to it for yo
 
 1. Open the live app (or run it on your computer using the steps in the technical doc).
 2. Create an account with an email and password.
-3. Log in. You should land on your Pantry page.
+3. Log in. You should land on your Pantry page. If the list is empty, you will see a short note: add a few ingredients (name, how much, and a unit), then tap Suggest recipes.
 
 One thing to know about the live site: the backend runs on a free hosting plan, so it sometimes sleeps. The first request after a quiet stretch can take half a minute or so. That is normal.
 
 ## Your pantry
 
-On the Pantry page, add what you have: a name, how much, and the unit (for example flour, 2, cup). Category and expiry date are optional. Items show up in your list with those fields when you set them. On a phone, the list stacks as cards instead of a wide table, and the main buttons (add, quantity − / +, delete, suggest, save) are sized for tapping. The unit field offers common choices (cup, g, lbs, and so on). Use a unit you will stick with — Save recipe and Cook this skip an ingredient when the recipe says cup and the pantry says lbs.
+On the Pantry page, add what you have: a name, how much, and a unit from the list (for example flour, 2, cup). Category and expiry date are optional. Items show up in your list with those fields when you set them. On a phone, the list stacks as cards instead of a wide table, and the main buttons (add, quantity − / +, delete, suggest, save) are sized for tapping. Unit is a required choice from common kitchen measures (g, ml, cup, tbsp, pcs, can, and so on) — not free text.
 
 If you set an expiry date, the list may show a small note next to it: Expired when the date is in the past, or Expiring soon when it falls within the next three days (including today). Items without an expiry date look the same as before. Expired items sit at the top of the list, then expiring-soon, then everything else (soonest date first within those groups).
 
@@ -41,7 +41,7 @@ If that item is still used in a saved recipe, it cannot be deleted yet. You will
 
 1. On the Pantry page, click Suggest recipes.
 2. The app looks at what you currently have and returns a few ideas. Each one usually includes a name, short description, prep time, ingredients with amounts, and steps. If something is expired or expiring within the next three days, the ideas tend to use those items when they reasonably can. Suggestions are aimed at a rushed cook with a possibly thin pantry: shorter prep when it makes sense, simple steps, mostly what you already listed, and a note in the recipe if something extra is still needed.
-3. If the ideas are thin, try adding a couple of staples. Suggestions only know about what is in your pantry right now. A very short list can still return a simple idea (or an honest note that there is not much to work with). If the pantry is empty, Suggest recipes stays disabled and you will see “Add a few ingredients to get suggestions.” The app also tries not to repeat recipes you already saved (by name). If everything it comes back with is already under Recipes, you will see a short note instead of duplicate cards.
+3. If the ideas are thin, try adding a couple of staples. Suggestions only know about what is in your pantry right now. A very short list can still return a simple idea (or an honest note that there is not much to work with). If the pantry is empty, Suggest recipes stays disabled. You will see a first-use note on the page (add a few ingredients, then Suggest) and “Add a few ingredients to get suggestions.” next to the button. The app also tries not to repeat recipes you already saved (by name). If everything it comes back with is already under Recipes, you will see a short note instead of duplicate cards.
 4. While it thinks, you will see “Generating suggestions…”. If that sits for a few seconds (often the first try after the live site has been idle), it changes to a note that the recipe service is waking up and can take a few seconds. If it still fails, you get a short error and a Try again button — tap that to run the same request. The rest of the pantry still works.
 
 ## Saving recipes
@@ -119,3 +119,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 17 Aug 2026: Cook this stays Cooked after a subtract, with View pantry. Pantry rows at 0 after cooking explain they are still on a recipe.
 - 18 Aug 2026: Pantry list and suggestion cards work on a phone (stacked cards, larger tap targets). Recipes and Meal Plans are unchanged.
 - 19 Aug 2026: Suggest recipes — waking-up note if it is slow; error plus Try again if it fails. Empty pantry helper unchanged.
+- 21 Aug 2026: Empty pantry first-use note — add a few ingredients, then Suggest recipes. Save skip notes already said what to do next. Unit on add is a required select of common kitchen measures (same list on Recipes).

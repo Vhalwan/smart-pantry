@@ -16,12 +16,15 @@ import {
 import { createRecipe, getRecipes } from "../api/recipes";
 import { getSuggestions } from "../api/suggestions";
 import { useAuth } from "../context/AuthContext";
+import { COMMON_UNITS } from "../units";
 
 const UNDO_TOAST_MS = 5000;
 const NEAR_EXPIRY_DAYS = 3;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const EMPTY_PANTRY_SUGGEST_MESSAGE =
   "Add a few ingredients to get suggestions.";
+const EMPTY_PANTRY_NEXT_STEP =
+  "Your pantry is empty. Add a few ingredients below (name, how much, and a unit). Then tap Suggest recipes for ideas from what you have.";
 const SUGGEST_SLOW_MS = 3000;
 const SUGGEST_LOADING_MESSAGE = "Generating suggestions…";
 const SUGGEST_WAKING_MESSAGE =
@@ -149,9 +152,6 @@ function saveNoteFromMatch({ unmatched, unitMismatches, saved }) {
   }
   return text;
 }
-
-const UNIT_DATALIST_ID = "pantry-unit-suggestions";
-const COMMON_UNITS = ["g", "kg", "ml", "cup", "tbsp", "tsp", "pcs", "lb", "oz"];
 
 function apiErrorMessage(err, fallback) {
   const detail = err?.response?.data?.detail;
@@ -733,6 +733,11 @@ export default function Pantry() {
       </header>
 
       <main className={`mx-auto max-w-5xl min-w-0 space-y-6 px-4 py-6 sm:py-8 ${undoToast ? "pb-28" : ""}`}>
+        {!loading && ingredients.length === 0 && (
+          <p className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+            {EMPTY_PANTRY_NEXT_STEP}
+          </p>
+        )}
         <div className="flex flex-col items-stretch gap-2 sm:items-end">
           <button
             type="button"
@@ -775,20 +780,19 @@ export default function Pantry() {
               onChange={(e) => setQuantity(e.target.value)}
               className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
             />
-            <input
-              type="text"
+            <select
               required
-              list={UNIT_DATALIST_ID}
-              placeholder="Unit (g, ml, cup)"
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
               className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
-            />
-            <datalist id={UNIT_DATALIST_ID}>
+            >
+              <option value="">Select unit</option>
               {COMMON_UNITS.map((option) => (
-                <option key={option} value={option} />
+                <option key={option} value={option}>
+                  {option}
+                </option>
               ))}
-            </datalist>
+            </select>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -816,10 +820,6 @@ export default function Pantry() {
               {submitting ? "Adding…" : "Add"}
             </button>
           </form>
-          <p className="mt-3 text-sm text-slate-500">
-            Pick a unit you will stick with. Save and Cook this skip an item when
-            the recipe says cup and the pantry says lbs — they have to match.
-          </p>
         </section>
 
         {error && (
@@ -837,7 +837,7 @@ export default function Pantry() {
             <p className="px-4 py-8 text-sm text-slate-500 sm:px-6">Loading…</p>
           ) : ingredients.length === 0 ? (
             <p className="px-4 py-8 text-sm text-slate-500 sm:px-6">
-              No ingredients yet. Add one above.
+              Nothing listed yet. Use Add ingredient above, then Suggest recipes.
             </p>
           ) : (
             <>

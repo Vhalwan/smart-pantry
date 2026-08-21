@@ -3,15 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { getIngredients } from "../api/ingredients";
 import { cookRecipe, createRecipe, deleteRecipe, getRecipes } from "../api/recipes";
 import { useAuth } from "../context/AuthContext";
+import { canonicalUnit, unitSelectOptions } from "../units";
 
 const emptyIngredientLine = () => ({
   ingredient_id: "",
   quantity: "",
   unit: "",
 });
-
-const RECIPE_UNIT_DATALIST_ID = "recipe-unit-suggestions";
-const COMMON_UNITS = ["g", "kg", "ml", "cup", "tbsp", "tsp", "pcs", "lb", "oz"];
 
 function formatQuantity(value) {
   const n = Number(value);
@@ -226,7 +224,7 @@ export default function Recipes() {
             (item) => String(item.id) === String(value),
           );
           if (pantryItem?.unit) {
-            next.unit = pantryItem.unit;
+            next.unit = canonicalUnit(pantryItem.unit);
           }
         }
         return next;
@@ -462,17 +460,21 @@ export default function Recipes() {
                     }
                     className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
                   />
-                  <input
-                    type="text"
+                  <select
                     required
-                    list={RECIPE_UNIT_DATALIST_ID}
-                    placeholder="Unit"
                     value={line.unit}
                     onChange={(e) =>
                       updateIngredientLine(index, "unit", e.target.value)
                     }
                     className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                  />
+                  >
+                    <option value="">Select unit</option>
+                    {unitSelectOptions(line.unit).map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
                   <button
                     type="button"
                     onClick={() => removeIngredientLine(index)}
@@ -490,11 +492,6 @@ export default function Recipes() {
               >
                 Add another ingredient line
               </button>
-              <datalist id={RECIPE_UNIT_DATALIST_ID}>
-                {COMMON_UNITS.map((option) => (
-                  <option key={option} value={option} />
-                ))}
-              </datalist>
             </div>
 
             <button

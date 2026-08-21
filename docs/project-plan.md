@@ -42,6 +42,7 @@ Already working:
 - Live site (frontend on Vercel, API on Render)
 - Pantry page and suggestion cards usable on a phone (stacked list, tappable controls; 18 Aug)
 - Suggest recipes: waking-up note on a slow call; plain-language error + Try again on failure (19 Aug)
+- Empty pantry first-use: add a few ingredients, then Suggest (21 Aug)
 
 Still open:
 
@@ -120,7 +121,7 @@ Ship what you meant to build. This is not another feature week.
 
 - [x] Pantry and suggestion cards readable on a phone, with clear main actions (18 Aug) — stacked ingredient cards below `md`; larger tap targets; Undo toast inset. Recipes / Meal Plans not in this pass.
 - [x] Clearer errors when the API is waking up or the AI call fails, plus a way to try again (19 Aug) — delayed waking-up note; mapped errors; Try again; 90s timeout; no silent retry
-- [ ] Clear next steps when the pantry is empty or a save skips ingredients
+- [x] Clear next steps when the pantry is empty or a save skips ingredients (21 Aug) — first-use add-then-Suggest note; save skip notes already named the next step (16 Aug)
 - [ ] Leave meal plans alone unless a small bug blocks basic use
 - [ ] Bring the user guide (and other docs if behavior changed) in line with what shipped
 - [ ] Run the “done” checklist below on the live app; fix blockers only
@@ -181,3 +182,4 @@ Spend a few minutes each Sunday:
 - 17 Aug 2026: Week 4 close — Cook this locks to Cooked after a subtract (retry stays available if every line was skipped); View pantry after cook; pantry quantity-0 rows note that Cook this left them because they are still on a recipe.
 - 18 Aug 2026: Ship-week start — Pantry + suggestion-card phone layout only (no behavior/API change). Remaining ship items: API/AI errors, Recipes/Meal Plans layout, docs/README, live done-checklist.
 - 19 Aug 2026: Ship-week item 2 — Suggest loading/error UI (waking-up note, mapped copy, Try again, 90s timeout). No silent retry; Gemini/cook logic unchanged. Remaining: Recipes/Meal Plans layout, README v1 note, live done-checklist.
+- 21 Aug 2026: Ship-week — empty pantry first-use (add a few ingredients, then Suggest). Save skip next-steps were already in the UI. Unit add fields locked to a common-measure select (Pantry + Recipes). Remaining: Recipes/Meal Plans layout, docs/README check, live done-checklist.
