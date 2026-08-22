@@ -56,7 +56,7 @@ On each saved recipe card, if there are instructions, use View instructions to e
 
 On a suggestion card, tap Save recipe (full-width on a phone). The app matches ingredient names to your pantry (ignoring capitalization and extra spaces, and simple singular/plural on the last word — tomato and tomatoes, berry and berries) and creates a normal recipe you can find under Recipes. The unit has to match too (cup and lbs do not count as the same; the app does not convert). After a successful save, the button stays on Saved and you can open View in Recipes. Clicking Save again on that card does nothing until you run Suggest recipes again.
 
-If some names do not match, or the name matches but the unit does not, the recipe still saves with the linked ones and you get a note — for example Saved, but skipped rice (suggestion: cup, pantry: lbs), plus a reminder to use the same unit on the pantry item if you want it linked next time. If nothing can be linked, the recipe is not saved and you get a clear note instead.
+If some names do not match, or the name matches but the unit does not, the recipe still saves with the linked ones and you get a note — for example Saved, but skipped rice (suggestion: cup, pantry: lbs), plus a reminder to use the same unit on the pantry item if you want it linked next time. Simple spelling differences count as the same unit (cup / cups, tbsp / tablespoon, lb / lbs). The app does not convert different measures (cup to ml). If nothing can be linked, the recipe is not saved and you get a clear note instead.
 
 ## After you cook
 
@@ -70,7 +70,9 @@ If a recipe has no ingredient lines, Cook this stays off.
 
 ## Meal plans
 
-Open Meal Plans from the navigation. Pick a saved recipe, a date, and breakfast, lunch, or dinner. Add it, or remove entries when plans change. Meal plans are optional. You can get value from the app without using them. Planned meals do not warn you if a linked pantry ingredient is expired or expiring soon, and they do not have Cook this (cook from the recipe under Recipes after you actually make it).
+Open Meal Plans from the navigation. Pick a saved recipe, a date, and breakfast, lunch, or dinner. Add it, or remove entries when plans change. Meal plans are optional. You can get value from the app without using them.
+
+Plans for **today** show a short pantry check (Ready, Short on…, or missing / unit mismatch) and a Cook this button — the same pantry update as on Recipes. After a successful subtract, the button stays Cooked with a View pantry link. Future dates stay plans only (no cook), so a Thursday dinner does not empty the pantry on Monday. Planned meals still do not warn about expiry on linked ingredients.
 
 ## Troubleshooting
 
@@ -81,10 +83,10 @@ If the pantry is empty, add at least one ingredient — the button stays off unt
 Check the email and password. Email is matched the way it was stored when you registered.
 
 **A saved recipe is missing some ingredients**
-If you saved from a suggestion, check the skip note. Names have to match your pantry entries closely (case, spaces, and simple plurals on the last word). Units have to match too — rice in cup will not link to rice in lbs. Different words still skip — tomato will not match cherry tomatoes.
+If you saved from a suggestion, check the skip note. Names have to match your pantry entries closely (case, spaces, and simple plurals on the last word). Units have to match too — rice in cup will not link to rice in lbs — but cup and cups (or tbsp and tablespoon) count as the same. Different words still skip — tomato will not match cherry tomatoes.
 
 **Cook this skipped an ingredient**
-If the note says the recipe uses one unit and the pantry uses another, change the pantry unit to match (and the amount if needed), then cook again. The app does not convert cup to lbs.
+If the note says the recipe uses one unit and the pantry uses another, change the pantry unit to match (and the amount if needed), then cook again. The app does not convert cup to lbs. Spelling variants like cups / cup are already treated as the same.
 
 **Can't delete a recipe**
 If you see a message about a meal plan, open Meal Plans, remove that recipe from the plan, then try deleting again.
@@ -120,3 +122,5 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 18 Aug 2026: Pantry list and suggestion cards work on a phone (stacked cards, larger tap targets). Recipes and Meal Plans are unchanged.
 - 19 Aug 2026: Suggest recipes — waking-up note if it is slow; error plus Try again if it fails. Empty pantry helper unchanged.
 - 21 Aug 2026: Empty pantry first-use note — add a few ingredients, then Suggest recipes. Save skip notes already said what to do next. Unit on add is a required select of common kitchen measures (same list on Recipes).
+- 22 Aug 2026: Ship week closed; live happy-path checklist passed. User guide matches shipped behavior; no further feature changes for v1.
+- 22 Aug 2026 (later): Unit aliases (cup/cups, tbsp/tablespoon, etc.) on save and cook. Meal Plans: Ready / short / mismatch note and Cook this for today’s plans only.

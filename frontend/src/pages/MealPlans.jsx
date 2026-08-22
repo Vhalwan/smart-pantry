@@ -1,7 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getIngredients } from "../api/ingredients";
 import { createMealPlan, deleteMealPlan, getMealPlans } from "../api/mealPlans";
-import { getRecipes } from "../api/recipes";
+import { cookRecipe, getRecipes } from "../api/recipes";
+import {
+  assessCookReadiness,
+  cookNoteFromResult,
+  localTodayISO,
+} from "../cookHelpers";
 import { useAuth } from "../context/AuthContext";
 
 export default function MealPlans() {
@@ -9,22 +15,49 @@ export default function MealPlans() {
   const { logout } = useAuth();
   const [mealPlans, setMealPlans] = useState([]);
   const [recipes, setRecipes] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [recipeId, setRecipeId] = useState("");
   const [plannedDate, setPlannedDate] = useState("");
   const [mealType, setMealType] = useState("breakfast");
   const [submitting, setSubmitting] = useState(false);
+  const [cookingPlanId, setCookingPlanId] = useState(null);
+  const [cookedPlanIds, setCookedPlanIds] = useState(() => new Set());
+  const [cookNotes, setCookNotes] = useState({});
+
+  const today = localTodayISO();
+
+  const pantryById = useMemo(() => {
+    const map = new Map();
+    for (const item of ingredients) {
+      map.set(item.id, item);
+    }
+    return map;
+  }, [ingredients]);
+
+  const sortedPlans = useMemo(() => {
+    return [...mealPlans].sort((a, b) => {
+      const aToday = a.planned_date === today ? 0 : 1;
+      const bToday = b.planned_date === today ? 0 : 1;
+      if (aToday !== bToday) {
+        return aToday - bToday;
+      }
+      return String(a.planned_date).localeCompare(String(b.planned_date));
+    });
+  }, [mealPlans, today]);
 
   async function loadData() {
     setError("");
     try {
-      const [mealPlansData, recipesData] = await Promise.all([
+      const [mealPlansData, recipesData, ingredientsData] = await Promise.all([
         getMealPlans(),
         getRecipes(),
+        getIngredients(),
       ]);
       setMealPlans(mealPlansData);
       setRecipes(recipesData);
+      setIngredients(ingredientsData);
     } catch {
       setError("Failed to load meal plans.");
     } finally {
@@ -64,6 +97,44 @@ export default function MealPlans() {
       await loadData();
     } catch {
       setError("Failed to delete meal plan.");
+    }
+  }
+
+  async function handleCook(plan) {
+    const recipe = plan.recipe;
+    if (!recipe?.id) {
+      return;
+    }
+    setCookingPlanId(plan.id);
+    setError("");
+    setCookNotes((prev) => {
+      const next = { ...prev };
+      delete next[plan.id];
+      return next;
+    });
+    try {
+      const result = await cookRecipe(recipe.id);
+      const note = cookNoteFromResult(result);
+      setCookNotes((prev) => ({
+        ...prev,
+        [plan.id]: note,
+      }));
+      if (note.subtracted) {
+        setCookedPlanIds((prev) => new Set(prev).add(plan.id));
+      }
+      const ingredientsData = await getIngredients();
+      setIngredients(ingredientsData);
+    } catch {
+      setCookNotes((prev) => ({
+        ...prev,
+        [plan.id]: {
+          text: "Couldn't update the pantry. Try again.",
+          warning: true,
+          subtracted: false,
+        },
+      }));
+    } finally {
+      setCookingPlanId(null);
     }
   }
 
@@ -167,11 +238,15 @@ export default function MealPlans() {
         <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200">
             <h2 className="text-lg font-medium text-slate-900">Meal plans</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Plans for today show whether you can cook them and a Cook this
+              button. Future dates stay plans only.
+            </p>
           </div>
 
           {loading ? (
             <p className="px-6 py-8 text-slate-500 text-sm">Loading…</p>
-          ) : mealPlans.length === 0 ? (
+          ) : sortedPlans.length === 0 ? (
             <p className="px-6 py-8 text-slate-500 text-sm">
               No meal plans yet. Add one above.
             </p>
@@ -183,28 +258,100 @@ export default function MealPlans() {
                     <th className="px-6 py-3 font-medium">Date</th>
                     <th className="px-6 py-3 font-medium">Meal</th>
                     <th className="px-6 py-3 font-medium">Recipe</th>
+                    <th className="px-6 py-3 font-medium">Tonight</th>
                     <th className="px-6 py-3 font-medium"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {mealPlans.map((plan) => (
-                    <tr key={plan.id} className="text-slate-800">
-                      <td className="px-6 py-3">{plan.planned_date}</td>
-                      <td className="px-6 py-3 capitalize">{plan.meal_type}</td>
-                      <td className="px-6 py-3">
-                        {plan.recipe?.name ?? "—"}
-                      </td>
-                      <td className="px-6 py-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(plan.id)}
-                          className="text-red-600 hover:text-red-700 font-medium"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {sortedPlans.map((plan) => {
+                    const isToday = plan.planned_date === today;
+                    const readiness = isToday
+                      ? assessCookReadiness(plan.recipe, pantryById)
+                      : null;
+                    const cooked = cookedPlanIds.has(plan.id);
+                    const cookNote = cookNotes[plan.id];
+                    const cooking = cookingPlanId === plan.id;
+
+                    return (
+                      <tr key={plan.id} className="text-slate-800 align-top">
+                        <td className="px-6 py-3 whitespace-nowrap">
+                          {plan.planned_date}
+                          {isToday && (
+                            <span className="ml-2 text-xs font-medium text-slate-500">
+                              Today
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-3 capitalize">{plan.meal_type}</td>
+                        <td className="px-6 py-3">
+                          {plan.recipe?.name ?? "—"}
+                        </td>
+                        <td className="px-6 py-3 min-w-[12rem]">
+                          {isToday ? (
+                            <div className="space-y-2">
+                              <p
+                                className={
+                                  readiness?.status === "ready"
+                                    ? "text-slate-700"
+                                    : "text-amber-800"
+                                }
+                              >
+                                {readiness?.label}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                  type="button"
+                                  disabled={
+                                    cooking ||
+                                    cooked ||
+                                    readiness?.status === "empty"
+                                  }
+                                  onClick={() => handleCook(plan)}
+                                  className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60 min-h-11"
+                                >
+                                  {cooking
+                                    ? "Cooking…"
+                                    : cooked
+                                      ? "Cooked"
+                                      : "Cook this"}
+                                </button>
+                                {cooked && (
+                                  <Link
+                                    to="/pantry"
+                                    className="text-sm font-medium text-slate-700 hover:text-slate-900"
+                                  >
+                                    View pantry
+                                  </Link>
+                                )}
+                              </div>
+                              {cookNote && (
+                                <p
+                                  className={
+                                    cookNote.warning
+                                      ? "text-sm text-amber-800"
+                                      : "text-sm text-slate-600"
+                                  }
+                                >
+                                  {cookNote.text}
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400">—</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-3 text-right whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(plan.id)}
+                            className="text-red-600 hover:text-red-700 font-medium min-h-11 px-2"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

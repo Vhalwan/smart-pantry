@@ -19,16 +19,9 @@ from app.schemas.recipe import (
     RecipeResponse,
     RecipeUpdate,
 )
+from app.units import units_match
 
 router = APIRouter(prefix="/recipes", tags=["recipes"])
-
-
-def _normalize_unit(unit: str | None) -> str:
-    return (unit or "").strip().casefold()
-
-
-def _units_match(recipe_unit: str | None, pantry_unit: str | None) -> bool:
-    return _normalize_unit(recipe_unit) == _normalize_unit(pantry_unit)
 
 
 def _missing_name(ingredient_id: int) -> str:
@@ -130,7 +123,7 @@ def cook_recipe(
             )
             continue
 
-        if not _units_match(line.unit, pantry_item.unit):
+        if not units_match(line.unit, pantry_item.unit):
             skipped.append(
                 CookSkippedLine(
                     ingredient_id=pantry_item.id,

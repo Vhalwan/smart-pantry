@@ -16,7 +16,7 @@ import {
 import { createRecipe, getRecipes } from "../api/recipes";
 import { getSuggestions } from "../api/suggestions";
 import { useAuth } from "../context/AuthContext";
-import { COMMON_UNITS } from "../units";
+import { COMMON_UNITS, canonicalUnit, unitsMatch } from "../units";
 
 const UNDO_TOAST_MS = 5000;
 const NEAR_EXPIRY_DAYS = 3;
@@ -97,16 +97,6 @@ function findPantryMatch(items, usedName) {
   return items.find((item) => namesMatch(item.name, usedName));
 }
 
-function normalizeUnit(value) {
-  return (value ?? "").trim().toLowerCase();
-}
-
-function unitsMatch(left, right) {
-  const a = normalizeUnit(left);
-  const b = normalizeUnit(right);
-  return Boolean(a) && a === b;
-}
-
 function describeUnitSkip(item) {
   const suggestionUnit = item.suggestionUnit?.trim() || "—";
   const pantryUnit = item.pantryUnit?.trim() || "—";
@@ -115,7 +105,7 @@ function describeUnitSkip(item) {
 
 function saveNoteFromMatch({ unmatched, unitMismatches, saved }) {
   const unitHint =
-    "Use the same unit on the pantry item as the suggestion if you want it linked next time.";
+    "Use the same unit on the pantry item as the suggestion if you want it linked next time (cup and cups count as the same; the app does not convert cup to ml).";
   const nameHint =
     "Rename the pantry item to match the suggestion, or add the missing item, then save again.";
 
@@ -649,7 +639,7 @@ export default function Pantry() {
       matched.push({
         ingredient_id: pantryItem.id,
         quantity: Number.isFinite(qty) ? qty : 0,
-        unit: used.unit,
+        unit: canonicalUnit(pantryItem.unit) || used.unit,
       });
     }
 

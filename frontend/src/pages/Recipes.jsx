@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getIngredients } from "../api/ingredients";
 import { cookRecipe, createRecipe, deleteRecipe, getRecipes } from "../api/recipes";
 import { useAuth } from "../context/AuthContext";
+import { cookNoteFromResult } from "../cookHelpers";
 import { canonicalUnit, unitSelectOptions } from "../units";
 
 const emptyIngredientLine = () => ({
@@ -10,51 +11,6 @@ const emptyIngredientLine = () => ({
   quantity: "",
   unit: "",
 });
-
-function formatQuantity(value) {
-  const n = Number(value);
-  if (!Number.isFinite(n)) {
-    return String(value ?? "");
-  }
-  return Number.isInteger(n) ? String(n) : String(n);
-}
-
-function cookNoteFromResult(result) {
-  const updated = result?.updated ?? [];
-  const short = result?.short ?? [];
-  const skipped = result?.skipped ?? [];
-  const parts = [];
-
-  if (updated.length + short.length > 0) {
-    parts.push("Pantry updated.");
-  } else if (skipped.length === 0) {
-    parts.push("This recipe has no ingredients to subtract.");
-  } else {
-    parts.push("Pantry unchanged.");
-  }
-
-  for (const line of short) {
-    parts.push(
-      `Used ${formatQuantity(line.used)} ${line.unit} ${line.name}, recipe needed ${formatQuantity(line.needed)}.`,
-    );
-  }
-  for (const line of skipped) {
-    if (line.reason === "missing") {
-      parts.push(`Skipped ${line.name} (no longer in pantry).`);
-    } else if (line.reason === "unit_mismatch") {
-      parts.push(
-        `Skipped ${line.name} (recipe: ${line.recipe_unit}, pantry: ${line.pantry_unit}). Use the same unit on the pantry item if you want it subtracted next time.`,
-      );
-    } else {
-      parts.push(`Skipped ${line.name}.`);
-    }
-  }
-
-  return {
-    text: parts.join(" "),
-    warning: short.length > 0 || skipped.length > 0,
-  };
-}
 
 function RecipeCard({
   recipe,

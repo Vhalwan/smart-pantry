@@ -43,10 +43,13 @@ Already working:
 - Pantry page and suggestion cards usable on a phone (stacked list, tappable controls; 18 Aug)
 - Suggest recipes: waking-up note on a slow call; plain-language error + Try again on failure (19 Aug)
 - Empty pantry first-use: add a few ingredients, then Suggest (21 Aug)
+- Ship week closed (22 Aug): live done-checklist passed; docs/README marked v1 complete; Recipes/Meal Plans phone layout skipped (already usable enough); meal plans left alone
+- Unit aliases on save and cook (22 Aug) — cup/cups, tbsp/tablespoon, etc.; still no cup↔ml conversion
+- Meal Plans: Ready / short / mismatch + Cook this for **today** only (22 Aug)
 
 Still open:
 
-- Rest of ship-week polish (Recipes/Meal Plans phone layout, docs/README check, live done-checklist) — checkpoint Sunday 6 September
+- Nothing required for core v1. See design “Possibly in future” for optional stretch ideas (safe conversions, shopping gaps, week strip, etc.).
 
 Category and expiry are collected and shown. Rows with an expiry date show a calm Expired or Expiring soon label when the date is past or within the next 3 days, and those rows sit at the top of the list. Suggestions tag those same items in the Gemini prompt and bias toward using them when it is reasonable. An empty pantry shows a helper instead of calling the model. Hitting quantity 0 on the pantry stepper removes the item after a short Undo window, unless the item is still used in a recipe — then it comes back with a named-recipe message. Cook this is different: it lowers quantities in one action and leaves a linked item at 0 instead of deleting it. After a subtract, Cook this stays Cooked on that card (with View pantry) so a second tap does not empty the list; leave and come back to cook it again. Pantry rows sitting at 0 after cook show they are still on a recipe. Save-from-suggestion matching covers simple last-word singular/plural as well as case, spaces, and the same unit (cup vs lbs is skipped, with a next step).
 
@@ -122,18 +125,27 @@ Ship what you meant to build. This is not another feature week.
 - [x] Pantry and suggestion cards readable on a phone, with clear main actions (18 Aug) — stacked ingredient cards below `md`; larger tap targets; Undo toast inset. Recipes / Meal Plans not in this pass.
 - [x] Clearer errors when the API is waking up or the AI call fails, plus a way to try again (19 Aug) — delayed waking-up note; mapped errors; Try again; 90s timeout; no silent retry
 - [x] Clear next steps when the pantry is empty or a save skips ingredients (21 Aug) — first-use add-then-Suggest note; save skip notes already named the next step (16 Aug)
-- [ ] Leave meal plans alone unless a small bug blocks basic use
-- [ ] Bring the user guide (and other docs if behavior changed) in line with what shipped
-- [ ] Run the “done” checklist below on the live app; fix blockers only
-- [ ] Short note in the README that v1 is complete
+- [x] Leave meal plans alone unless a small bug blocks basic use (22 Aug) — no meal-plan bugs blocking basic use; dedicated Recipes/Meal Plans phone pass skipped (already usable)
+- [x] Bring the user guide (and other docs if behavior changed) in line with what shipped (22 Aug)
+- [x] Run the “done” checklist below on the live app; fix blockers only (22 Aug) — passed
+- [x] Short note in the README that v1 is complete (22 Aug)
+
+Core v1 done early (22 Aug), ahead of the 6 September checkpoint.
 
 ### Buffer: Sunday 13 September 2026
 
-Only if the 6 September checklist failed, or one small stretch is clearly worth it (better name matching, shopping hints, category filter, AI retries, optional “similar to a saved recipe” badge for near-dupes, meal-plan expiry flags — see below). If you already passed on the 6th, stop.
+Only if the done checklist had failed, or one small stretch is clearly worth it (better name matching, shopping hints, category filter, AI retries, optional “similar to a saved recipe” badge for near-dupes, meal-plan expiry flags — see below). Checklist passed 22 Aug — stop unless you deliberately want a stretch item.
 
-Parked (13 Aug 2026): on Meal Plans, flag a planned recipe when its linked pantry ingredients are expired or expiring soon (same 3-day window), and show which ones. Adjacent to “what do I cook tonight,” but not Week 3 work. Cleaner after Week 4 cook-and-update, when meal plans and pantry quantities start interacting more directly. Candidate for this buffer week, next to better name matching.
+Parked (13 Aug 2026): on Meal Plans, flag a planned recipe when its linked pantry ingredients are expired or expiring soon (same 3-day window), and show which ones. Still optional; today cook/readiness shipped 22 Aug without expiry flags.
 
-Parked (16 Aug 2026): Cook this on meal-plan rows (or suggestion cards). Cook stays on saved recipes. A plan is “I meant to eat this”; cook is “I actually cooked it.” Cook on a future plan would subtract the pantry too early. Optional later: Cook this only when the plan date is today, still using `POST /recipes/{id}/cook`.
+Shipped (22 Aug 2026): Cook this on meal-plan rows when the plan date is **today** (same `POST /recipes/{id}/cook`). Future plans stay plans-only. Cook on suggestion cards remains out.
+
+## Possibly in future
+
+- Safe amount conversions within a family (tsp↔tbsp, g↔kg) — not cup↔g
+- Meal-plan expiry / low-stock flags
+- Shopping / gaps list; remembered default unit; category filter
+- Week strip UI; “Plan this” from a recipe; expiring-item chips on Suggest
 
 ## In scope / out of scope
 
@@ -183,3 +195,5 @@ Spend a few minutes each Sunday:
 - 18 Aug 2026: Ship-week start — Pantry + suggestion-card phone layout only (no behavior/API change). Remaining ship items: API/AI errors, Recipes/Meal Plans layout, docs/README, live done-checklist.
 - 19 Aug 2026: Ship-week item 2 — Suggest loading/error UI (waking-up note, mapped copy, Try again, 90s timeout). No silent retry; Gemini/cook logic unchanged. Remaining: Recipes/Meal Plans layout, README v1 note, live done-checklist.
 - 21 Aug 2026: Ship-week — empty pantry first-use (add a few ingredients, then Suggest). Save skip next-steps were already in the UI. Unit add fields locked to a common-measure select (Pantry + Recipes). Remaining: Recipes/Meal Plans layout, docs/README check, live done-checklist.
+- 22 Aug 2026: Ship week closed early. Live done-checklist passed; README v1 note; docs aligned. Recipes/Meal Plans dedicated phone pass skipped (already usable); meal plans left alone. Core v1 complete; buffer week optional only.
+- 22 Aug 2026 (later): Unit aliases; Meal Plans today readiness + Cook this. Possibly-in-future list in design/plan.
