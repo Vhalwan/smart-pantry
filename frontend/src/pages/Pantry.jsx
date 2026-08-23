@@ -16,11 +16,13 @@ import {
 import { createRecipe, getRecipes } from "../api/recipes";
 import { getSuggestions } from "../api/suggestions";
 import { useAuth } from "../context/AuthContext";
+import {
+  getExpiryStatus,
+  parseLocalDate,
+} from "../expiryHelpers";
 import { COMMON_UNITS, canonicalUnit, unitsMatch } from "../units";
 
 const UNDO_TOAST_MS = 5000;
-const NEAR_EXPIRY_DAYS = 3;
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const EMPTY_PANTRY_SUGGEST_MESSAGE =
   "Add a few ingredients to get suggestions.";
 const EMPTY_PANTRY_NEXT_STEP =
@@ -166,56 +168,6 @@ function suggestFailureMessage(err) {
     return SUGGEST_NETWORK_MESSAGE;
   }
   return SUGGEST_FAIL_MESSAGE;
-}
-
-/** Parse YYYY-MM-DD (or ISO datetime prefix) as a local calendar date. */
-function parseLocalDate(value) {
-  if (value == null || value === "") {
-    return null;
-  }
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value));
-  if (!match) {
-    return null;
-  }
-  const year = Number(match[1]);
-  const month = Number(match[2]) - 1;
-  const day = Number(match[3]);
-  return new Date(year, month, day);
-}
-
-/** Calendar-day difference in local time (DST-safe via UTC day numbers). */
-function calendarDaysBetween(fromDate, toDate) {
-  const fromUtc = Date.UTC(
-    fromDate.getFullYear(),
-    fromDate.getMonth(),
-    fromDate.getDate(),
-  );
-  const toUtc = Date.UTC(
-    toDate.getFullYear(),
-    toDate.getMonth(),
-    toDate.getDate(),
-  );
-  return Math.round((toUtc - fromUtc) / MS_PER_DAY);
-}
-
-/**
- * Returns "expired" | "expiring_soon" | null.
- * Compares calendar dates only so time-of-day never flips the status.
- */
-function getExpiryStatus(expiryDate) {
-  const expiry = parseLocalDate(expiryDate);
-  if (!expiry) {
-    return null;
-  }
-  const today = new Date();
-  const daysUntil = calendarDaysBetween(today, expiry);
-  if (daysUntil < 0) {
-    return "expired";
-  }
-  if (daysUntil <= NEAR_EXPIRY_DAYS) {
-    return "expiring_soon";
-  }
-  return null;
 }
 
 function expiryUrgencyRank(status) {

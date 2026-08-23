@@ -72,7 +72,7 @@ If a recipe has no ingredient lines, Cook this stays off.
 
 Open Meal Plans from the navigation. Pick a saved recipe, a date, and breakfast, lunch, or dinner. Add it, or remove entries when plans change. Meal plans are optional. You can get value from the app without using them.
 
-Plans for **today** show a short pantry check (Ready, Short on…, or missing / unit mismatch) and a Cook this button — the same pantry update as on Recipes. After a successful subtract, the button stays Cooked with a View pantry link. Future dates stay plans only (no cook), so a Thursday dinner does not empty the pantry on Monday. Planned meals still do not warn about expiry on linked ingredients.
+Plans for any date show a short pantry check (Ready, Short on…, or missing / unit mismatch) and, when linked pantry items are past or within three days of expiry, calm Expired / Expiring soon lines naming those items — so you can decide whether to cook tonight or change plans. Plans for **today** also show a Cook this button — the same pantry update as on Recipes. After a successful subtract, the button stays Cooked with a View pantry link. Future dates stay plans only for cook (no cook button), so a Thursday dinner does not empty the pantry on Monday.
 
 ## Troubleshooting
 
@@ -124,3 +124,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 21 Aug 2026: Empty pantry first-use note — add a few ingredients, then Suggest recipes. Save skip notes already said what to do next. Unit on add is a required select of common kitchen measures (same list on Recipes).
 - 22 Aug 2026: Ship week closed; live happy-path checklist passed. User guide matches shipped behavior; no further feature changes for v1.
 - 22 Aug 2026 (later): Unit aliases (cup/cups, tbsp/tablespoon, etc.) on save and cook. Meal Plans: Ready / short / mismatch note and Cook this for today’s plans only.
+- 23 Aug 2026: Meal Plans also show Expired / Expiring soon for linked ingredients, and readiness on future plans too (Cook this still today only).

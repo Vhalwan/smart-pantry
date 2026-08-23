@@ -136,14 +136,15 @@ Core v1 done early (22 Aug), ahead of the 6 September checkpoint.
 
 Only if the done checklist had failed, or one small stretch is clearly worth it (better name matching, shopping hints, category filter, AI retries, optional “similar to a saved recipe” badge for near-dupes, meal-plan expiry flags — see below). Checklist passed 22 Aug — stop unless you deliberately want a stretch item.
 
-Parked (13 Aug 2026): on Meal Plans, flag a planned recipe when its linked pantry ingredients are expired or expiring soon (same 3-day window), and show which ones. Still optional; today cook/readiness shipped 22 Aug without expiry flags.
+Parked (13 Aug 2026): meal-plan expiry flags — **shipped as stretch 23 Aug 2026** (see below).
 
-Shipped (22 Aug 2026): Cook this on meal-plan rows when the plan date is **today** (same `POST /recipes/{id}/cook`). Future plans stay plans-only. Cook on suggestion cards remains out.
+Shipped (22 Aug 2026): Cook this on meal-plan rows when the plan date is **today** (same `POST /recipes/{id}/cook`). Future plans stay plans-only for cook. Cook on suggestion cards remains out.
+
+Shipped (23 Aug 2026, stretch): Meal Plans show Ready / short / mismatch on every plan, plus Expired / Expiring soon names for linked pantry ingredients (same 3-day window as pantry). Cook this still today-only.
 
 ## Possibly in future
 
 - Safe amount conversions within a family (tsp↔tbsp, g↔kg) — not cup↔g
-- Meal-plan expiry / low-stock flags
 - Shopping / gaps list; remembered default unit; category filter
 - Week strip UI; “Plan this” from a recipe; expiring-item chips on Suggest
 
@@ -197,3 +198,4 @@ Spend a few minutes each Sunday:
 - 21 Aug 2026: Ship-week — empty pantry first-use (add a few ingredients, then Suggest). Save skip next-steps were already in the UI. Unit add fields locked to a common-measure select (Pantry + Recipes). Remaining: Recipes/Meal Plans layout, docs/README check, live done-checklist.
 - 22 Aug 2026: Ship week closed early. Live done-checklist passed; README v1 note; docs aligned. Recipes/Meal Plans dedicated phone pass skipped (already usable); meal plans left alone. Core v1 complete; buffer week optional only.
 - 22 Aug 2026 (later): Unit aliases; Meal Plans today readiness + Cook this. Possibly-in-future list in design/plan.
+- 23 Aug 2026: Stretch — Meal Plans expiry / low-stock flags (readiness on every plan; Expired / Expiring soon names; Cook this still today-only).

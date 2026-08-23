@@ -8,6 +8,7 @@ import {
   cookNoteFromResult,
   localTodayISO,
 } from "../cookHelpers";
+import { assessLinkedExpiry } from "../expiryHelpers";
 import { useAuth } from "../context/AuthContext";
 
 export default function MealPlans() {
@@ -239,8 +240,8 @@ export default function MealPlans() {
           <div className="px-6 py-4 border-b border-slate-200">
             <h2 className="text-lg font-medium text-slate-900">Meal plans</h2>
             <p className="mt-1 text-sm text-slate-500">
-              Plans for today show whether you can cook them and a Cook this
-              button. Future dates stay plans only.
+              Each plan shows pantry readiness and expiry flags on linked
+              ingredients. Cook this is only for today.
             </p>
           </div>
 
@@ -258,16 +259,18 @@ export default function MealPlans() {
                     <th className="px-6 py-3 font-medium">Date</th>
                     <th className="px-6 py-3 font-medium">Meal</th>
                     <th className="px-6 py-3 font-medium">Recipe</th>
-                    <th className="px-6 py-3 font-medium">Tonight</th>
+                    <th className="px-6 py-3 font-medium">Check</th>
                     <th className="px-6 py-3 font-medium"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {sortedPlans.map((plan) => {
                     const isToday = plan.planned_date === today;
-                    const readiness = isToday
-                      ? assessCookReadiness(plan.recipe, pantryById)
-                      : null;
+                    const readiness = assessCookReadiness(
+                      plan.recipe,
+                      pantryById,
+                    );
+                    const expiry = assessLinkedExpiry(plan.recipe, pantryById);
                     const cooked = cookedPlanIds.has(plan.id);
                     const cookNote = cookNotes[plan.id];
                     const cooking = cookingPlanId === plan.id;
@@ -287,24 +290,34 @@ export default function MealPlans() {
                           {plan.recipe?.name ?? "—"}
                         </td>
                         <td className="px-6 py-3 min-w-[12rem]">
-                          {isToday ? (
-                            <div className="space-y-2">
-                              <p
-                                className={
-                                  readiness?.status === "ready"
-                                    ? "text-slate-700"
-                                    : "text-amber-800"
-                                }
-                              >
-                                {readiness?.label}
+                          <div className="space-y-2">
+                            <p
+                              className={
+                                readiness.status === "ready"
+                                  ? "text-slate-700"
+                                  : "text-amber-800"
+                              }
+                            >
+                              {readiness.label}
+                            </p>
+                            {expiry.expired.length > 0 && (
+                              <p className="text-sm text-stone-500">
+                                Expired: {expiry.expired.join(", ")}
                               </p>
+                            )}
+                            {expiry.expiringSoon.length > 0 && (
+                              <p className="text-sm text-amber-700/80">
+                                Expiring soon: {expiry.expiringSoon.join(", ")}
+                              </p>
+                            )}
+                            {isToday && (
                               <div className="flex flex-wrap items-center gap-2">
                                 <button
                                   type="button"
                                   disabled={
                                     cooking ||
                                     cooked ||
-                                    readiness?.status === "empty"
+                                    readiness.status === "empty"
                                   }
                                   onClick={() => handleCook(plan)}
                                   className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60 min-h-11"
@@ -324,21 +337,19 @@ export default function MealPlans() {
                                   </Link>
                                 )}
                               </div>
-                              {cookNote && (
-                                <p
-                                  className={
-                                    cookNote.warning
-                                      ? "text-sm text-amber-800"
-                                      : "text-sm text-slate-600"
-                                  }
-                                >
-                                  {cookNote.text}
-                                </p>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-slate-400">—</span>
-                          )}
+                            )}
+                            {cookNote && (
+                              <p
+                                className={
+                                  cookNote.warning
+                                    ? "text-sm text-amber-800"
+                                    : "text-sm text-slate-600"
+                                }
+                              >
+                                {cookNote.text}
+                              </p>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-3 text-right whitespace-nowrap">
                           <button

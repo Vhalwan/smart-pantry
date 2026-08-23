@@ -66,7 +66,7 @@ The API subtracts each linked line from the pantry by `ingredient_id`. Quantitie
 
 The Recipes page shows a short confirmation (Pantry updated, plus skipped or short lines). After any line is subtracted, Cook this on that card stays Cooked until you leave the page (same idea as Saved on a suggestion). View pantry sits next to it. If every line was skipped, the button stays enabled so you can fix units and try again.
 
-On Meal Plans, rows dated today show a pantry readiness note (Ready / Short on… / missing or unit mismatch) using the same id + alias rules as cook, plus Cook this (same API). Future dates show no cook control. After a subtract, that plan row locks to Cooked with View pantry for the rest of the visit.
+On Meal Plans, every row shows a pantry readiness note (Ready / Short on… / missing or unit mismatch) using the same id + alias rules as cook, plus calm Expired / Expiring soon lines naming linked pantry items in the same 3-day window as the pantry list. Cook this remains only for rows dated today (same API). Future dates stay plans-only for cook. After a subtract, that plan row locks to Cooked with View pantry for the rest of the visit.
 
 Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete) show a calm note that they are still on a recipe.
 
@@ -79,8 +79,8 @@ Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete
 - Pantry list order is client-side: expired, then expiring soon (soonest date first), then the rest in API order
 - Quantity at 0 **on the pantry stepper** removes the row from the UI immediately and schedules a per-item delayed DELETE (~5s) with an Undo toast; Undo cancels only that item’s countdown. Explicit Delete stays immediate. Timers live outside the Pantry page so navigate-away still deletes. If DELETE is blocked because the item is still used in a recipe, the API returns a conflict, the row is restored, and the page names those recipes. Cook this is a separate path: it PUTs remaining quantity (including 0) and keeps the row. Those leftover 0 rows show a calm “still on a recipe” note on Pantry.
 - Deleting a pantry item still linked to a recipe is rejected (same idea as deleting a recipe still on a meal plan)
-- Near-expiry / expired notices on the pantry list are frontend-only (calm per-row labels; calendar-day compare; 3-day near window; list sorted so those rows sit at the top). The suggestion prompt uses the same 3-day window on the backend (`NEAR_EXPIRY_DAYS = 3`) to tag items and bias recipes
-- Meal plans do not flag expiry on linked ingredients (parked). Cook this on meal plans is only for **today’s** date (future plans stay plans-only)
+- Near-expiry / expired notices on the pantry list are frontend-only (calm per-row labels; calendar-day compare; 3-day near window; list sorted so those rows sit at the top). The suggestion prompt uses the same 3-day window on the backend (`NEAR_EXPIRY_DAYS = 3`) to tag items and bias recipes. Meal Plans reuse the same client helpers (`expiryHelpers.js`) to flag linked ingredients on each plan
+- Cook this on meal plans is only for **today’s** date (future plans stay plans-only for cook; readiness and expiry flags still show)
 - Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching. Unit family mismatches skip linking too (no conversion)
 - Cook this does not convert units across families and does not delete pantry rows that hit 0 while they are still on a recipe. The Cooked lock is UI-only for that page visit; the API still accepts another cook after remount.
 - Avoiding already-saved recipes is by name only (not ingredients or “similar dish” detection)
@@ -91,7 +91,6 @@ Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete
 Ideas that fit the product but are not built yet:
 
 - Safe amount conversions within a unit family only (e.g. tsp↔tbsp, g↔kg) — still no cup↔g without density data
-- Meal-plan expiry / low-stock flags on planned recipes
 - Simple shopping / gaps list after suggest or on a recipe
 - Default or remembered unit on pantry add; category filter on Pantry
 - Week strip UI using the existing week meal-plan API
@@ -117,3 +116,4 @@ Ideas that fit the product but are not built yet:
 - 21 Aug 2026: Empty pantry first-use note on the Pantry page (add, then Suggest). Save skip notes already included a next step. Unit fields are required selects of common kitchen measures (`frontend/src/units.js`).
 - 22 Aug 2026: Ship week closed; core v1 complete. Recipes / Meal Plans phone layout left as-is (no dedicated pass).
 - 22 Aug 2026 (later): Unit aliases on save/cook (`app/units.py`, `frontend/src/units.js`). Meal Plans: readiness + Cook this for today only. Possibly-in-future list added.
+- 23 Aug 2026: Stretch — Meal Plans: readiness on every plan + Expired / Expiring soon flags for linked ingredients (`expiryHelpers.js` shared with Pantry). Cook this still today-only.
