@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import AppLayout from "../components/AppLayout";
 import { getIngredients } from "../api/ingredients";
 import { cookRecipe, createRecipe, deleteRecipe, getRecipes } from "../api/recipes";
 import { useAuth } from "../context/AuthContext";
@@ -26,7 +27,7 @@ function RecipeCard({
   const hasIngredientLines = (recipe.ingredients ?? []).length > 0;
 
   return (
-    <article className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+    <article className="card p-5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1 space-y-3">
           <h3 className="text-base font-semibold text-slate-900">
@@ -76,7 +77,7 @@ function RecipeCard({
                 type="button"
                 onClick={() => onCook(recipe)}
                 disabled={cooking || cooked || !hasIngredientLines}
-                className="rounded-lg bg-slate-900 text-white px-3 py-1.5 text-sm font-medium hover:bg-slate-800 disabled:opacity-60"
+                className="btn-primary px-3 py-1.5"
               >
                 {cooking ? "Updating…" : cooked ? "Cooked" : "Cook this"}
               </button>
@@ -296,44 +297,8 @@ export default function Recipes() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <h1 className="text-xl font-semibold text-slate-900">Recipes</h1>
-            <nav className="flex gap-4 text-sm">
-              <Link
-                to="/pantry"
-                className="text-slate-600 hover:text-slate-900"
-              >
-                Pantry
-              </Link>
-              <Link
-                to="/recipes"
-                className="font-medium text-slate-900"
-              >
-                Recipes
-              </Link>
-              <Link
-                to="/meal-plans"
-                className="text-slate-600 hover:text-slate-900"
-              >
-                Meal Plans
-              </Link>
-            </nav>
-          </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-        <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+    <AppLayout title="Recipes" currentPath="/recipes" onLogout={handleLogout}>
+        <section className="card p-6">
           <h2 className="text-lg font-medium text-slate-900 mb-4">
             Add recipe
           </h2>
@@ -345,7 +310,7 @@ export default function Recipes() {
                 placeholder="Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="input-field"
               />
               <input
                 type="number"
@@ -353,7 +318,7 @@ export default function Recipes() {
                 placeholder="Prep time (minutes)"
                 value={prepTimeMinutes}
                 onChange={(e) => setPrepTimeMinutes(e.target.value)}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="input-field"
               />
             </div>
             <textarea
@@ -361,14 +326,14 @@ export default function Recipes() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="input-field w-full"
             />
             <textarea
               placeholder="Instructions"
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="input-field w-full"
             />
 
             <div className="space-y-3">
@@ -394,7 +359,7 @@ export default function Recipes() {
                         e.target.value,
                       )
                     }
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    className="input-field"
                   >
                     <option value="">Select ingredient</option>
                     {ingredients.map((item) => (
@@ -414,7 +379,7 @@ export default function Recipes() {
                     onChange={(e) =>
                       updateIngredientLine(index, "quantity", e.target.value)
                     }
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    className="input-field"
                   />
                   <select
                     required
@@ -422,7 +387,7 @@ export default function Recipes() {
                     onChange={(e) =>
                       updateIngredientLine(index, "unit", e.target.value)
                     }
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    className="input-field"
                   >
                     <option value="">Select unit</option>
                     {unitSelectOptions(line.unit).map((option) => (
@@ -435,7 +400,7 @@ export default function Recipes() {
                     type="button"
                     onClick={() => removeIngredientLine(index)}
                     disabled={ingredientLines.length === 1}
-                    className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                    className="btn-secondary"
                   >
                     Remove
                   </button>
@@ -444,7 +409,7 @@ export default function Recipes() {
               <button
                 type="button"
                 onClick={addIngredientLine}
-                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="btn-secondary px-3 py-1.5"
               >
                 Add another ingredient line
               </button>
@@ -453,18 +418,14 @@ export default function Recipes() {
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-slate-900 text-white px-4 py-2 font-medium hover:bg-slate-800 disabled:opacity-60"
+              className="btn-primary"
             >
               {submitting ? "Adding…" : "Add recipe"}
             </button>
           </form>
         </section>
 
-        {error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-            {error}
-          </p>
-        )}
+        {error && <p className="alert-error">{error}</p>}
 
         <section className="space-y-4">
           <h2 className="text-lg font-medium text-slate-900">Your recipes</h2>
@@ -475,7 +436,7 @@ export default function Recipes() {
               placeholder="Search recipes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="input-field w-full"
             />
           )}
 
@@ -506,7 +467,6 @@ export default function Recipes() {
             </div>
           )}
         </section>
-      </main>
-    </div>
+    </AppLayout>
   );
 }

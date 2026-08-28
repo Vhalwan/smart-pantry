@@ -1,1 +1,63 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth antialiased;
+  }
+
+  body {
+    @apply min-h-screen font-sans text-slate-900;
+  }
+
+  ::selection {
+    @apply bg-emerald-100 text-emerald-950;
+  }
+}
+
+@layer components {
+  .bg-app {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgb(209 250 229 / 0.45), transparent),
+      linear-gradient(to bottom, rgb(250 250 249), rgb(255 255 255), rgb(236 253 245 / 0.35));
+  }
+
+  .card {
+    @apply rounded-xl border border-slate-200/80 bg-white shadow-sm;
+  }
+
+  .card-section-header {
+    @apply border-b border-slate-200 px-4 py-4 sm:px-6;
+  }
+
+  .input-field {
+    @apply min-h-11 min-w-0 rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 shadow-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-800 px-4 py-2 text-base font-medium text-white shadow-sm transition-colors hover:bg-emerald-900 disabled:opacity-60 sm:text-sm;
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50;
+  }
+
+  .alert-error {
+    @apply break-words rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600;
+  }
+
+  .alert-info {
+    @apply break-words rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700;
+  }
+
+  .badge-expired {
+    @apply ml-1.5 inline-flex rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600;
+  }
+
+  .badge-expiring {
+    @apply ml-1.5 inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800;
+  }
+}

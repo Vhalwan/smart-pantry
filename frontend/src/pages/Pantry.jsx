@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import AppLayout from "../components/AppLayout";
 import {
   createIngredient,
   deleteIngredient,
@@ -205,18 +206,10 @@ function sortIngredientsForDisplay(items) {
 
 function ExpiryNotice({ status }) {
   if (status === "expired") {
-    return (
-      <span className="ml-1.5 text-xs font-normal text-stone-500">
-        Expired
-      </span>
-    );
+    return <span className="badge-expired">Expired</span>;
   }
   if (status === "expiring_soon") {
-    return (
-      <span className="ml-1.5 text-xs font-normal text-amber-700/80">
-        Expiring soon
-      </span>
-    );
+    return <span className="badge-expiring">Expiring soon</span>;
   }
   return null;
 }
@@ -638,45 +631,15 @@ export default function Pantry() {
   }
 
   return (
-    <div className="min-h-screen min-w-0 bg-slate-100">
-      <header className="bg-white border-b border-slate-200">
-        <div className="mx-auto flex max-w-5xl min-w-0 flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
-          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
-            <h1 className="text-xl font-semibold text-slate-900">My Pantry</h1>
-            <nav className="flex flex-wrap items-center gap-1 text-base sm:gap-2 sm:text-sm">
-              <Link
-                to="/pantry"
-                className="inline-flex min-h-11 items-center px-2 font-medium text-slate-900"
-              >
-                Pantry
-              </Link>
-              <Link
-                to="/recipes"
-                className="inline-flex min-h-11 items-center px-2 text-slate-600 hover:text-slate-900"
-              >
-                Recipes
-              </Link>
-              <Link
-                to="/meal-plans"
-                className="inline-flex min-h-11 items-center px-2 text-slate-600 hover:text-slate-900"
-              >
-                Meal Plans
-              </Link>
-            </nav>
-          </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 sm:w-auto"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-
-      <main className={`mx-auto max-w-5xl min-w-0 space-y-6 px-4 py-6 sm:py-8 ${undoToast ? "pb-28" : ""}`}>
+    <>
+      <AppLayout
+        title="My Pantry"
+        currentPath="/pantry"
+        onLogout={handleLogout}
+        mainClassName={undoToast ? "pb-28" : ""}
+      >
         {!loading && ingredients.length === 0 && (
-          <p className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+          <p className="card px-4 py-3 text-sm text-slate-700">
             {EMPTY_PANTRY_NEXT_STEP}
           </p>
         )}
@@ -685,7 +648,7 @@ export default function Pantry() {
             type="button"
             onClick={handleSuggest}
             disabled={suggesting || (!loading && ingredients.length === 0)}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-base font-medium text-white hover:bg-slate-800 disabled:opacity-60 sm:w-auto sm:text-sm"
+            className="btn-primary w-full sm:w-auto"
           >
             {suggesting ? "Suggesting…" : "Suggest recipes"}
           </button>
@@ -696,7 +659,7 @@ export default function Pantry() {
           )}
         </div>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+        <section className="card p-4 sm:p-6">
           <h2 className="mb-4 text-lg font-medium text-slate-900">
             Add ingredient
           </h2>
@@ -710,7 +673,7 @@ export default function Pantry() {
               placeholder="Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="input-field"
             />
             <input
               type="number"
@@ -720,13 +683,13 @@ export default function Pantry() {
               placeholder="Quantity"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="input-field"
             />
             <select
               required
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
-              className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="input-field"
             >
               <option value="">Select unit</option>
               {COMMON_UNITS.map((option) => (
@@ -738,7 +701,7 @@ export default function Pantry() {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="input-field"
             >
               <option value="">Select category (optional)</option>
               <option value="Produce">Produce</option>
@@ -752,26 +715,22 @@ export default function Pantry() {
               type="date"
               value={expiryDate}
               onChange={(e) => setExpiryDate(e.target.value)}
-              className="min-h-11 min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="input-field"
             />
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-slate-900 py-2 text-base font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+              className="btn-primary"
             >
               {submitting ? "Adding…" : "Add"}
             </button>
           </form>
         </section>
 
-        {error && (
-          <p className="break-words rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600">
-            {error}
-          </p>
-        )}
+        {error && <p className="alert-error">{error}</p>}
 
-        <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-4 py-4 sm:px-6">
+        <section className="card overflow-hidden">
+          <div className="card-section-header">
             <h2 className="text-lg font-medium text-slate-900">Ingredients</h2>
           </div>
 
@@ -902,7 +861,7 @@ export default function Pantry() {
             <button
               type="button"
               onClick={handleSuggest}
-              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-base font-medium text-white hover:bg-slate-800 sm:w-auto sm:text-sm"
+              className="btn-primary w-full shrink-0 sm:w-auto"
             >
               Try again
             </button>
@@ -910,9 +869,7 @@ export default function Pantry() {
         )}
 
         {suggestNote && !suggesting && (
-          <p className="break-words rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-            {suggestNote}
-          </p>
+          <p className="alert-info">{suggestNote}</p>
         )}
 
         {(suggesting || suggestions.length > 0) && (
@@ -921,7 +878,7 @@ export default function Pantry() {
               Recipe suggestions
             </h2>
             {suggesting ? (
-              <p className="break-words rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+              <p className="alert-info">
                 {suggestSlow ? SUGGEST_WAKING_MESSAGE : SUGGEST_LOADING_MESSAGE}
               </p>
             ) : (
@@ -938,7 +895,7 @@ export default function Pantry() {
                   return (
                   <article
                     key={`${recipe.name}-${index}`}
-                    className="min-w-0 space-y-3 break-words rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+                    className="card min-w-0 space-y-3 break-words p-4 sm:p-5"
                   >
                     <h3 className="text-lg font-semibold text-slate-900 md:text-base">
                       {recipe.name}
@@ -974,7 +931,7 @@ export default function Pantry() {
                         type="button"
                         onClick={() => handleSaveSuggestion(recipe, index)}
                         disabled={savingIndex === index || isSaved}
-                        className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-base font-medium text-white hover:bg-slate-800 disabled:opacity-60 sm:w-auto sm:text-sm"
+                        className="btn-primary w-full sm:w-auto"
                       >
                         {savingIndex === index
                           ? "Saving..."
@@ -1009,7 +966,7 @@ export default function Pantry() {
             )}
           </section>
         )}
-      </main>
+      </AppLayout>
 
       {undoToast && (
         <UndoToast
@@ -1017,6 +974,6 @@ export default function Pantry() {
           onUndo={() => handleUndoRemoval(undoToast.id)}
         />
       )}
-    </div>
+    </>
   );
 }

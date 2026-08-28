@@ -125,3 +125,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 22 Aug 2026: Ship week closed; live happy-path checklist passed. User guide matches shipped behavior; no further feature changes for v1.
 - 22 Aug 2026 (later): Unit aliases (cup/cups, tbsp/tablespoon, etc.) on save and cook. Meal Plans: Ready / short / mismatch note and Cook this for today’s plans only.
 - 23 Aug 2026: Meal Plans also show Expired / Expiring soon for linked ingredients, and readiness on future plans too (Cook this still today only).
+- 28 Aug 2026: Visual refresh — same screens and actions, nicer look: shared header with Smart Pantry branding, softer background, clearer buttons and form fields, pill badges for expiry. No change to what the app does.

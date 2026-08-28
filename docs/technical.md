@@ -229,3 +229,4 @@ On Render, bind the HTTP server to `0.0.0.0` and the platform `$PORT`. Local dis
 - 22 Aug 2026: Ship week closed; README / plan mark v1 complete. No API change.
 - 22 Aug 2026 (later): Unit aliases (`app/units.py` + `frontend/src/units.js`) for cook and save matching. Meal Plans today readiness + Cook this (same cook endpoint). `cookHelpers.js` shared notes/readiness.
 - 23 Aug 2026: Stretch — `expiryHelpers.js` shared by Pantry + Meal Plans; plan rows show readiness always and Expired / Expiring soon for linked ingredients. No API change.
+- 28 Aug 2026: UI polish — `frontend/src/components/AppLayout.jsx`, `AuthLayout.jsx`, shared CSS utilities in `index.css` (cards, inputs, buttons, alerts). Page title Smart Pantry. No API or behavior change.

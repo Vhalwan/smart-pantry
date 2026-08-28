@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import AppLayout from "../components/AppLayout";
 import { getIngredients } from "../api/ingredients";
 import { createMealPlan, deleteMealPlan, getMealPlans } from "../api/mealPlans";
 import { cookRecipe, getRecipes } from "../api/recipes";
@@ -145,44 +146,8 @@ export default function MealPlans() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <h1 className="text-xl font-semibold text-slate-900">Meal Plans</h1>
-            <nav className="flex gap-4 text-sm">
-              <Link
-                to="/pantry"
-                className="text-slate-600 hover:text-slate-900"
-              >
-                Pantry
-              </Link>
-              <Link
-                to="/recipes"
-                className="text-slate-600 hover:text-slate-900"
-              >
-                Recipes
-              </Link>
-              <Link
-                to="/meal-plans"
-                className="font-medium text-slate-900"
-              >
-                Meal Plans
-              </Link>
-            </nav>
-          </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-        <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+    <AppLayout title="Meal Plans" currentPath="/meal-plans" onLogout={handleLogout}>
+        <section className="card p-6">
           <h2 className="text-lg font-medium text-slate-900 mb-4">
             Add meal plan
           </h2>
@@ -194,7 +159,7 @@ export default function MealPlans() {
               required
               value={recipeId}
               onChange={(e) => setRecipeId(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="input-field"
             >
               <option value="">Select recipe</option>
               {recipes.map((recipe) => (
@@ -208,13 +173,13 @@ export default function MealPlans() {
               required
               value={plannedDate}
               onChange={(e) => setPlannedDate(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="input-field"
             />
             <select
               required
               value={mealType}
               onChange={(e) => setMealType(e.target.value)}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="input-field"
             >
               <option value="breakfast">Breakfast</option>
               <option value="lunch">Lunch</option>
@@ -223,21 +188,17 @@ export default function MealPlans() {
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-slate-900 text-white py-2 font-medium hover:bg-slate-800 disabled:opacity-60"
+              className="btn-primary"
             >
               {submitting ? "Adding…" : "Add"}
             </button>
           </form>
         </section>
 
-        {error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-            {error}
-          </p>
-        )}
+        {error && <p className="alert-error">{error}</p>}
 
-        <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200">
+        <section className="card overflow-hidden">
+          <div className="card-section-header">
             <h2 className="text-lg font-medium text-slate-900">Meal plans</h2>
             <p className="mt-1 text-sm text-slate-500">
               Each plan shows pantry readiness and expiry flags on linked
@@ -280,7 +241,7 @@ export default function MealPlans() {
                         <td className="px-6 py-3 whitespace-nowrap">
                           {plan.planned_date}
                           {isToday && (
-                            <span className="ml-2 text-xs font-medium text-slate-500">
+                            <span className="badge-expiring ml-2">
                               Today
                             </span>
                           )}
@@ -320,7 +281,7 @@ export default function MealPlans() {
                                     readiness.status === "empty"
                                   }
                                   onClick={() => handleCook(plan)}
-                                  className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60 min-h-11"
+                                  className="btn-primary px-3 py-2"
                                 >
                                   {cooking
                                     ? "Cooking…"
@@ -368,7 +329,6 @@ export default function MealPlans() {
             </div>
           )}
         </section>
-      </main>
-    </div>
+    </AppLayout>
   );
 }

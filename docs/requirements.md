@@ -79,3 +79,4 @@ These are intentionally out for now:
 | 22 Aug 2026 | Ship week closed: live done-checklist passed; README marks v1 complete. No new FR. Parked items stay out of this version. |
 | 22 Aug 2026 | Unit aliases on save/cook (FR-9). Meal Plans: readiness + Cook this for today (FR-12 / FR-16). No amount conversion between different units. |
 | 23 Aug 2026 | Stretch: Meal Plans flag linked Expired / Expiring soon ingredients (same 3-day window) and show readiness on every plan; Cook this still today-only. |
+| 28 Aug 2026 | UX only: shared app shell (header, nav, branding), DM Sans typography, warm page background, emerald accent, pill expiry badges, auth page polish, consistent mobile nav on Recipes and Meal Plans. No new FR; behavior unchanged. |

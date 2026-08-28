@@ -117,3 +117,4 @@ Ideas that fit the product but are not built yet:
 - 22 Aug 2026: Ship week closed; core v1 complete. Recipes / Meal Plans phone layout left as-is (no dedicated pass).
 - 22 Aug 2026 (later): Unit aliases on save/cook (`app/units.py`, `frontend/src/units.js`). Meal Plans: readiness + Cook this for today only. Possibly-in-future list added.
 - 23 Aug 2026: Stretch — Meal Plans: readiness on every plan + Expired / Expiring soon flags for linked ingredients (`expiryHelpers.js` shared with Pantry). Cook this still today-only.
+- 28 Aug 2026: UX only — `AppLayout` / `AuthLayout`, DM Sans, warm gradient background, emerald accent and shared form/button classes (`index.css`). Pill expiry badges. Recipes / Meal Plans get the same sticky header and mobile nav as Pantry. No API or behavior change.
