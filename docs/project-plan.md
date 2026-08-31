@@ -142,10 +142,15 @@ Shipped (22 Aug 2026): Cook this on meal-plan rows when the plan date is **today
 
 Shipped (23 Aug 2026, stretch): Meal Plans show Ready / short / mismatch on every plan, plus Expired / Expiring soon names for linked pantry ingredients (same 3-day window as pantry). Cook this still today-only.
 
-## Possibly in future
+## v2 — Tonight (in progress)
+
+v1 is complete. v2 adds a **Tonight** page: one place to see what you can cook right now (ready recipes, today’s meal plan, expiring items, aggregated gaps). Full scope and week-by-week tasks: [v2 plan](./v2-plan.md).
+
+## Possibly in future (after v2 or if parked)
 
 - Safe amount conversions within a family (tsp↔tbsp, g↔kg) — not cup↔g
-- Shopping / gaps list; remembered default unit; category filter
+- Full shopping list with persistence (v2 ships a lightweight gaps list only)
+- Remembered default unit; category filter on Pantry
 - Week strip UI; “Plan this” from a recipe; expiring-item chips on Suggest
 
 ## In scope / out of scope
@@ -199,3 +204,4 @@ Spend a few minutes each Sunday:
 - 22 Aug 2026: Ship week closed early. Live done-checklist passed; README v1 note; docs aligned. Recipes/Meal Plans dedicated phone pass skipped (already usable); meal plans left alone. Core v1 complete; buffer week optional only.
 - 22 Aug 2026 (later): Unit aliases; Meal Plans today readiness + Cook this. Possibly-in-future list in design/plan.
 - 23 Aug 2026: Stretch — Meal Plans expiry / low-stock flags (readiness on every plan; Expired / Expiring soon names; Cook this still today-only).
+- 31 Aug 2026: v2 plan added — Tonight decision page; see [v2-plan.md](./v2-plan.md).

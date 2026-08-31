@@ -4,6 +4,8 @@ Web app for tracking pantry ingredients, generating AI recipe suggestions (Gemin
 
 **v1 is complete** (August 2026): pantry → suggest → save → cook, with expiry awareness and meal plans. Live app: [smart-pantry-hazel.vercel.app](https://smart-pantry-hazel.vercel.app/login). See the [project plan](docs/project-plan.md) for what shipped and what stayed out of scope.
 
+**v2 (planned):** [Tonight](docs/v2-plan.md) — one screen for “what should I cook right now?” (recipe readiness, today’s plan, use-it-up items, gaps list).
+
 **Stack:** React (Vite) · FastAPI · PostgreSQL · Docker Compose
 
 ## Documentation
@@ -14,6 +16,7 @@ Web app for tracking pantry ingredients, generating AI recipe suggestions (Gemin
 | [Architecture & Design](docs/design.md) | Engineers / interview prep | Architecture, data model, AI flow, ingredient-matching tradeoff |
 | [Technical](docs/technical.md) | Developers | API reference, layout, env vars, conventions |
 | [User Guide](docs/user-guide.md) | End users | Setup and how-to |
+| [v2 Plan — Tonight](docs/v2-plan.md) | Product / developers | v2 scope, timeline, requirements |
 
 ## Quick start
 

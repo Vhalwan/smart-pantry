@@ -86,12 +86,16 @@ Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete
 - Avoiding already-saved recipes is by name only (not ingredients or “similar dish” detection)
 - Phone layout is done for Pantry and suggestion cards (stacked list, tappable controls). Recipes and Meal Plans did not get a dedicated pass; they were left as-is after ship-week review (usable enough on a phone).
 
+## v2 — Tonight (planned)
+
+v1 is complete. v2 adds a **Tonight** page at `/tonight`: expiring pantry items, today’s meal plan, saved recipes grouped by cook readiness (Ready / Short / Blocked), optional aggregated gaps list, and a path to Suggest when nothing is ready. Reuses `cookHelpers.js` and `expiryHelpers.js`; no new API for the core page. See [v2 plan](./v2-plan.md).
+
 ## Possibly in future
 
-Ideas that fit the product but are not built yet:
+Ideas that fit the product but are not built yet (some may land in v2):
 
 - Safe amount conversions within a unit family only (e.g. tsp↔tbsp, g↔kg) — still no cup↔g without density data
-- Simple shopping / gaps list after suggest or on a recipe
+- Full shopping list with persistence (v2 targets a lightweight gaps list on Tonight only)
 - Default or remembered unit on pantry add; category filter on Pantry
 - Week strip UI using the existing week meal-plan API
 - “Plan this” from a recipe card (tonight / tomorrow)

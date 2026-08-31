@@ -1,6 +1,6 @@
 # Smart Pantry — Technical Documentation
 
-This doc is for people working on the code: layout, API, payloads, and local run. Product intent is in [requirements](./requirements.md). Architecture choices are in [design](./design.md). How to use the live app is in the [user guide](./user-guide.md). Deadlines are in the [project plan](./project-plan.md).
+This doc is for people working on the code: layout, API, payloads, and local run. Product intent is in [requirements](./requirements.md). Architecture choices are in [design](./design.md). How to use the live app is in the [user guide](./user-guide.md). v1 deadlines are in the [project plan](./project-plan.md). **v2 (Tonight)** scope is in the [v2 plan](./v2-plan.md).
 
 ## Project layout
 

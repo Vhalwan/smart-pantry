@@ -8,7 +8,8 @@ It works best when you only have a few things left and need something you can ac
 
 ## Related docs
 
-- [Project plan](./project-plan.md) — goals and weekly deadlines
+- [Project plan](./project-plan.md) — v1 goals and weekly deadlines
+- [v2 plan](./v2-plan.md) — Tonight page (in progress)
 - [Requirements](./requirements.md) — what the product is supposed to do
 - [Design](./design.md) — how the pieces fit together
 - [Technical](./technical.md) — setup and API details for developers
