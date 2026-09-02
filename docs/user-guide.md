@@ -22,9 +22,22 @@ You do not need to open the backend URL yourself. The website talks to it for yo
 
 1. Open the live app (or run it on your computer using the steps in the technical doc).
 2. Create an account with an email and password.
-3. Log in. You should land on your Pantry page. If the list is empty, you will see a short note: add a few ingredients (name, how much, and a unit), then tap Suggest recipes.
+3. Log in. You should land on your Pantry page. If the list is empty, you will see a short note: add a few ingredients (name, how much, and a unit), then tap Suggest recipes. After login, **Tonight** is the first item in the nav (the home page after login is still Pantry until a later v2 stretch).
 
 One thing to know about the live site: the backend runs on a free hosting plan, so it sometimes sleeps. The first request after a quiet stretch can take half a minute or so. That is normal.
+
+## Tonight
+
+Open **Tonight** from the navigation (first item). This is the v2 decision page: what to cook right now, without hopping tabs.
+
+You will see today’s date, then:
+
+1. **Use it up** — pantry items that are expired or expiring within the next three days (same window as Pantry). If nothing is in that window, it says “Nothing expiring soon.”
+2. **Today’s plan** — meals you planned for today, with the same Ready / Short on… / mismatch check, Expired / Expiring soon names, and **Cook this** as Meal Plans. After a successful cook, the button stays Cooked and you get View pantry. If you have no plan for today, there is a link to Meal Plans.
+
+If the pantry is empty, Tonight points you to Pantry to add ingredients and Suggest. If you have pantry items but no saved recipes yet, it links to Pantry to get ideas.
+
+Saved recipes grouped as Ready / Almost ready / Need attention are not on this page yet (later this week). Gaps list is week 2.
 
 ## Your pantry
 
@@ -65,7 +78,7 @@ On a saved recipe card, click Cook this. The app subtracts that recipe’s linke
 
 Items that hit zero stay on the pantry list at 0 while they are still used in the recipe (they cannot be deleted until you take them off the recipe). Those rows show a short note: Still on a recipe — Cook this left this at 0. There is no Undo toast for this action — if you used a different amount, change the quantity on Pantry. Leave the page and come back if you cook the same recipe again later.
 
-Cook this is not on suggestion cards or on Meal Plans. Save the suggestion first, then cook from Recipes. A meal plan is for a date you chose; cooking from a future plan would take food off the list too soon.
+Cook this is not on suggestion cards or on **future** meal plans. Save the suggestion first, then cook from Recipes, from a **today** row on Meal Plans, or from **Tonight** (today’s plan). A future meal plan is for a date you chose; cooking from it would take food off the list too soon.
 
 If a recipe has no ingredient lines, Cook this stays off.
 
@@ -127,3 +140,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 22 Aug 2026 (later): Unit aliases (cup/cups, tbsp/tablespoon, etc.) on save and cook. Meal Plans: Ready / short / mismatch note and Cook this for today’s plans only.
 - 23 Aug 2026: Meal Plans also show Expired / Expiring soon for linked ingredients, and readiness on future plans too (Cook this still today only).
 - 28 Aug 2026: Visual refresh — same screens and actions, nicer look: shared header with Smart Pantry branding, softer background, clearer buttons and form fields, pill badges for expiry. No change to what the app does.
+- 2 Sep 2026: Tonight page (v2 start) — nav item, Use it up, today’s plan with Cook this. Recipe groups still coming.

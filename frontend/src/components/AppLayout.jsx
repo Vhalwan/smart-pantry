@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 const NAV_ITEMS = [
+  { to: "/tonight", label: "Tonight" },
   { to: "/pantry", label: "Pantry" },
   { to: "/recipes", label: "Recipes" },
   { to: "/meal-plans", label: "Meal Plans" },

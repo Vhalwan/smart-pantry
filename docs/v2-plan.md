@@ -137,17 +137,19 @@ Checkpoints every Sunday. If behind, drop gaps list or post-login redirect befor
 
 Ship the Tonight page with real data and cook actions.
 
-- [ ] Add `/tonight` route and **Tonight** nav item (first in nav)
-- [ ] New `Tonight.jsx` page inside `AppLayout`
-- [ ] Parallel load: ingredients, recipes, meal plans
-- [ ] **Use it up** section from pantry + `getExpiryStatus`
-- [ ] **Today’s plan** section (filter `localTodayISO`, reuse readiness + expiry + Cook this patterns from `MealPlans.jsx`)
+- [x] Add `/tonight` route and **Tonight** nav item (first in nav) (2 Sep)
+- [x] New `Tonight.jsx` page inside `AppLayout` (2 Sep)
+- [x] Parallel load: ingredients, recipes, meal plans (2 Sep)
+- [x] **Use it up** section from pantry + `getExpiryStatus` (2 Sep)
+- [x] **Today’s plan** section (filter `localTodayISO`, reuse readiness + expiry + Cook this patterns from `MealPlans.jsx`) (2 Sep)
 - [ ] **Ready / Almost ready / Need attention** recipe groups via `assessCookReadiness`
 - [ ] Cook this wired per recipe row (share logic with Recipes where practical — extract a small component or hook if it avoids copy-paste)
-- [ ] **Get ideas** empty/ thin state with link to Pantry
-- [ ] Mobile layout: stacked sections, tappable Cook this / links
+- [x] **Get ideas** empty/ thin state with link to Pantry (2 Sep — empty pantry + pantry-with-no-recipes; still need the “nothing ready” CTA once groups exist)
+- [x] Mobile layout: stacked sections, tappable Cook this / links (2 Sep for shipped sections)
 
 **Done when:** You can open Tonight, see grouped recipes and today’s plan, cook a ready recipe, and land on View pantry — without opening Recipes or Meal Plans.
+
+**2 Sep:** First implementation day after the 31 Aug plan. Shell (route, nav, parallel fetch) plus the first two sections: Use it up and Today’s plan with Cook this. Recipe groups still next.
 
 ### Week 2 — Sunday 14 September 2026
 
@@ -197,3 +199,4 @@ Same habit as v1:
 | Date | Change |
 |------|--------|
 | 31 Aug 2026 | First v2 plan: Tonight decision page, 2-week timeline, requirements V2-1–V2-8. |
+| 2 Sep 2026 | Week 1 day 1: `/tonight` route, Tonight first in nav, parallel fetch, Use it up, Today’s plan + Cook this. Recipe groups still open. |

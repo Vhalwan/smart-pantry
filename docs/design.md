@@ -60,7 +60,7 @@ Manual recipe creation already picks pantry items directly, so it does not need 
 
 ## Cooking a saved recipe
 
-Cook this lives on saved recipe cards and on **today’s** meal-plan rows (not suggestion cards, not future meal plans). A suggestion is names until you save it; a future meal plan is “I meant to eat this later,” so subtracting the pantry there would be too early.
+Cook this lives on saved recipe cards, on **today’s** meal-plan rows, and on **Tonight** for those same today rows (not suggestion cards, not future meal plans). A suggestion is names until you save it; a future meal plan is “I meant to eat this later,” so subtracting the pantry there would be too early.
 
 The API subtracts each linked line from the pantry by `ingredient_id`. Quantities never go negative. If the pantry has less than the recipe needs, it uses what is there and reports the shortfall. If the pantry row is gone, or units do not match, that line is skipped and named. Rows that hit 0 stay in the pantry at 0 — they are still on the recipe, so delete would be refused. The pantry stepper’s Undo / delayed DELETE path is unchanged and is not used for cook.
 
@@ -80,15 +80,17 @@ Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete
 - Quantity at 0 **on the pantry stepper** removes the row from the UI immediately and schedules a per-item delayed DELETE (~5s) with an Undo toast; Undo cancels only that item’s countdown. Explicit Delete stays immediate. Timers live outside the Pantry page so navigate-away still deletes. If DELETE is blocked because the item is still used in a recipe, the API returns a conflict, the row is restored, and the page names those recipes. Cook this is a separate path: it PUTs remaining quantity (including 0) and keeps the row. Those leftover 0 rows show a calm “still on a recipe” note on Pantry.
 - Deleting a pantry item still linked to a recipe is rejected (same idea as deleting a recipe still on a meal plan)
 - Near-expiry / expired notices on the pantry list are frontend-only (calm per-row labels; calendar-day compare; 3-day near window; list sorted so those rows sit at the top). The suggestion prompt uses the same 3-day window on the backend (`NEAR_EXPIRY_DAYS = 3`) to tag items and bias recipes. Meal Plans reuse the same client helpers (`expiryHelpers.js`) to flag linked ingredients on each plan
-- Cook this on meal plans is only for **today’s** date (future plans stay plans-only for cook; readiness and expiry flags still show)
+- Cook this on meal plans and Tonight is only for **today’s** date (future plans stay plans-only for cook; readiness and expiry flags still show on Meal Plans)
 - Save-from-suggestion is in the UI; unmatched names still skip linking rather than fuzzy-matching. Unit family mismatches skip linking too (no conversion)
 - Cook this does not convert units across families and does not delete pantry rows that hit 0 while they are still on a recipe. The Cooked lock is UI-only for that page visit; the API still accepts another cook after remount.
 - Avoiding already-saved recipes is by name only (not ingredients or “similar dish” detection)
 - Phone layout is done for Pantry and suggestion cards (stacked list, tappable controls). Recipes and Meal Plans did not get a dedicated pass; they were left as-is after ship-week review (usable enough on a phone).
 
-## v2 — Tonight (planned)
+## v2 — Tonight (in progress)
 
-v1 is complete. v2 adds a **Tonight** page at `/tonight`: expiring pantry items, today’s meal plan, saved recipes grouped by cook readiness (Ready / Short / Blocked), optional aggregated gaps list, and a path to Suggest when nothing is ready. Reuses `cookHelpers.js` and `expiryHelpers.js`; no new API for the core page. See [v2 plan](./v2-plan.md).
+v1 is complete. v2 adds a **Tonight** page at `/tonight` (first nav item): expiring pantry items, today’s meal plan with the same Cook this as Meal Plans, and (next) saved recipes grouped by cook readiness. Reuses `cookHelpers.js` and `expiryHelpers.js`; no new API. See [v2 plan](./v2-plan.md).
+
+Shipped so far (2 Sep): route, nav, parallel fetch, Use it up, today’s plan + Cook this. Not yet: Ready / Almost ready / Need attention groups, gaps list, post-login redirect.
 
 ## Possibly in future
 
@@ -122,3 +124,4 @@ Ideas that fit the product but are not built yet (some may land in v2):
 - 22 Aug 2026 (later): Unit aliases on save/cook (`app/units.py`, `frontend/src/units.js`). Meal Plans: readiness + Cook this for today only. Possibly-in-future list added.
 - 23 Aug 2026: Stretch — Meal Plans: readiness on every plan + Expired / Expiring soon flags for linked ingredients (`expiryHelpers.js` shared with Pantry). Cook this still today-only.
 - 28 Aug 2026: UX only — `AppLayout` / `AuthLayout`, DM Sans, warm gradient background, emerald accent and shared form/button classes (`index.css`). Pill expiry badges. Recipes / Meal Plans get the same sticky header and mobile nav as Pantry. No API or behavior change.
+- 2 Sep 2026: v2 start — Tonight page (`/tonight`): Use it up + today’s plan Cook this. Recipe groups still planned.

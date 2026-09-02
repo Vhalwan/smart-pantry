@@ -81,3 +81,4 @@ These are intentionally out for now:
 | 23 Aug 2026 | Stretch: Meal Plans flag linked Expired / Expiring soon ingredients (same 3-day window) and show readiness on every plan; Cook this still today-only. |
 | 28 Aug 2026 | UX only: shared app shell (header, nav, branding), DM Sans typography, warm page background, emerald accent, pill expiry badges, auth page polish, consistent mobile nav on Recipes and Meal Plans. No new FR; behavior unchanged. |
 | 31 Aug 2026 | v2 plan — Tonight page (V2-1–V2-8); see [v2-plan.md](./v2-plan.md). |
+| 2 Sep 2026 | v2 start: Tonight route/nav, Use it up, today’s plan Cook this (V2-1–V2-3). Recipe groups (V2-4) still open. |

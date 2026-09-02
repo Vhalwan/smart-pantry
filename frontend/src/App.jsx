@@ -5,6 +5,7 @@ import MealPlans from "./pages/MealPlans";
 import Pantry from "./pages/Pantry";
 import Recipes from "./pages/Recipes";
 import Register from "./pages/Register";
+import Tonight from "./pages/Tonight";
 
 function ProtectedRoute({ children }) {
   const { token } = useAuth();
@@ -22,6 +23,14 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route
+            path="/tonight"
+            element={
+              <ProtectedRoute>
+                <Tonight />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/pantry"
             element={
