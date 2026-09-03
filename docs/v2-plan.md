@@ -143,8 +143,8 @@ Ship the Tonight page with real data and cook actions.
 - [x] **Use it up** section from pantry + `getExpiryStatus` (2 Sep)
 - [x] **Today’s plan** section (filter `localTodayISO`, reuse readiness + expiry + Cook this patterns from `MealPlans.jsx`) (2 Sep)
 - [ ] **Ready / Almost ready / Need attention** recipe groups via `assessCookReadiness`
-- [ ] Cook this wired per recipe row (share logic with Recipes where practical — extract a small component or hook if it avoids copy-paste)
-- [x] **Get ideas** empty/ thin state with link to Pantry (2 Sep — empty pantry + pantry-with-no-recipes; still need the “nothing ready” CTA once groups exist)
+- [x] Cook this wired per recipe row (share logic with Recipes where practical — extract a small component or hook if it avoids copy-paste)
+- [x] **Get ideas** empty/ thin state with link to Pantry (2 Sep; 3 Sep — nothing-ready CTA added)
 - [x] Mobile layout: stacked sections, tappable Cook this / links (2 Sep for shipped sections)
 
 **Done when:** You can open Tonight, see grouped recipes and today’s plan, cook a ready recipe, and land on View pantry — without opening Recipes or Meal Plans.
@@ -200,3 +200,4 @@ Same habit as v1:
 |------|--------|
 | 31 Aug 2026 | First v2 plan: Tonight decision page, 2-week timeline, requirements V2-1–V2-8. |
 | 2 Sep 2026 | Week 1 day 1: `/tonight` route, Tonight first in nav, parallel fetch, Use it up, Today’s plan + Cook this. Recipe groups still open. |
+| 3 Sep 2026 | Week 1 day 2: Ready / Almost ready / Need attention recipe groups, Cook this per recipe row, nothing-ready CTA. Week 1 complete. |

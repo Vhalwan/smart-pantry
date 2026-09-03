@@ -44,6 +44,97 @@ function ExpiryNotice({ status }) {
   return null;
 }
 
+function RecipeGroupSection({
+  title,
+  subtitle,
+  entries,
+  cookingId,
+  cookedIds,
+  cookNotes,
+  onCook,
+  pantryById,
+}) {
+  if (entries.length === 0) return null;
+
+  return (
+    <section className="card overflow-hidden">
+      <div className="card-section-header">
+        <h2 className="text-lg font-medium text-slate-900">{title}</h2>
+        <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+      </div>
+      <ul className="divide-y divide-slate-100">
+        {entries.map(({ recipe, readiness }) => {
+          const expiry = assessLinkedExpiry(recipe, pantryById);
+          const cooked = cookedIds.has(recipe.id);
+          const cooking = cookingId === recipe.id;
+          const note = cookNotes[recipe.id];
+          const hasLines = (recipe.ingredients ?? []).length > 0;
+
+          return (
+            <li
+              key={recipe.id}
+              className="space-y-3 px-4 py-4 text-slate-800 sm:px-6"
+            >
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <p className="text-base font-semibold text-slate-900">
+                  {recipe.name}
+                </p>
+                {recipe.prep_time_minutes != null && (
+                  <p className="text-sm text-slate-500">
+                    {recipe.prep_time_minutes} min
+                  </p>
+                )}
+              </div>
+              {readiness.status !== "ready" && (
+                <p className="text-sm text-amber-800">{readiness.label}</p>
+              )}
+              {expiry.expired.length > 0 && (
+                <p className="text-sm text-stone-500">
+                  Expired: {expiry.expired.join(", ")}
+                </p>
+              )}
+              {expiry.expiringSoon.length > 0 && (
+                <p className="text-sm text-amber-700/80">
+                  Expiring soon: {expiry.expiringSoon.join(", ")}
+                </p>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  disabled={cooking || cooked || !hasLines}
+                  onClick={() => onCook(recipe)}
+                  className="btn-primary"
+                >
+                  {cooking ? "Cooking…" : cooked ? "Cooked" : "Cook this"}
+                </button>
+                {cooked && (
+                  <Link
+                    to="/pantry"
+                    className="inline-flex min-h-11 items-center text-sm font-medium text-slate-700 hover:text-slate-900"
+                  >
+                    View pantry
+                  </Link>
+                )}
+              </div>
+              {note && (
+                <p
+                  className={
+                    note.warning
+                      ? "text-sm text-amber-800"
+                      : "text-sm text-slate-600"
+                  }
+                >
+                  {note.text}
+                </p>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 async function fetchTonightData() {
   const [ingredientsData, recipesData, mealPlansData] = await Promise.all([
     getIngredients(),
@@ -64,6 +155,9 @@ export default function Tonight() {
   const [cookingPlanId, setCookingPlanId] = useState(null);
   const [cookedPlanIds, setCookedPlanIds] = useState(() => new Set());
   const [cookNotes, setCookNotes] = useState({});
+  const [cookingRecipeId, setCookingRecipeId] = useState(null);
+  const [cookedRecipeIds, setCookedRecipeIds] = useState(() => new Set());
+  const [recipeCookNotes, setRecipeCookNotes] = useState({});
 
   const today = localTodayISO();
 
@@ -204,6 +298,62 @@ export default function Tonight() {
     logout();
     navigate("/login");
   }
+
+  const recipeGroups = useMemo(() => {
+    const ready = [];
+    const short = [];
+    const blocked = [];
+    for (const recipe of recipes) {
+      const r = assessCookReadiness(recipe, pantryById);
+      const entry = { recipe, readiness: r };
+      if (r.status === "ready") ready.push(entry);
+      else if (r.status === "short") short.push(entry);
+      else blocked.push(entry);
+    }
+    ready.sort((a, b) => {
+      const aTime = a.recipe.prep_time_minutes ?? Infinity;
+      const bTime = b.recipe.prep_time_minutes ?? Infinity;
+      if (aTime !== bTime) return aTime - bTime;
+      return (a.recipe.name ?? "").localeCompare(b.recipe.name ?? "");
+    });
+    short.sort((a, b) => (a.recipe.name ?? "").localeCompare(b.recipe.name ?? ""));
+    blocked.sort((a, b) => (a.recipe.name ?? "").localeCompare(b.recipe.name ?? ""));
+    return { ready, short, blocked };
+  }, [recipes, pantryById]);
+
+  async function handleCookRecipe(recipe) {
+    if (!(recipe.ingredients ?? []).length) return;
+    setCookingRecipeId(recipe.id);
+    setError("");
+    setRecipeCookNotes((prev) => {
+      const next = { ...prev };
+      delete next[recipe.id];
+      return next;
+    });
+    try {
+      const result = await cookRecipe(recipe.id);
+      const note = cookNoteFromResult(result);
+      setRecipeCookNotes((prev) => ({ ...prev, [recipe.id]: note }));
+      if (note.subtracted) {
+        setCookedRecipeIds((prev) => new Set(prev).add(recipe.id));
+      }
+      const ingredientsData = await getIngredients();
+      setIngredients(ingredientsData);
+    } catch {
+      setRecipeCookNotes((prev) => ({
+        ...prev,
+        [recipe.id]: {
+          text: "Couldn't update the pantry. Try again.",
+          warning: true,
+          subtracted: false,
+        },
+      }));
+    } finally {
+      setCookingRecipeId(null);
+    }
+  }
+
+  const nothingReady = recipeGroups.ready.length === 0 && recipeGroups.short.length === 0;
 
   const pantryEmpty = !loading && ingredients.length === 0;
   const hasRecipes = recipes.length > 0;
@@ -378,6 +528,41 @@ export default function Tonight() {
             )}
           </section>
 
+          {hasRecipes && (
+            <>
+              <RecipeGroupSection
+                title="Ready to cook"
+                subtitle="Everything you need is in the pantry."
+                entries={recipeGroups.ready}
+                cookingId={cookingRecipeId}
+                cookedIds={cookedRecipeIds}
+                cookNotes={recipeCookNotes}
+                onCook={handleCookRecipe}
+                pantryById={pantryById}
+              />
+              <RecipeGroupSection
+                title="Almost ready"
+                subtitle="You can cook these but you'll run short on something."
+                entries={recipeGroups.short}
+                cookingId={cookingRecipeId}
+                cookedIds={cookedRecipeIds}
+                cookNotes={recipeCookNotes}
+                onCook={handleCookRecipe}
+                pantryById={pantryById}
+              />
+              <RecipeGroupSection
+                title="Need attention"
+                subtitle="Missing ingredients or unit mismatches."
+                entries={recipeGroups.blocked}
+                cookingId={cookingRecipeId}
+                cookedIds={cookedRecipeIds}
+                cookNotes={recipeCookNotes}
+                onCook={handleCookRecipe}
+                pantryById={pantryById}
+              />
+            </>
+          )}
+
           {!pantryEmpty && !hasRecipes && (
             <p className="alert-info">
               No saved recipes yet.{" "}
@@ -388,6 +573,19 @@ export default function Tonight() {
                 Get ideas on Pantry
               </Link>{" "}
               with Suggest recipes.
+            </p>
+          )}
+
+          {hasRecipes && nothingReady && (
+            <p className="alert-info">
+              Nothing is ready to cook right now.{" "}
+              <Link
+                to="/pantry"
+                className="font-medium text-emerald-800 underline"
+              >
+                Check your pantry
+              </Link>{" "}
+              and use Suggest recipes for ideas from what you have.
             </p>
           )}
         </>

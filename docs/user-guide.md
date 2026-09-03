@@ -37,7 +37,15 @@ You will see today’s date, then:
 
 If the pantry is empty, Tonight points you to Pantry to add ingredients and Suggest. If you have pantry items but no saved recipes yet, it links to Pantry to get ideas.
 
-Saved recipes grouped as Ready / Almost ready / Need attention are not on this page yet (later this week). Gaps list is week 2.
+Below the plan, your saved recipes are split into three groups:
+
+3. **Ready to cook** — you have everything. Sorted by prep time (shortest first). Each has Cook this.
+4. **Almost ready** — you can cook but will run short on something. Cook this still works.
+5. **Need attention** — missing ingredients or unit mismatches. Cook this is available per the same rules as Recipes.
+
+If nothing is ready or almost ready, you will see a link to check your pantry and use Suggest recipes.
+
+Gaps list is week 2.
 
 ## Your pantry
 
@@ -141,3 +149,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 23 Aug 2026: Meal Plans also show Expired / Expiring soon for linked ingredients, and readiness on future plans too (Cook this still today only).
 - 28 Aug 2026: Visual refresh — same screens and actions, nicer look: shared header with Smart Pantry branding, softer background, clearer buttons and form fields, pill badges for expiry. No change to what the app does.
 - 2 Sep 2026: Tonight page (v2 start) — nav item, Use it up, today’s plan with Cook this. Recipe groups still coming.
+- 3 Sep 2026: Tonight recipe groups (Ready to cook / Almost ready / Need attention) with Cook this; nothing-ready CTA.
