@@ -45,7 +45,7 @@ Below the plan, your saved recipes are split into three groups:
 
 If nothing is ready or almost ready, you will see a link to check your pantry and use Suggest recipes.
 
-Gaps list is week 2.
+Below the recipe groups (when something is short or blocked), **What’s missing** lists the gaps in plain language — for example, that Fried Rice needs 1 more cup of rice, or that an ingredient uses different units on the recipe and in the pantry. Identical lines are shown once. There is no shopping list to check off; add what’s missing on Pantry if you want to cook that dish tonight. The section is hidden when every saved recipe is ready (or you have no recipes yet).
 
 ## Your pantry
 
@@ -150,3 +150,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 28 Aug 2026: Visual refresh — same screens and actions, nicer look: shared header with Smart Pantry branding, softer background, clearer buttons and form fields, pill badges for expiry. No change to what the app does.
 - 2 Sep 2026: Tonight page (v2 start) — nav item, Use it up, today’s plan with Cook this. Recipe groups still coming.
 - 3 Sep 2026: Tonight recipe groups (Ready to cook / Almost ready / Need attention) with Cook this; nothing-ready CTA.
+- 6 Sep 2026: Tonight What’s missing list — short or blocked recipes named with the amount/unit or mismatch.

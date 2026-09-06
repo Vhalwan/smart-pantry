@@ -55,6 +55,7 @@ Reuse existing helpers:
 | Expiry status | `expiryHelpers.js` → `getExpiryStatus`, `assessLinkedExpiry` | Use-it-up strip; flags on recipe rows |
 | Today’s date | `cookHelpers.js` → `localTodayISO` | Filter meal plans |
 | Cook result notes | `cookHelpers.js` → `cookNoteFromResult` | After Cook this (same as Recipes) |
+| Gaps list | `cookHelpers.js` → `collectRecipeGaps` | What’s missing (short / missing / unit mismatch) |
 
 Cook this still calls `POST /recipes/{id}/cook` — same rules as v1 (aliases, clamp at 0, Cooked lock, View pantry).
 
@@ -142,7 +143,7 @@ Ship the Tonight page with real data and cook actions.
 - [x] Parallel load: ingredients, recipes, meal plans (2 Sep)
 - [x] **Use it up** section from pantry + `getExpiryStatus` (2 Sep)
 - [x] **Today’s plan** section (filter `localTodayISO`, reuse readiness + expiry + Cook this patterns from `MealPlans.jsx`) (2 Sep)
-- [ ] **Ready / Almost ready / Need attention** recipe groups via `assessCookReadiness`
+- [x] **Ready / Almost ready / Need attention** recipe groups via `assessCookReadiness` (3 Sep)
 - [x] Cook this wired per recipe row (share logic with Recipes where practical — extract a small component or hook if it avoids copy-paste)
 - [x] **Get ideas** empty/ thin state with link to Pantry (2 Sep; 3 Sep — nothing-ready CTA added)
 - [x] Mobile layout: stacked sections, tappable Cook this / links (2 Sep for shipped sections)
@@ -151,17 +152,21 @@ Ship the Tonight page with real data and cook actions.
 
 **2 Sep:** First implementation day after the 31 Aug plan. Shell (route, nav, parallel fetch) plus the first two sections: Use it up and Today’s plan with Cook this. Recipe groups still next.
 
+**3 Sep:** Week 1 day 2 — recipe groups + Cook this per row + nothing-ready CTA. Week 1 complete.
+
 ### Week 2 — Sunday 14 September 2026
 
 Make blockers actionable and close the docs loop.
 
-- [ ] **Gaps** aggregated list from short/blocked recipes (V2-8)
+- [x] **Gaps** aggregated list from short/blocked recipes (V2-8) (6 Sep)
 - [ ] Highlight recipes that use expiring pantry items (client-side: recipe linked ids ∩ expiring pantry ids) — optional badge on cards in Ready / Almost ready
-- [ ] Loading and error handling (failed fetch → message + retry)
-- [ ] Update [user guide](./user-guide.md) with a Tonight section
-- [ ] Update [technical](./technical.md) with route, file layout, no new API note
-- [ ] Short note in [README](../README.md) that v2 is in progress or complete
+- [ ] Loading and error handling (failed fetch → message + retry) — page-level message + Try again already in week 1; still confirm on live
+- [x] Update [user guide](./user-guide.md) with a Tonight section (3 Sep groups; 6 Sep gaps)
+- [x] Update [technical](./technical.md) with route, file layout, no new API note (6 Sep — `collectRecipeGaps`)
+- [x] Short note in [README](../README.md) that v2 is in progress (6 Sep — gaps shipped, v2 still in progress)
 - [ ] Run the v2 done checklist below on the live app; fix blockers only
+
+**6 Sep:** Week 2 day 1 — gaps list on Tonight from short/blocked recipes (`collectRecipeGaps` in `cookHelpers.js`). Deduped plain rows; hidden when empty. Expiring-item badge, live checklist, and remaining docs still next.
 
 **Done when:** Blockers are visible in one gaps list, docs match behavior, and the live Tonight flow passes the checklist.
 
@@ -201,3 +206,4 @@ Same habit as v1:
 | 31 Aug 2026 | First v2 plan: Tonight decision page, 2-week timeline, requirements V2-1–V2-8. |
 | 2 Sep 2026 | Week 1 day 1: `/tonight` route, Tonight first in nav, parallel fetch, Use it up, Today’s plan + Cook this. Recipe groups still open. |
 | 3 Sep 2026 | Week 1 day 2: Ready / Almost ready / Need attention recipe groups, Cook this per recipe row, nothing-ready CTA. Week 1 complete. |
+| 6 Sep 2026 | Week 2 day 1: aggregated gaps list (V2-8) from short/blocked recipes. |

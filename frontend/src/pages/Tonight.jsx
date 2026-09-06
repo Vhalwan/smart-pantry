@@ -6,6 +6,7 @@ import { getMealPlans } from "../api/mealPlans";
 import { cookRecipe, getRecipes } from "../api/recipes";
 import {
   assessCookReadiness,
+  collectRecipeGaps,
   cookNoteFromResult,
   localTodayISO,
 } from "../cookHelpers";
@@ -321,6 +322,14 @@ export default function Tonight() {
     return { ready, short, blocked };
   }, [recipes, pantryById]);
 
+  const gaps = useMemo(() => {
+    const gapRecipes = [
+      ...recipeGroups.short.map(({ recipe }) => recipe),
+      ...recipeGroups.blocked.map(({ recipe }) => recipe),
+    ];
+    return collectRecipeGaps(gapRecipes, pantryById);
+  }, [recipeGroups, pantryById]);
+
   async function handleCookRecipe(recipe) {
     if (!(recipe.ingredients ?? []).length) return;
     setCookingRecipeId(recipe.id);
@@ -561,6 +570,37 @@ export default function Tonight() {
                 pantryById={pantryById}
               />
             </>
+          )}
+
+          {gaps.length > 0 && (
+            <section className="card overflow-hidden">
+              <div className="card-section-header">
+                <h2 className="text-lg font-medium text-slate-900">
+                  What’s missing
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  What would unblock recipes that are short or blocked. Add
+                  these on{" "}
+                  <Link
+                    to="/pantry"
+                    className="font-medium text-emerald-800 underline"
+                  >
+                    Pantry
+                  </Link>{" "}
+                  if you want to cook them tonight.
+                </p>
+              </div>
+              <ul className="divide-y divide-slate-100">
+                {gaps.map((gap) => (
+                  <li
+                    key={gap.text}
+                    className="px-4 py-3 text-sm text-slate-800 sm:px-6"
+                  >
+                    {gap.text}
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
 
           {!pantryEmpty && !hasRecipes && (

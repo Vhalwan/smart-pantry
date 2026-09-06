@@ -88,9 +88,9 @@ Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete
 
 ## v2 — Tonight (in progress)
 
-v1 is complete. v2 adds a **Tonight** page at `/tonight` (first nav item): expiring pantry items, today’s meal plan with the same Cook this as Meal Plans, and (next) saved recipes grouped by cook readiness. Reuses `cookHelpers.js` and `expiryHelpers.js`; no new API. See [v2 plan](./v2-plan.md).
+v1 is complete. v2 adds a **Tonight** page at `/tonight` (first nav item): expiring pantry items, today’s meal plan with the same Cook this as Meal Plans, saved recipes grouped by cook readiness, and an aggregated gaps list for short/blocked recipes. Reuses `cookHelpers.js` and `expiryHelpers.js`; no new API. See [v2 plan](./v2-plan.md).
 
-Shipped so far (2 Sep): route, nav, parallel fetch, Use it up, today’s plan + Cook this. Not yet: Ready / Almost ready / Need attention groups, gaps list, post-login redirect.
+Shipped so far: route, nav, parallel fetch, Use it up, today’s plan + Cook this (2 Sep); Ready / Almost ready / Need attention groups (3 Sep); **What’s missing** gaps list from short/blocked recipes (6 Sep). Not yet: expiring-item badge on ready cards, post-login redirect.
 
 ## Possibly in future
 
@@ -125,3 +125,4 @@ Ideas that fit the product but are not built yet (some may land in v2):
 - 23 Aug 2026: Stretch — Meal Plans: readiness on every plan + Expired / Expiring soon flags for linked ingredients (`expiryHelpers.js` shared with Pantry). Cook this still today-only.
 - 28 Aug 2026: UX only — `AppLayout` / `AuthLayout`, DM Sans, warm gradient background, emerald accent and shared form/button classes (`index.css`). Pill expiry badges. Recipes / Meal Plans get the same sticky header and mobile nav as Pantry. No API or behavior change.
 - 2 Sep 2026: v2 start — Tonight page (`/tonight`): Use it up + today’s plan Cook this. Recipe groups still planned.
+- 6 Sep 2026: Tonight gaps list (`collectRecipeGaps`) for short/blocked recipes. No API change.

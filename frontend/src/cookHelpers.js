@@ -73,6 +73,76 @@ export function assessCookReadiness(recipe, pantryById) {
   };
 }
 
+function formatGapQuantity(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) {
+    return String(value ?? "");
+  }
+  const rounded = Math.round(n * 1000) / 1000;
+  return formatQuantity(rounded);
+}
+
+function describeLineGap(recipeName, line, pantryById) {
+  const item = pantryById.get(line.ingredient_id);
+  const needed = Number(line.quantity);
+  const recipeUnit = line.unit ?? "";
+
+  if (!item) {
+    const amount =
+      Number.isFinite(needed) && recipeUnit
+        ? `${formatGapQuantity(needed)} ${recipeUnit}`
+        : Number.isFinite(needed)
+          ? formatGapQuantity(needed)
+          : recipeUnit;
+    const text = amount
+      ? `To make ${recipeName} you need ${amount} (not in pantry).`
+      : `To make ${recipeName}, a linked ingredient is not in the pantry.`;
+    return { text, kind: "missing" };
+  }
+
+  if (!unitsMatch(line.unit, item.unit)) {
+    return {
+      text: `To make ${recipeName}, ${item.name} is ${recipeUnit} on the recipe and ${item.unit} in the pantry.`,
+      kind: "mismatch",
+    };
+  }
+
+  const have = Number(item.quantity);
+  if (Number.isFinite(needed) && Number.isFinite(have) && have < needed) {
+    const shortBy = formatGapQuantity(needed - have);
+    return {
+      text: `To make ${recipeName} you need ${shortBy} more ${item.unit} ${item.name}.`,
+      kind: "short",
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Aggregated gaps from short/blocked recipes.
+ * One readable row per short, missing, or unit-mismatched line.
+ * Dedupes identical text. No persistence.
+ */
+export function collectRecipeGaps(recipes, pantryById) {
+  const rows = [];
+  const seen = new Set();
+
+  for (const recipe of recipes ?? []) {
+    const recipeName = String(recipe?.name ?? "").trim() || "this recipe";
+    for (const line of recipe?.ingredients ?? []) {
+      const gap = describeLineGap(recipeName, line, pantryById);
+      if (!gap || seen.has(gap.text)) {
+        continue;
+      }
+      seen.add(gap.text);
+      rows.push(gap);
+    }
+  }
+
+  return rows;
+}
+
 export function cookNoteFromResult(result) {
   const updated = result?.updated ?? [];
   const short = result?.short ?? [];

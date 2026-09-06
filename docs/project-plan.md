@@ -146,7 +146,11 @@ Shipped (23 Aug 2026, stretch): Meal Plans show Ready / short / mismatch on ever
 
 v1 is complete. v2 adds a **Tonight** page: one place to see what you can cook right now (ready recipes, today’s meal plan, expiring items, aggregated gaps). Full scope and week-by-week tasks: [v2 plan](./v2-plan.md).
 
-**2 Sep 2026:** `/tonight` is in the nav (first). The page loads pantry, recipes, and meal plans together. It shows **Use it up** (expired / expiring-soon) and **Today’s plan** with the same Cook this as Meal Plans. Recipe groups (Ready / Almost ready / Need attention) are next.
+**2 Sep 2026:** `/tonight` is in the nav (first). The page loads pantry, recipes, and meal plans together. It shows **Use it up** (expired / expiring-soon) and **Today’s plan** with the same Cook this as Meal Plans.
+
+**3 Sep 2026:** Recipe groups shipped (Ready / Almost ready / Need attention) with Cook this.
+
+**6 Sep 2026:** Week 2 day 1 — aggregated **What’s missing** gaps list on Tonight (short/blocked recipes; no new API).
 
 ## Possibly in future (after v2 or if parked)
 
@@ -208,3 +212,4 @@ Spend a few minutes each Sunday:
 - 23 Aug 2026: Stretch — Meal Plans expiry / low-stock flags (readiness on every plan; Expired / Expiring soon names; Cook this still today-only).
 - 31 Aug 2026: v2 plan added — Tonight decision page; see [v2-plan.md](./v2-plan.md).
 - 2 Sep 2026: v2 Week 1 day 1 — Tonight route/nav, Use it up, today’s plan + Cook this. Recipe groups still open.
+- 6 Sep 2026: v2 Week 2 day 1 — Tonight gaps list (What’s missing) from short/blocked recipes. No new API.
