@@ -39,8 +39,8 @@ If the pantry is empty, Tonight points you to Pantry to add ingredients and Sugg
 
 Below the plan, your saved recipes are split into three groups:
 
-3. **Ready to cook** — you have everything. Sorted by prep time (shortest first). Each has Cook this.
-4. **Almost ready** — you can cook but will run short on something. Cook this still works.
+3. **Ready to cook** — you have everything. Sorted by prep time (shortest first). Each has Cook this. If the recipe uses a pantry item that is expired or expiring within three days, you will see a **Uses expiring items** badge next to the name (the same window as Use it up). Named Expired / Expiring soon lines still list which ingredients.
+4. **Almost ready** — you can cook but will run short on something. Cook this still works. Same **Uses expiring items** badge as Ready when those recipes use items in that window.
 5. **Need attention** — missing ingredients or unit mismatches. Cook this is available per the same rules as Recipes.
 
 If nothing is ready or almost ready, you will see a link to check your pantry and use Suggest recipes.
@@ -151,3 +151,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 2 Sep 2026: Tonight page (v2 start) — nav item, Use it up, today’s plan with Cook this. Recipe groups still coming.
 - 3 Sep 2026: Tonight recipe groups (Ready to cook / Almost ready / Need attention) with Cook this; nothing-ready CTA.
 - 6 Sep 2026: Tonight What’s missing list — short or blocked recipes named with the amount/unit or mismatch.
+- 7 Sep 2026: Tonight Ready / Almost ready — Uses expiring items badge when a recipe uses pantry items that are expired or expiring soon.

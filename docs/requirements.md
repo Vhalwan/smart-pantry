@@ -83,3 +83,4 @@ These are intentionally out for now:
 | 31 Aug 2026 | v2 plan — Tonight page (V2-1–V2-8); see [v2-plan.md](./v2-plan.md). |
 | 2 Sep 2026 | v2 start: Tonight route/nav, Use it up, today’s plan Cook this (V2-1–V2-3). Recipe groups (V2-4) still open. |
 | 6 Sep 2026 | v2 Week 2 day 1: Tonight gaps list (V2-8) — What’s missing from short/blocked recipes. |
+| 7 Sep 2026 | v2 Week 2 day 2: Tonight Ready / Almost ready show a Uses expiring items badge when linked pantry items are expired or expiring soon (same 3-day window). |

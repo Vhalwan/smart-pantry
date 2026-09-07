@@ -52,7 +52,7 @@ Reuse existing helpers:
 | Helper | File | Use on Tonight |
 |--------|------|----------------|
 | Cook readiness | `cookHelpers.js` → `assessCookReadiness` | Group recipes; Cook this |
-| Expiry status | `expiryHelpers.js` → `getExpiryStatus`, `assessLinkedExpiry` | Use-it-up strip; flags on recipe rows |
+| Expiry status | `expiryHelpers.js` → `getExpiryStatus`, `assessLinkedExpiry`, `collectExpiringPantryIds`, `recipeUsesExpiringPantry` | Use-it-up strip; flags on recipe rows; **Uses expiring items** badge on Ready / Almost ready |
 | Today’s date | `cookHelpers.js` → `localTodayISO` | Filter meal plans |
 | Cook result notes | `cookHelpers.js` → `cookNoteFromResult` | After Cook this (same as Recipes) |
 | Gaps list | `cookHelpers.js` → `collectRecipeGaps` | What’s missing (short / missing / unit mismatch) |
@@ -65,9 +65,9 @@ Cook this still calls `POST /recipes/{id}/cook` — same rules as v1 (aliases, c
 
 2. **Today’s plan** — Meal plans where `planned_date` is today (local calendar). Each row: recipe name, meal type, readiness label, expiry flags on linked ingredients, **Cook this** when v1 would allow it. Empty state: “No meals planned for today” with a link to Meal Plans.
 
-3. **Ready to cook** — Saved recipes where `assessCookReadiness` returns `ready`. Show name, prep time if set, and Cook this. Sort by prep time ascending when available, else name.
+3. **Ready to cook** — Saved recipes where `assessCookReadiness` returns `ready`. Show name, prep time if set, and Cook this. Sort by prep time ascending when available, else name. If a recipe links a pantry item that is expired or expiring soon, show a calm **Uses expiring items** badge (same 3-day window as Use it up).
 
-4. **Almost ready** — Recipes with status `short` (can cook but will run short). Show the readiness label. Cook this still enabled (same as v1).
+4. **Almost ready** — Recipes with status `short` (can cook but will run short). Show the readiness label. Cook this still enabled (same as v1). Same **Uses expiring items** badge as Ready when linked pantry items are in that window.
 
 5. **Need attention** — Recipes with status `blocked` (missing ingredient or unit mismatch). Show the readiness label. Cook this stays available per v1 rules, but the section sets expectations.
 
@@ -159,14 +159,16 @@ Ship the Tonight page with real data and cook actions.
 Make blockers actionable and close the docs loop.
 
 - [x] **Gaps** aggregated list from short/blocked recipes (V2-8) (6 Sep)
-- [ ] Highlight recipes that use expiring pantry items (client-side: recipe linked ids ∩ expiring pantry ids) — optional badge on cards in Ready / Almost ready
+- [x] Highlight recipes that use expiring pantry items (client-side: recipe linked ids ∩ expiring pantry ids) — optional badge on cards in Ready / Almost ready (7 Sep)
 - [ ] Loading and error handling (failed fetch → message + retry) — page-level message + Try again already in week 1; still confirm on live
-- [x] Update [user guide](./user-guide.md) with a Tonight section (3 Sep groups; 6 Sep gaps)
-- [x] Update [technical](./technical.md) with route, file layout, no new API note (6 Sep — `collectRecipeGaps`)
-- [x] Short note in [README](../README.md) that v2 is in progress (6 Sep — gaps shipped, v2 still in progress)
+- [x] Update [user guide](./user-guide.md) with a Tonight section (3 Sep groups; 6 Sep gaps; 7 Sep expiring badge)
+- [x] Update [technical](./technical.md) with route, file layout, no new API note (6 Sep — `collectRecipeGaps`; 7 Sep — expiring pantry helpers)
+- [x] Short note in [README](../README.md) that v2 is in progress (7 Sep — expiring-item badge shipped, v2 still in progress)
 - [ ] Run the v2 done checklist below on the live app; fix blockers only
 
 **6 Sep:** Week 2 day 1 — gaps list on Tonight from short/blocked recipes (`collectRecipeGaps` in `cookHelpers.js`). Deduped plain rows; hidden when empty. Expiring-item badge, live checklist, and remaining docs still next.
+
+**7 Sep:** Week 2 day 2 — **Uses expiring items** badge on Ready / Almost ready when a recipe’s linked pantry ids overlap expired/expiring-soon pantry ids. Need attention stays names-only (no badge). Sort boost within Ready is still buffer. Live checklist still next.
 
 **Done when:** Blockers are visible in one gaps list, docs match behavior, and the live Tonight flow passes the checklist.
 
@@ -207,3 +209,4 @@ Same habit as v1:
 | 2 Sep 2026 | Week 1 day 1: `/tonight` route, Tonight first in nav, parallel fetch, Use it up, Today’s plan + Cook this. Recipe groups still open. |
 | 3 Sep 2026 | Week 1 day 2: Ready / Almost ready / Need attention recipe groups, Cook this per recipe row, nothing-ready CTA. Week 1 complete. |
 | 6 Sep 2026 | Week 2 day 1: aggregated gaps list (V2-8) from short/blocked recipes. |
+| 7 Sep 2026 | Week 2 day 2: Uses expiring items badge on Ready / Almost ready. |

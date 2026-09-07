@@ -81,3 +81,31 @@ export function assessLinkedExpiry(recipe, pantryById) {
     hasFlags: expired.length > 0 || expiringSoon.length > 0,
   };
 }
+
+/** Pantry item ids that are expired or expiring within the 3-day window. */
+export function collectExpiringPantryIds(items) {
+  const ids = new Set();
+  for (const item of items ?? []) {
+    const status = getExpiryStatus(item.expiry_date);
+    if (status === "expired" || status === "expiring_soon") {
+      ids.add(item.id);
+    }
+  }
+  return ids;
+}
+
+/**
+ * True when the recipe links at least one expiring/expired pantry item
+ * (intersection of recipe ingredient_ids and expiring pantry ids).
+ */
+export function recipeUsesExpiringPantry(recipe, expiringIds) {
+  if (!expiringIds || expiringIds.size === 0) {
+    return false;
+  }
+  for (const line of recipe?.ingredients ?? []) {
+    if (expiringIds.has(line.ingredient_id)) {
+      return true;
+    }
+  }
+  return false;
+}

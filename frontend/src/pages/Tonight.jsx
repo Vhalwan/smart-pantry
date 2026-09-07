@@ -12,8 +12,10 @@ import {
 } from "../cookHelpers";
 import {
   assessLinkedExpiry,
+  collectExpiringPantryIds,
   getExpiryStatus,
   parseLocalDate,
+  recipeUsesExpiringPantry,
 } from "../expiryHelpers";
 import { useAuth } from "../context/AuthContext";
 
@@ -54,6 +56,8 @@ function RecipeGroupSection({
   cookNotes,
   onCook,
   pantryById,
+  expiringIds,
+  showExpiringBadge,
 }) {
   if (entries.length === 0) return null;
 
@@ -70,6 +74,8 @@ function RecipeGroupSection({
           const cooking = cookingId === recipe.id;
           const note = cookNotes[recipe.id];
           const hasLines = (recipe.ingredients ?? []).length > 0;
+          const usesExpiring =
+            showExpiringBadge && recipeUsesExpiringPantry(recipe, expiringIds);
 
           return (
             <li
@@ -84,6 +90,9 @@ function RecipeGroupSection({
                   <p className="text-sm text-slate-500">
                     {recipe.prep_time_minutes} min
                   </p>
+                )}
+                {usesExpiring && (
+                  <span className="badge-expiring">Uses expiring items</span>
                 )}
               </div>
               {readiness.status !== "ready" && (
@@ -169,6 +178,11 @@ export default function Tonight() {
     }
     return map;
   }, [ingredients]);
+
+  const expiringIds = useMemo(
+    () => collectExpiringPantryIds(ingredients),
+    [ingredients],
+  );
 
   const useItUpItems = useMemo(() => {
     return ingredients
@@ -548,6 +562,8 @@ export default function Tonight() {
                 cookNotes={recipeCookNotes}
                 onCook={handleCookRecipe}
                 pantryById={pantryById}
+                expiringIds={expiringIds}
+                showExpiringBadge
               />
               <RecipeGroupSection
                 title="Almost ready"
@@ -558,6 +574,8 @@ export default function Tonight() {
                 cookNotes={recipeCookNotes}
                 onCook={handleCookRecipe}
                 pantryById={pantryById}
+                expiringIds={expiringIds}
+                showExpiringBadge
               />
               <RecipeGroupSection
                 title="Need attention"
@@ -568,6 +586,7 @@ export default function Tonight() {
                 cookNotes={recipeCookNotes}
                 onCook={handleCookRecipe}
                 pantryById={pantryById}
+                expiringIds={expiringIds}
               />
             </>
           )}
