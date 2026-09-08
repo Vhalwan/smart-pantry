@@ -152,7 +152,7 @@ v1 is complete. v2 adds a **Tonight** page: one place to see what you can cook r
 
 **6 Sep 2026:** Week 2 day 1 — aggregated **What’s missing** gaps list on Tonight (short/blocked recipes; no new API).
 
-**7 Sep 2026:** Week 2 day 2 — **Uses expiring items** badge on Tonight Ready / Almost ready when a recipe uses expired or expiring-soon pantry items.
+**8 Sep 2026:** Week 2 day 3 — Tonight load errors (partial fetch does not look like an empty pantry; Try again per section or for the whole page).
 
 ## Possibly in future (after v2 or if parked)
 
@@ -216,3 +216,4 @@ Spend a few minutes each Sunday:
 - 2 Sep 2026: v2 Week 1 day 1 — Tonight route/nav, Use it up, today’s plan + Cook this. Recipe groups still open.
 - 6 Sep 2026: v2 Week 2 day 1 — Tonight gaps list (What’s missing) from short/blocked recipes. No new API.
 - 7 Sep 2026: v2 Week 2 day 2 — Tonight Uses expiring items badge on Ready / Almost ready. No new API.
+- 8 Sep 2026: v2 Week 2 day 3 — Tonight load errors (`Promise.allSettled`, per-section Try again, slow-load note). No new API.

@@ -90,7 +90,7 @@ Pantry rows at quantity 0 (the cook leftover, not the stepper’s delayed delete
 
 v1 is complete. v2 adds a **Tonight** page at `/tonight` (first nav item): expiring pantry items, today’s meal plan with the same Cook this as Meal Plans, saved recipes grouped by cook readiness, and an aggregated gaps list for short/blocked recipes. Reuses `cookHelpers.js` and `expiryHelpers.js`; no new API. See [v2 plan](./v2-plan.md).
 
-Shipped so far: route, nav, parallel fetch, Use it up, today’s plan + Cook this (2 Sep); Ready / Almost ready / Need attention groups (3 Sep); **What’s missing** gaps list from short/blocked recipes (6 Sep); **Uses expiring items** badge on Ready / Almost ready when linked pantry ids overlap the Use it up window (7 Sep). Not yet: post-login redirect; sort boost within Ready.
+Shipped so far: route, nav, parallel fetch, Use it up, today’s plan + Cook this (2 Sep); Ready / Almost ready / Need attention groups (3 Sep); **What’s missing** gaps list from short/blocked recipes (6 Sep); **Uses expiring items** badge on Ready / Almost ready when linked pantry ids overlap the Use it up window (7 Sep); load errors with per-section or page-level Try again (8 Sep). Not yet: post-login redirect; sort boost within Ready; live v2 checklist.
 
 ## Possibly in future
 
@@ -127,3 +127,4 @@ Ideas that fit the product but are not built yet (some may land in v2):
 - 2 Sep 2026: v2 start — Tonight page (`/tonight`): Use it up + today’s plan Cook this. Recipe groups still planned.
 - 6 Sep 2026: Tonight gaps list (`collectRecipeGaps`) for short/blocked recipes. No API change.
 - 7 Sep 2026: Tonight Ready / Almost ready badge when a recipe uses expiring pantry items (`collectExpiringPantryIds` ∩ linked ids). No API change.
+- 8 Sep 2026: Tonight load errors — settled parallel fetch, per-section retry, no empty-pantry CTA on a failed pantry GET. No API change.

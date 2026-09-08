@@ -37,6 +37,8 @@ You will see today’s date, then:
 
 If the pantry is empty, Tonight points you to Pantry to add ingredients and Suggest. If you have pantry items but no saved recipes yet, it links to Pantry to get ideas.
 
+If Tonight cannot load (the API is asleep or a request fails), you get a plain-language error and **Try again** — not an empty-pantry message. If only one part fails (pantry, recipes, or meal plans), the other sections still show and that section has its own Try again. A slow first load (or retry) may say the service is waking up.
+
 Below the plan, your saved recipes are split into three groups:
 
 3. **Ready to cook** — you have everything. Sorted by prep time (shortest first). Each has Cook this. If the recipe uses a pantry item that is expired or expiring within three days, you will see a **Uses expiring items** badge next to the name (the same window as Use it up). Named Expired / Expiring soon lines still list which ingredients.
@@ -152,3 +154,4 @@ No. You need a network connection, and suggestions need the AI service to be rea
 - 3 Sep 2026: Tonight recipe groups (Ready to cook / Almost ready / Need attention) with Cook this; nothing-ready CTA.
 - 6 Sep 2026: Tonight What’s missing list — short or blocked recipes named with the amount/unit or mismatch.
 - 7 Sep 2026: Tonight Ready / Almost ready — Uses expiring items badge when a recipe uses pantry items that are expired or expiring soon.
+- 8 Sep 2026: Tonight load errors — Try again if the page (or one section) cannot load; no empty-pantry helper when the pantry request failed; waking-up note if it is slow.

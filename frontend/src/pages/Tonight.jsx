@@ -20,6 +20,15 @@ import {
 import { useAuth } from "../context/AuthContext";
 
 const MEAL_ORDER = { breakfast: 0, lunch: 1, dinner: 2 };
+const LOAD_SLOW_MS = 3000;
+const LOAD_SLOW_MESSAGE =
+  "The service is waking up. This can take a few seconds.";
+const LOAD_SECTION_MESSAGES = {
+  ingredients: "Couldn't load pantry items. Try again.",
+  recipes: "Couldn't load recipes. Try again.",
+  mealPlans: "Couldn't load meal plans. Try again.",
+};
+const LOAD_ALL_FAILED_MESSAGE = "Couldn't load tonight's view. Try again.";
 
 function formatTodayLabel(iso) {
   const [y, m, d] = iso.split("-").map(Number);
@@ -45,6 +54,22 @@ function ExpiryNotice({ status }) {
     return <span className="badge-expiring">Expiring soon</span>;
   }
   return null;
+}
+
+function SectionRetry({ message, onRetry, retrying }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 px-4 py-5 sm:px-6">
+      <p className="alert-error">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        disabled={retrying}
+        className="btn-secondary"
+      >
+        {retrying ? "Trying…" : "Try again"}
+      </button>
+    </div>
+  );
 }
 
 function RecipeGroupSection({
@@ -146,12 +171,13 @@ function RecipeGroupSection({
 }
 
 async function fetchTonightData() {
-  const [ingredientsData, recipesData, mealPlansData] = await Promise.all([
-    getIngredients(),
-    getRecipes(),
-    getMealPlans(),
-  ]);
-  return { ingredientsData, recipesData, mealPlansData };
+  const [ingredientsResult, recipesResult, mealPlansResult] =
+    await Promise.allSettled([
+      getIngredients(),
+      getRecipes(),
+      getMealPlans(),
+    ]);
+  return { ingredientsResult, recipesResult, mealPlansResult };
 }
 
 export default function Tonight() {
@@ -161,7 +187,18 @@ export default function Tonight() {
   const [recipes, setRecipes] = useState([]);
   const [mealPlans, setMealPlans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [retrying, setRetrying] = useState(false);
+  const [loadSlow, setLoadSlow] = useState(false);
+  const [loaded, setLoaded] = useState({
+    ingredients: false,
+    recipes: false,
+    mealPlans: false,
+  });
+  const [loadErrors, setLoadErrors] = useState({
+    ingredients: false,
+    recipes: false,
+    mealPlans: false,
+  });
   const [cookingPlanId, setCookingPlanId] = useState(null);
   const [cookedPlanIds, setCookedPlanIds] = useState(() => new Set());
   const [cookNotes, setCookNotes] = useState({});
@@ -225,19 +262,48 @@ export default function Tonight() {
       });
   }, [mealPlans, today]);
 
+  function applyFetchResults({
+    ingredientsResult,
+    recipesResult,
+    mealPlansResult,
+  }) {
+    const nextErrors = {
+      ingredients: false,
+      recipes: false,
+      mealPlans: false,
+    };
+
+    if (ingredientsResult.status === "fulfilled") {
+      setIngredients(ingredientsResult.value);
+      setLoaded((prev) => ({ ...prev, ingredients: true }));
+    } else {
+      nextErrors.ingredients = true;
+    }
+
+    if (recipesResult.status === "fulfilled") {
+      setRecipes(recipesResult.value);
+      setLoaded((prev) => ({ ...prev, recipes: true }));
+    } else {
+      nextErrors.recipes = true;
+    }
+
+    if (mealPlansResult.status === "fulfilled") {
+      setMealPlans(mealPlansResult.value);
+      setLoaded((prev) => ({ ...prev, mealPlans: true }));
+    } else {
+      nextErrors.mealPlans = true;
+    }
+
+    setLoadErrors(nextErrors);
+  }
+
   async function loadData() {
-    setError("");
-    setLoading(true);
+    setLoadSlow(false);
+    setRetrying(true);
     try {
-      const { ingredientsData, recipesData, mealPlansData } =
-        await fetchTonightData();
-      setIngredients(ingredientsData);
-      setRecipes(recipesData);
-      setMealPlans(mealPlansData);
-    } catch {
-      setError("Couldn't load tonight's view. Try again.");
+      applyFetchResults(await fetchTonightData());
     } finally {
-      setLoading(false);
+      setRetrying(false);
     }
   }
 
@@ -246,17 +312,9 @@ export default function Tonight() {
 
     async function loadOnMount() {
       try {
-        const { ingredientsData, recipesData, mealPlansData } =
-          await fetchTonightData();
-        if (cancelled) {
-          return;
-        }
-        setIngredients(ingredientsData);
-        setRecipes(recipesData);
-        setMealPlans(mealPlansData);
-      } catch {
+        const results = await fetchTonightData();
         if (!cancelled) {
-          setError("Couldn't load tonight's view. Try again.");
+          applyFetchResults(results);
         }
       } finally {
         if (!cancelled) {
@@ -271,13 +329,20 @@ export default function Tonight() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!loading && !retrying) {
+      return undefined;
+    }
+    const timerId = setTimeout(() => setLoadSlow(true), LOAD_SLOW_MS);
+    return () => clearTimeout(timerId);
+  }, [loading, retrying]);
+
   async function handleCook(plan) {
     const recipe = plan.recipe;
     if (!recipe?.id) {
       return;
     }
     setCookingPlanId(plan.id);
-    setError("");
     setCookNotes((prev) => {
       const next = { ...prev };
       delete next[plan.id];
@@ -347,7 +412,6 @@ export default function Tonight() {
   async function handleCookRecipe(recipe) {
     if (!(recipe.ingredients ?? []).length) return;
     setCookingRecipeId(recipe.id);
-    setError("");
     setRecipeCookNotes((prev) => {
       const next = { ...prev };
       delete next[recipe.id];
@@ -378,8 +442,20 @@ export default function Tonight() {
 
   const nothingReady = recipeGroups.ready.length === 0 && recipeGroups.short.length === 0;
 
-  const pantryEmpty = !loading && ingredients.length === 0;
-  const hasRecipes = recipes.length > 0;
+  const pantryFailed = loadErrors.ingredients;
+  const recipesFailed = loadErrors.recipes;
+  const plansFailed = loadErrors.mealPlans;
+  const allFailed = pantryFailed && recipesFailed && plansFailed;
+  const pantryEmpty = loaded.ingredients && !pantryFailed && ingredients.length === 0;
+  const hasRecipes = loaded.recipes && !recipesFailed && recipes.length > 0;
+  const canGroupRecipes =
+    loaded.ingredients &&
+    loaded.recipes &&
+    !pantryFailed &&
+    !recipesFailed &&
+    hasRecipes;
+  const showGaps = canGroupRecipes && gaps.length > 0;
+  const waiting = loading || retrying;
 
   return (
     <AppLayout title="Tonight" currentPath="/tonight" onLogout={handleLogout}>
@@ -387,19 +463,31 @@ export default function Tonight() {
         {formatTodayLabel(today)} — what you can cook right now.
       </p>
 
-      {error && (
+      {loading ? (
+        <p className="text-sm text-slate-500">
+          {loadSlow ? LOAD_SLOW_MESSAGE : "Loading tonight's view…"}
+        </p>
+      ) : allFailed ? (
         <div className="flex flex-wrap items-center gap-3">
-          <p className="alert-error">{error}</p>
-          <button type="button" onClick={loadData} className="btn-secondary">
-            Try again
+          {retrying && loadSlow && (
+            <p className="w-full text-sm text-slate-500">{LOAD_SLOW_MESSAGE}</p>
+          )}
+          <p className="alert-error">{LOAD_ALL_FAILED_MESSAGE}</p>
+          <button
+            type="button"
+            onClick={loadData}
+            disabled={retrying}
+            className="btn-secondary"
+          >
+            {retrying ? "Trying…" : "Try again"}
           </button>
         </div>
-      )}
-
-      {loading ? (
-        <p className="text-sm text-slate-500">Loading tonight's view…</p>
       ) : (
         <>
+          {retrying && loadSlow && (
+            <p className="text-sm text-slate-500">{LOAD_SLOW_MESSAGE}</p>
+          )}
+
           {pantryEmpty && (
             <p className="alert-info">
               Your pantry is empty.{" "}
@@ -420,7 +508,13 @@ export default function Tonight() {
                 Expired or expiring within the next three days.
               </p>
             </div>
-            {useItUpItems.length === 0 ? (
+            {pantryFailed ? (
+              <SectionRetry
+                message={LOAD_SECTION_MESSAGES.ingredients}
+                onRetry={loadData}
+                retrying={waiting}
+              />
+            ) : useItUpItems.length === 0 ? (
               <p className="px-4 py-5 text-sm text-slate-500 sm:px-6">
                 Nothing expiring soon.
               </p>
@@ -454,7 +548,13 @@ export default function Tonight() {
                 same way as on Meal Plans.
               </p>
             </div>
-            {todayPlans.length === 0 ? (
+            {plansFailed ? (
+              <SectionRetry
+                message={LOAD_SECTION_MESSAGES.mealPlans}
+                onRetry={loadData}
+                retrying={waiting}
+              />
+            ) : todayPlans.length === 0 ? (
               <p className="px-4 py-5 text-sm text-slate-500 sm:px-6">
                 No meals planned for today.{" "}
                 <Link
@@ -551,7 +651,25 @@ export default function Tonight() {
             )}
           </section>
 
-          {hasRecipes && (
+          {recipesFailed && (
+            <section className="card overflow-hidden">
+              <div className="card-section-header">
+                <h2 className="text-lg font-medium text-slate-900">
+                  Ready to cook
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Saved recipes grouped by whether you can cook them tonight.
+                </p>
+              </div>
+              <SectionRetry
+                message={LOAD_SECTION_MESSAGES.recipes}
+                onRetry={loadData}
+                retrying={waiting}
+              />
+            </section>
+          )}
+
+          {canGroupRecipes && (
             <>
               <RecipeGroupSection
                 title="Ready to cook"
@@ -591,7 +709,7 @@ export default function Tonight() {
             </>
           )}
 
-          {gaps.length > 0 && (
+          {showGaps && (
             <section className="card overflow-hidden">
               <div className="card-section-header">
                 <h2 className="text-lg font-medium text-slate-900">
@@ -622,7 +740,10 @@ export default function Tonight() {
             </section>
           )}
 
-          {!pantryEmpty && !hasRecipes && (
+          {!pantryEmpty &&
+            loaded.recipes &&
+            !recipesFailed &&
+            !hasRecipes && (
             <p className="alert-info">
               No saved recipes yet.{" "}
               <Link
@@ -635,7 +756,7 @@ export default function Tonight() {
             </p>
           )}
 
-          {hasRecipes && nothingReady && (
+          {canGroupRecipes && nothingReady && (
             <p className="alert-info">
               Nothing is ready to cook right now.{" "}
               <Link

@@ -89,8 +89,8 @@ A small aggregated block (above or below recipe groups):
 | Empty pantry | Same first-use tone as Pantry: add ingredients, then Suggest. Link to Pantry. |
 | Pantry has items, no saved recipes | Use-it-up strip if applicable; “Get ideas” CTA to Pantry → Suggest. |
 | Recipes exist, none ready | Show Need attention + Almost ready; gaps list if week 2 shipped. |
-| Loading | Simple loading copy on the whole page (parallel fetch pantry + recipes + meal plans). |
-| Partial fetch failure | Inline error per section or one page-level message + retry; do not crash. |
+| Loading | Simple loading copy on the whole page (parallel fetch pantry + recipes + meal plans). After ~3 seconds, a waking-up note. |
+| Partial fetch failure | Inline error + Try again on the failed section; other sections still render. Empty-pantry / no-recipes CTAs only after that GET succeeded. All three failed: one page-level message + retry. |
 
 ### Out of scope for v2
 
@@ -160,15 +160,17 @@ Make blockers actionable and close the docs loop.
 
 - [x] **Gaps** aggregated list from short/blocked recipes (V2-8) (6 Sep)
 - [x] Highlight recipes that use expiring pantry items (client-side: recipe linked ids ∩ expiring pantry ids) — optional badge on cards in Ready / Almost ready (7 Sep)
-- [ ] Loading and error handling (failed fetch → message + retry) — page-level message + Try again already in week 1; still confirm on live
-- [x] Update [user guide](./user-guide.md) with a Tonight section (3 Sep groups; 6 Sep gaps; 7 Sep expiring badge)
-- [x] Update [technical](./technical.md) with route, file layout, no new API note (6 Sep — `collectRecipeGaps`; 7 Sep — expiring pantry helpers)
-- [x] Short note in [README](../README.md) that v2 is in progress (7 Sep — expiring-item badge shipped, v2 still in progress)
+- [x] Loading and error handling (failed fetch → message + retry) — page-level when all three GETs fail; per-section Try again on partial failure; empty-pantry CTAs only after pantry actually loaded; slow-load waking-up note (8 Sep)
+- [x] Update [user guide](./user-guide.md) with a Tonight section (3 Sep groups; 6 Sep gaps; 7 Sep expiring badge; 8 Sep load errors)
+- [x] Update [technical](./technical.md) with route, file layout, no new API note (6 Sep — `collectRecipeGaps`; 7 Sep — expiring pantry helpers; 8 Sep — `Promise.allSettled` + per-section retry)
+- [x] Short note in [README](../README.md) that v2 is in progress (8 Sep — load errors shipped, v2 still in progress)
 - [ ] Run the v2 done checklist below on the live app; fix blockers only
 
 **6 Sep:** Week 2 day 1 — gaps list on Tonight from short/blocked recipes (`collectRecipeGaps` in `cookHelpers.js`). Deduped plain rows; hidden when empty. Expiring-item badge, live checklist, and remaining docs still next.
 
 **7 Sep:** Week 2 day 2 — **Uses expiring items** badge on Ready / Almost ready when a recipe’s linked pantry ids overlap expired/expiring-soon pantry ids. Need attention stays names-only (no badge). Sort boost within Ready is still buffer. Live checklist still next.
+
+**8 Sep:** Week 2 day 3 — Tonight load errors: `Promise.allSettled` so one failed GET does not blank the page; per-section retry; all-failed page message; no empty-pantry helper on a failed pantry fetch; waking-up note if the first load (or retry) sits past 3 seconds. Live checklist still next.
 
 **Done when:** Blockers are visible in one gaps list, docs match behavior, and the live Tonight flow passes the checklist.
 
@@ -210,3 +212,4 @@ Same habit as v1:
 | 3 Sep 2026 | Week 1 day 2: Ready / Almost ready / Need attention recipe groups, Cook this per recipe row, nothing-ready CTA. Week 1 complete. |
 | 6 Sep 2026 | Week 2 day 1: aggregated gaps list (V2-8) from short/blocked recipes. |
 | 7 Sep 2026 | Week 2 day 2: Uses expiring items badge on Ready / Almost ready. |
+| 8 Sep 2026 | Week 2 day 3: Tonight loading / partial-fetch errors + Try again; slow-load waking-up note. |
